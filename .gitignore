@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.so
+webssh/.venv/
+webssh/__pycache__/
+webssh/*.pyc
+webssh/users.db
+
+# System
+.local/
+.cache/
+.config/
+.npm/
+.ssh/
+.bash_history
+.bashrc
+.bash_logout
+.profile
+.sudo_as_admin_successful
+.gitconfig
+.npmrc
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+opencode.log
+
+# Environment
+.env
+.venv
+venv/

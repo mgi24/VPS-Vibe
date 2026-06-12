@@ -1,0 +1,577 @@
+timestamp=2026-06-12T14:45:44.733Z level=INFO run=445d24e0 message="creating instance" directory=/home/mamad/webssh
+timestamp=2026-06-12T14:45:44.735Z level=INFO run=445d24e0 message=fromDirectory directory=/home/mamad/webssh
+timestamp=2026-06-12T14:45:44.832Z level=INFO run=445d24e0 message=bootstrapping directory=/home/mamad/webssh
+timestamp=2026-06-12T14:45:44.848Z level=INFO run=445d24e0 message=loading path=/home/mamad/.config/opencode/config.json
+timestamp=2026-06-12T14:45:44.849Z level=INFO run=445d24e0 message=loading path=/home/mamad/.config/opencode/opencode.json
+timestamp=2026-06-12T14:45:44.850Z level=INFO run=445d24e0 message=loading path=/home/mamad/.config/opencode/opencode.jsonc
+timestamp=2026-06-12T14:45:45.076Z level=INFO run=445d24e0 message="all LSPs are disabled"
+timestamp=2026-06-12T14:45:45.079Z level=INFO run=445d24e0 message="all formatters are disabled"
+timestamp=2026-06-12T14:45:45.079Z level=INFO run=445d24e0 message=init
+timestamp=2026-06-12T14:45:45.342Z level=INFO run=445d24e0 message="booting location services" directory=/home/mamad/webssh workspaceID=undefined
+timestamp=2026-06-12T14:45:45.950Z level=INFO run=445d24e0 message="watcher backend" directory=/home/mamad/webssh platform=linux backend=inotify
+timestamp=2026-06-12T14:45:47.046Z level=INFO run=445d24e0 message=init count=1
+timestamp=2026-06-12T14:48:34.882Z level=INFO run=8c0a82a4 message="creating instance" directory=/home/mamad/webssh
+timestamp=2026-06-12T14:48:34.885Z level=INFO run=8c0a82a4 message=fromDirectory directory=/home/mamad/webssh
+timestamp=2026-06-12T14:48:34.989Z level=INFO run=8c0a82a4 message=bootstrapping directory=/home/mamad/webssh
+timestamp=2026-06-12T14:48:35.005Z level=INFO run=8c0a82a4 message=loading path=/home/mamad/.config/opencode/config.json
+timestamp=2026-06-12T14:48:35.006Z level=INFO run=8c0a82a4 message=loading path=/home/mamad/.config/opencode/opencode.json
+timestamp=2026-06-12T14:48:35.006Z level=INFO run=8c0a82a4 message=loading path=/home/mamad/.config/opencode/opencode.jsonc
+timestamp=2026-06-12T14:48:35.062Z level=INFO run=8c0a82a4 message="all LSPs are disabled"
+timestamp=2026-06-12T14:48:35.064Z level=INFO run=8c0a82a4 message="all formatters are disabled"
+timestamp=2026-06-12T14:48:35.064Z level=INFO run=8c0a82a4 message=init
+timestamp=2026-06-12T14:48:35.275Z level=INFO run=8c0a82a4 message="booting location services" directory=/home/mamad/webssh workspaceID=undefined
+timestamp=2026-06-12T14:48:35.858Z level=INFO run=8c0a82a4 message="watcher backend" directory=/home/mamad/webssh platform=linux backend=inotify
+timestamp=2026-06-12T14:48:36.911Z level=INFO run=8c0a82a4 message=init count=1
+timestamp=2026-06-12T14:50:40.563Z level=INFO run=c5018752 message="creating instance" directory=/home/mamad/webssh
+timestamp=2026-06-12T14:50:40.565Z level=INFO run=c5018752 message=fromDirectory directory=/home/mamad/webssh
+timestamp=2026-06-12T14:50:40.608Z level=INFO run=c5018752 message=bootstrapping directory=/home/mamad/webssh
+timestamp=2026-06-12T14:50:40.636Z level=INFO run=c5018752 message=loading path=/home/mamad/.config/opencode/config.json
+timestamp=2026-06-12T14:50:40.643Z level=INFO run=c5018752 message=loading path=/home/mamad/.config/opencode/opencode.json
+timestamp=2026-06-12T14:50:40.644Z level=INFO run=c5018752 message=loading path=/home/mamad/.config/opencode/opencode.jsonc
+timestamp=2026-06-12T14:50:40.684Z level=INFO run=c5018752 message="all LSPs are disabled"
+timestamp=2026-06-12T14:50:40.686Z level=INFO run=c5018752 message="all formatters are disabled"
+timestamp=2026-06-12T14:50:40.686Z level=INFO run=c5018752 message=init
+timestamp=2026-06-12T14:50:40.892Z level=INFO run=c5018752 message="booting location services" directory=/home/mamad/webssh workspaceID=undefined
+timestamp=2026-06-12T14:50:41.471Z level=INFO run=c5018752 message="watcher backend" directory=/home/mamad/webssh platform=linux backend=inotify
+timestamp=2026-06-12T14:50:42.523Z level=INFO run=c5018752 message=init count=1
+timestamp=2026-06-12T14:53:54.084Z level=INFO run=c5018752 message=created id=ses_143acbbdcffehm2PaelYNn24Lt slug=eager-otter version=1.17.4 projectID=global directory=/home/mamad/webssh path=home/mamad/webssh workspaceID=undefined parentID=undefined title="New session - 2026-06-12T14:53:54.084Z" agent=build model.id=big-pickle model.providerID=opencode metadata=undefined permission=undefined cost=0 tokens.input=0 tokens.output=0 tokens.reasoning=0 tokens.cache.read=0 tokens.cache.write=0 time.created=1781276034084 time.updated=1781276034084
+timestamp=2026-06-12T14:53:54.138Z level=INFO run=c5018752 message=loop session.id=ses_143acbbdcffehm2PaelYNn24Lt step=0
+timestamp=2026-06-12T14:53:54.156Z level=INFO run=c5018752 message="shell tool using shell" shell=/bin/bash
+timestamp=2026-06-12T14:53:54.202Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acbbdcffehm2PaelYNn24Lt small=true agent=title mode=primary
+timestamp=2026-06-12T14:53:54.225Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:53:54.299Z level=INFO run=c5018752 message=process session.id=ses_143acbbdcffehm2PaelYNn24Lt messageID=msg_ebc53445e001CT1rVL0hk2eXQT
+timestamp=2026-06-12T14:53:54.301Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acbbdcffehm2PaelYNn24Lt small=false agent=build mode=primary
+timestamp=2026-06-12T14:53:54.318Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:53:57.841Z level=INFO run=c5018752 message=evaluated permission=task pattern=explore action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T14:53:57.844Z level=INFO run=c5018752 message=created id=ses_143acad2cffe856QSHDT4GcNX3 slug=mighty-meadow version=1.17.4 projectID=global directory=/home/mamad/webssh path=home/mamad/webssh workspaceID=undefined parentID=ses_143acbbdcffehm2PaelYNn24Lt title="Explore webssh codebase (@explore subagent)" agent=explore model=undefined metadata=undefined permission="[{\"permission\":\"todowrite\",\"pattern\":\"*\",\"action\":\"deny\"},{\"permission\":\"task\",\"pattern\":\"*\",\"action\":\"deny\"}]" cost=0 tokens.input=0 tokens.output=0 tokens.reasoning=0 tokens.cache.read=0 tokens.cache.write=0 time.created=1781276037844 time.updated=1781276037844
+timestamp=2026-06-12T14:53:57.887Z level=INFO run=c5018752 message=loop session.id=ses_143acad2cffe856QSHDT4GcNX3 step=0
+timestamp=2026-06-12T14:53:57.938Z level=INFO run=c5018752 message=process session.id=ses_143acad2cffe856QSHDT4GcNX3 messageID=msg_ebc535301001sv3xr2LqOYdDfX
+timestamp=2026-06-12T14:53:57.939Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acad2cffe856QSHDT4GcNX3 small=false agent=explore mode=subagent
+timestamp=2026-06-12T14:53:57.941Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:53:59.926Z level=INFO run=c5018752 message=evaluated permission=read pattern=home/mamad/webssh action.permission=read action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:00.120Z level=INFO run=c5018752 message=evaluated permission=glob pattern=**/* action.permission=glob action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:00.140Z level=INFO run=c5018752 message="downloading ripgrep" url=https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/ripgrep-15.1.0-aarch64-unknown-linux-gnu.tar.gz
+timestamp=2026-06-12T14:54:00.359Z level=INFO run=c5018752 message=evaluated permission=glob pattern=**/*.py action.permission=glob action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:00.695Z level=INFO run=c5018752 message=evaluated permission=glob pattern=**/*.{txt,cfg,conf,ini,yml,yaml,json,env} action.permission=glob action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:00.791Z level=INFO run=c5018752 message=loop session.id=ses_143acad2cffe856QSHDT4GcNX3 step=1
+timestamp=2026-06-12T14:54:00.825Z level=INFO run=c5018752 message=process session.id=ses_143acad2cffe856QSHDT4GcNX3 messageID=msg_ebc535e59001tForrYNtG7lJ4J
+timestamp=2026-06-12T14:54:00.826Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acad2cffe856QSHDT4GcNX3 small=false agent=explore mode=subagent
+timestamp=2026-06-12T14:54:00.842Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:54:03.300Z level=INFO run=c5018752 message=evaluated permission=read pattern=home/mamad/webssh/main.py action.permission=read action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:03.336Z level=INFO run=c5018752 message="touching file" file=/home/mamad/webssh/main.py
+timestamp=2026-06-12T14:54:03.435Z level=INFO run=c5018752 message=evaluated permission=read pattern=home/mamad/webssh/requirements.txt action.permission=read action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:03.457Z level=INFO run=c5018752 message="touching file" file=/home/mamad/webssh/requirements.txt
+timestamp=2026-06-12T14:54:03.621Z level=INFO run=c5018752 message=evaluated permission=read pattern=home/mamad/webssh/static/index.html action.permission=read action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:03.633Z level=INFO run=c5018752 message="touching file" file=/home/mamad/webssh/static/index.html
+timestamp=2026-06-12T14:54:03.764Z level=INFO run=c5018752 message=evaluated permission=read pattern=home/mamad/webssh/static action.permission=read action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:03.828Z level=INFO run=c5018752 message=loop session.id=ses_143acad2cffe856QSHDT4GcNX3 step=2
+timestamp=2026-06-12T14:54:03.858Z level=INFO run=c5018752 message=process session.id=ses_143acad2cffe856QSHDT4GcNX3 messageID=msg_ebc536a36001CVEu5yDQ9vNuKw
+timestamp=2026-06-12T14:54:03.859Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acad2cffe856QSHDT4GcNX3 small=false agent=explore mode=subagent
+timestamp=2026-06-12T14:54:03.867Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:54:06.367Z level=INFO run=c5018752 message=evaluated permission=glob pattern=**/.* action.permission=glob action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:06.862Z level=INFO run=c5018752 message=evaluated permission=bash pattern="sqlite3 /home/mamad/webssh/users.db \".schema\" 2>/dev/null" action.permission=bash action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:06.862Z level=INFO run=c5018752 message=evaluated permission=bash pattern="echo \"sqlite3 not available or not a valid DB\"" action.permission=bash action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:07.031Z level=INFO run=c5018752 message=evaluated permission=bash pattern="ls -la /home/mamad/webssh/" action.permission=bash action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:07.116Z level=INFO run=c5018752 message=loop session.id=ses_143acad2cffe856QSHDT4GcNX3 step=3
+timestamp=2026-06-12T14:54:07.146Z level=INFO run=c5018752 message=process session.id=ses_143acad2cffe856QSHDT4GcNX3 messageID=msg_ebc53770e001x8Zd0Oup4JB1hA
+timestamp=2026-06-12T14:54:07.148Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acad2cffe856QSHDT4GcNX3 small=false agent=explore mode=subagent
+timestamp=2026-06-12T14:54:07.157Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:54:09.868Z level=INFO run=c5018752 message=evaluated permission=bash pattern="python3 -c \"\nimport sqlite3\nconn = sqlite3.connect('/home/mamad/webssh/users.db')\ncur = conn.execute(\\\"SELECT name FROM sqlite_master WHERE type='table'\\\")\nprint('Tables:', [r[0] for r in cur.fetchall()])\ncur = conn.execute('PRAGMA table_info(users)')\nprint('Users schema:', cur.fetchall())\ncur = conn.execute('SELECT id, username, created_at FROM users')\nprint('Users:', cur.fetchall())\nconn.close()\n\"" action.permission=bash action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:09.932Z level=INFO run=c5018752 message=loop session.id=ses_143acad2cffe856QSHDT4GcNX3 step=4
+timestamp=2026-06-12T14:54:09.963Z level=INFO run=c5018752 message=process session.id=ses_143acad2cffe856QSHDT4GcNX3 messageID=msg_ebc53820e0012GDGhDQnEP4YWn
+timestamp=2026-06-12T14:54:09.964Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acad2cffe856QSHDT4GcNX3 small=false agent=explore mode=subagent
+timestamp=2026-06-12T14:54:09.966Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:54:31.697Z level=INFO run=c5018752 message=loop session.id=ses_143acad2cffe856QSHDT4GcNX3 step=5
+timestamp=2026-06-12T14:54:31.700Z level=INFO run=c5018752 message="exiting loop" session.id=ses_143acad2cffe856QSHDT4GcNX3
+timestamp=2026-06-12T14:54:31.721Z level=INFO run=c5018752 message=loop session.id=ses_143acbbdcffehm2PaelYNn24Lt step=1
+timestamp=2026-06-12T14:54:31.773Z level=INFO run=c5018752 message=process session.id=ses_143acbbdcffehm2PaelYNn24Lt messageID=msg_ebc53d72b001oLJ2wp3N4mP2sl
+timestamp=2026-06-12T14:54:31.774Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acbbdcffehm2PaelYNn24Lt small=false agent=build mode=primary
+timestamp=2026-06-12T14:54:31.785Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:54:45.393Z level=INFO run=c5018752 message=evaluated permission=read pattern=home/mamad/webssh/main.py action.permission=read action.pattern=* action.action=allow
+timestamp=2026-06-12T14:54:45.412Z level=INFO run=c5018752 message="touching file" file=/home/mamad/webssh/main.py
+timestamp=2026-06-12T14:54:45.581Z level=INFO run=c5018752 message=evaluated permission=read pattern=home/mamad/webssh/requirements.txt action.permission=read action.pattern=* action.action=allow
+timestamp=2026-06-12T14:54:45.598Z level=INFO run=c5018752 message="touching file" file=/home/mamad/webssh/requirements.txt
+timestamp=2026-06-12T14:54:45.639Z level=INFO run=c5018752 message=loop session.id=ses_143acbbdcffehm2PaelYNn24Lt step=2
+timestamp=2026-06-12T14:54:45.668Z level=INFO run=c5018752 message=process session.id=ses_143acbbdcffehm2PaelYNn24Lt messageID=msg_ebc540d8a001uBQv51MnCquWyJ
+timestamp=2026-06-12T14:54:45.669Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acbbdcffehm2PaelYNn24Lt small=false agent=build mode=primary
+timestamp=2026-06-12T14:54:45.671Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:54:50.371Z level=INFO run=c5018752 message=evaluated permission=edit pattern=home/mamad/webssh/main.py action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:50.381Z level=INFO run=c5018752 message=formatting file=/home/mamad/webssh/main.py
+timestamp=2026-06-12T14:54:50.386Z level=INFO run=c5018752 message="touching file" file=/home/mamad/webssh/main.py
+timestamp=2026-06-12T14:54:50.428Z level=INFO run=c5018752 message=loop session.id=ses_143acbbdcffehm2PaelYNn24Lt step=3
+timestamp=2026-06-12T14:54:50.456Z level=INFO run=c5018752 message=process session.id=ses_143acbbdcffehm2PaelYNn24Lt messageID=msg_ebc54203e001an2sw6wYDcWyh1
+timestamp=2026-06-12T14:54:50.457Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acbbdcffehm2PaelYNn24Lt small=false agent=build mode=primary
+timestamp=2026-06-12T14:54:50.458Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:54:54.077Z level=INFO run=c5018752 message=evaluated permission=edit pattern=home/mamad/webssh/main.py action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:54.078Z level=INFO run=c5018752 message=formatting file=/home/mamad/webssh/main.py
+timestamp=2026-06-12T14:54:54.084Z level=INFO run=c5018752 message="touching file" file=/home/mamad/webssh/main.py
+timestamp=2026-06-12T14:54:54.143Z level=INFO run=c5018752 message=loop session.id=ses_143acbbdcffehm2PaelYNn24Lt step=4
+timestamp=2026-06-12T14:54:54.179Z level=INFO run=c5018752 message=process session.id=ses_143acbbdcffehm2PaelYNn24Lt messageID=msg_ebc542ec2001OjnrqeWUMO8I17
+timestamp=2026-06-12T14:54:54.181Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acbbdcffehm2PaelYNn24Lt small=false agent=build mode=primary
+timestamp=2026-06-12T14:54:54.191Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:54:57.844Z level=INFO run=c5018752 message=evaluated permission=edit pattern=home/mamad/webssh/main.py action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T14:54:57.844Z level=INFO run=c5018752 message=formatting file=/home/mamad/webssh/main.py
+timestamp=2026-06-12T14:54:57.848Z level=INFO run=c5018752 message="touching file" file=/home/mamad/webssh/main.py
+timestamp=2026-06-12T14:54:57.903Z level=INFO run=c5018752 message=loop session.id=ses_143acbbdcffehm2PaelYNn24Lt step=5
+timestamp=2026-06-12T14:54:57.931Z level=INFO run=c5018752 message=process session.id=ses_143acbbdcffehm2PaelYNn24Lt messageID=msg_ebc543d71001NEXntHSjfLfbDC
+timestamp=2026-06-12T14:54:57.932Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acbbdcffehm2PaelYNn24Lt small=false agent=build mode=primary
+timestamp=2026-06-12T14:54:57.934Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:55:00.449Z level=INFO run=c5018752 message=evaluated permission=edit pattern=home/mamad/webssh/requirements.txt action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T14:55:00.450Z level=INFO run=c5018752 message=formatting file=/home/mamad/webssh/requirements.txt
+timestamp=2026-06-12T14:55:00.453Z level=INFO run=c5018752 message="touching file" file=/home/mamad/webssh/requirements.txt
+timestamp=2026-06-12T14:55:00.496Z level=INFO run=c5018752 message=loop session.id=ses_143acbbdcffehm2PaelYNn24Lt step=6
+timestamp=2026-06-12T14:55:00.523Z level=INFO run=c5018752 message=process session.id=ses_143acbbdcffehm2PaelYNn24Lt messageID=msg_ebc544792001FedC4OIz7DZwS2
+timestamp=2026-06-12T14:55:00.524Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acbbdcffehm2PaelYNn24Lt small=false agent=build mode=primary
+timestamp=2026-06-12T14:55:00.525Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:55:02.385Z level=INFO run=c5018752 message=evaluated permission=read pattern=home/mamad/webssh/main.py action.permission=read action.pattern=* action.action=allow
+timestamp=2026-06-12T14:55:02.403Z level=INFO run=c5018752 message="touching file" file=/home/mamad/webssh/main.py
+timestamp=2026-06-12T14:55:02.531Z level=INFO run=c5018752 message=evaluated permission=read pattern=home/mamad/webssh/requirements.txt action.permission=read action.pattern=* action.action=allow
+timestamp=2026-06-12T14:55:02.547Z level=INFO run=c5018752 message="touching file" file=/home/mamad/webssh/requirements.txt
+timestamp=2026-06-12T14:55:02.597Z level=INFO run=c5018752 message=loop session.id=ses_143acbbdcffehm2PaelYNn24Lt step=7
+timestamp=2026-06-12T14:55:02.625Z level=INFO run=c5018752 message=process session.id=ses_143acbbdcffehm2PaelYNn24Lt messageID=msg_ebc544fc70014sC0IEhB8AlUop
+timestamp=2026-06-12T14:55:02.625Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acbbdcffehm2PaelYNn24Lt small=false agent=build mode=primary
+timestamp=2026-06-12T14:55:02.627Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:55:04.926Z level=INFO run=c5018752 message=evaluated permission=bash pattern="python3 -c \"import py_compile; py_compile.compile('/home/mamad/webssh/main.py', doraise=True)\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T14:55:04.978Z level=INFO run=c5018752 message=loop session.id=ses_143acbbdcffehm2PaelYNn24Lt step=8
+timestamp=2026-06-12T14:55:05.013Z level=INFO run=c5018752 message=process session.id=ses_143acbbdcffehm2PaelYNn24Lt messageID=msg_ebc545915001yVjQdZ00lDfBCE
+timestamp=2026-06-12T14:55:05.014Z level=INFO run=c5018752 message=stream providerID=opencode modelID=big-pickle session.id=ses_143acbbdcffehm2PaelYNn24Lt small=false agent=build mode=primary
+timestamp=2026-06-12T14:55:05.031Z level=INFO run=c5018752 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T14:55:08.638Z level=INFO run=c5018752 message=loop session.id=ses_143acbbdcffehm2PaelYNn24Lt step=9
+timestamp=2026-06-12T14:55:08.640Z level=INFO run=c5018752 message="exiting loop" session.id=ses_143acbbdcffehm2PaelYNn24Lt
+timestamp=2026-06-12T15:02:49.326Z level=INFO run=445d24e0 message="disposing all instances"
+timestamp=2026-06-12T15:02:49.327Z level=INFO run=445d24e0 message="disposing instance" directory=/home/mamad/webssh
+timestamp=2026-06-12T15:21:49.609Z level=INFO run=b1a2641e message="creating instance" directory=/home/mamad
+timestamp=2026-06-12T15:21:49.611Z level=INFO run=b1a2641e message=fromDirectory directory=/home/mamad
+timestamp=2026-06-12T15:21:49.627Z level=INFO run=b1a2641e message=bootstrapping directory=/home/mamad
+timestamp=2026-06-12T15:21:49.656Z level=INFO run=b1a2641e message=loading path=/home/mamad/.config/opencode/config.json
+timestamp=2026-06-12T15:21:49.663Z level=INFO run=b1a2641e message=loading path=/home/mamad/.config/opencode/opencode.json
+timestamp=2026-06-12T15:21:49.664Z level=INFO run=b1a2641e message=loading path=/home/mamad/.config/opencode/opencode.jsonc
+timestamp=2026-06-12T15:21:49.713Z level=INFO run=b1a2641e message="all LSPs are disabled"
+timestamp=2026-06-12T15:21:49.715Z level=INFO run=b1a2641e message="all formatters are disabled"
+timestamp=2026-06-12T15:21:49.715Z level=INFO run=b1a2641e message=init
+timestamp=2026-06-12T15:21:49.929Z level=INFO run=b1a2641e message="booting location services" directory=/home/mamad workspaceID=undefined
+timestamp=2026-06-12T15:21:50.512Z level=INFO run=b1a2641e message="watcher backend" directory=/home/mamad platform=linux backend=inotify
+timestamp=2026-06-12T15:21:51.606Z level=INFO run=b1a2641e message=init count=1
+timestamp=2026-06-12T15:24:32.916Z level=INFO run=14bf1191 message="creating instance" directory=/home/mamad
+timestamp=2026-06-12T15:24:32.919Z level=INFO run=14bf1191 message=fromDirectory directory=/home/mamad
+timestamp=2026-06-12T15:24:33.056Z level=INFO run=14bf1191 message=bootstrapping directory=/home/mamad
+timestamp=2026-06-12T15:24:33.070Z level=INFO run=14bf1191 message=loading path=/home/mamad/.config/opencode/config.json
+timestamp=2026-06-12T15:24:33.071Z level=INFO run=14bf1191 message=loading path=/home/mamad/.config/opencode/opencode.json
+timestamp=2026-06-12T15:24:33.072Z level=INFO run=14bf1191 message=loading path=/home/mamad/.config/opencode/opencode.jsonc
+timestamp=2026-06-12T15:24:33.111Z level=INFO run=14bf1191 message="all LSPs are disabled"
+timestamp=2026-06-12T15:24:33.113Z level=INFO run=14bf1191 message="all formatters are disabled"
+timestamp=2026-06-12T15:24:33.113Z level=INFO run=14bf1191 message=init
+timestamp=2026-06-12T15:24:33.326Z level=INFO run=14bf1191 message="booting location services" directory=/home/mamad workspaceID=undefined
+timestamp=2026-06-12T15:24:33.903Z level=INFO run=14bf1191 message="watcher backend" directory=/home/mamad platform=linux backend=inotify
+timestamp=2026-06-12T15:24:34.935Z level=INFO run=14bf1191 message=init count=1
+timestamp=2026-06-12T15:32:33.592Z level=INFO run=3385c1a6 message="creating instance" directory=/home/mamad
+timestamp=2026-06-12T15:32:33.595Z level=INFO run=3385c1a6 message=fromDirectory directory=/home/mamad
+timestamp=2026-06-12T15:32:33.706Z level=INFO run=3385c1a6 message=bootstrapping directory=/home/mamad
+timestamp=2026-06-12T15:32:33.720Z level=INFO run=3385c1a6 message=loading path=/home/mamad/.config/opencode/config.json
+timestamp=2026-06-12T15:32:33.721Z level=INFO run=3385c1a6 message=loading path=/home/mamad/.config/opencode/opencode.json
+timestamp=2026-06-12T15:32:33.721Z level=INFO run=3385c1a6 message=loading path=/home/mamad/.config/opencode/opencode.jsonc
+timestamp=2026-06-12T15:32:33.770Z level=INFO run=3385c1a6 message="all LSPs are disabled"
+timestamp=2026-06-12T15:32:33.772Z level=INFO run=3385c1a6 message="all formatters are disabled"
+timestamp=2026-06-12T15:32:33.772Z level=INFO run=3385c1a6 message=init
+timestamp=2026-06-12T15:32:33.981Z level=INFO run=3385c1a6 message="booting location services" directory=/home/mamad workspaceID=undefined
+timestamp=2026-06-12T15:32:34.547Z level=INFO run=3385c1a6 message="watcher backend" directory=/home/mamad platform=linux backend=inotify
+timestamp=2026-06-12T15:32:35.594Z level=INFO run=3385c1a6 message=init count=1
+timestamp=2026-06-12T15:32:43.570Z level=ERROR run=3385c1a6 message="Failed to fetch models.dev" cause=Cause([Fail(TimeoutError)])
+timestamp=2026-06-12T15:32:57.454Z level=INFO run=6209b17e message="creating instance" directory=/home/mamad
+timestamp=2026-06-12T15:32:57.456Z level=INFO run=6209b17e message=fromDirectory directory=/home/mamad
+timestamp=2026-06-12T15:32:57.557Z level=INFO run=6209b17e message=bootstrapping directory=/home/mamad
+timestamp=2026-06-12T15:32:57.571Z level=INFO run=6209b17e message=loading path=/home/mamad/.config/opencode/config.json
+timestamp=2026-06-12T15:32:57.572Z level=INFO run=6209b17e message=loading path=/home/mamad/.config/opencode/opencode.json
+timestamp=2026-06-12T15:32:57.572Z level=INFO run=6209b17e message=loading path=/home/mamad/.config/opencode/opencode.jsonc
+timestamp=2026-06-12T15:32:57.618Z level=INFO run=6209b17e message="all LSPs are disabled"
+timestamp=2026-06-12T15:32:57.620Z level=INFO run=6209b17e message="all formatters are disabled"
+timestamp=2026-06-12T15:32:57.620Z level=INFO run=6209b17e message=init
+timestamp=2026-06-12T15:32:57.830Z level=INFO run=6209b17e message="booting location services" directory=/home/mamad workspaceID=undefined
+timestamp=2026-06-12T15:32:58.395Z level=INFO run=6209b17e message="watcher backend" directory=/home/mamad platform=linux backend=inotify
+timestamp=2026-06-12T15:32:59.431Z level=INFO run=6209b17e message=init count=1
+timestamp=2026-06-12T15:33:07.425Z level=ERROR run=6209b17e message="Failed to fetch models.dev" cause=Cause([Fail(TimeoutError)])
+timestamp=2026-06-12T15:33:26.120Z level=INFO run=a3296482 message="creating instance" directory=/home/mamad
+timestamp=2026-06-12T15:33:26.122Z level=INFO run=a3296482 message=fromDirectory directory=/home/mamad
+timestamp=2026-06-12T15:33:26.182Z level=INFO run=a3296482 message=bootstrapping directory=/home/mamad
+timestamp=2026-06-12T15:33:26.196Z level=INFO run=a3296482 message=loading path=/home/mamad/.config/opencode/config.json
+timestamp=2026-06-12T15:33:26.197Z level=INFO run=a3296482 message=loading path=/home/mamad/.config/opencode/opencode.json
+timestamp=2026-06-12T15:33:26.198Z level=INFO run=a3296482 message=loading path=/home/mamad/.config/opencode/opencode.jsonc
+timestamp=2026-06-12T15:33:26.243Z level=INFO run=a3296482 message="all LSPs are disabled"
+timestamp=2026-06-12T15:33:26.245Z level=INFO run=a3296482 message="all formatters are disabled"
+timestamp=2026-06-12T15:33:26.245Z level=INFO run=a3296482 message=init
+timestamp=2026-06-12T15:33:26.448Z level=INFO run=a3296482 message="booting location services" directory=/home/mamad workspaceID=undefined
+timestamp=2026-06-12T15:33:27.009Z level=INFO run=a3296482 message="watcher backend" directory=/home/mamad platform=linux backend=inotify
+timestamp=2026-06-12T15:33:28.031Z level=INFO run=a3296482 message=init count=1
+timestamp=2026-06-12T15:34:51.870Z level=INFO run=df01b436 message="creating instance" directory=/home/mamad
+timestamp=2026-06-12T15:34:51.872Z level=INFO run=df01b436 message=fromDirectory directory=/home/mamad
+timestamp=2026-06-12T15:34:51.973Z level=INFO run=df01b436 message=bootstrapping directory=/home/mamad
+timestamp=2026-06-12T15:34:51.988Z level=INFO run=df01b436 message=loading path=/home/mamad/.config/opencode/config.json
+timestamp=2026-06-12T15:34:51.989Z level=INFO run=df01b436 message=loading path=/home/mamad/.config/opencode/opencode.json
+timestamp=2026-06-12T15:34:51.989Z level=INFO run=df01b436 message=loading path=/home/mamad/.config/opencode/opencode.jsonc
+timestamp=2026-06-12T15:34:52.038Z level=INFO run=df01b436 message="all LSPs are disabled"
+timestamp=2026-06-12T15:34:52.040Z level=INFO run=df01b436 message="all formatters are disabled"
+timestamp=2026-06-12T15:34:52.040Z level=INFO run=df01b436 message=init
+timestamp=2026-06-12T15:34:52.253Z level=INFO run=df01b436 message="booting location services" directory=/home/mamad workspaceID=undefined
+timestamp=2026-06-12T15:34:52.828Z level=INFO run=df01b436 message="watcher backend" directory=/home/mamad platform=linux backend=inotify
+timestamp=2026-06-12T15:34:53.897Z level=INFO run=df01b436 message=init count=1
+timestamp=2026-06-12T15:55:54.634Z level=INFO run=df01b436 message=created id=ses_14373f675ffegkih6P6qcNrmCw slug=jolly-squid version=1.17.4 projectID=global directory=/home/mamad path=home/mamad workspaceID=undefined parentID=undefined title="New session - 2026-06-12T15:55:54.634Z" agent=build model.id=big-pickle model.providerID=opencode metadata=undefined permission=undefined cost=0 tokens.input=0 tokens.output=0 tokens.reasoning=0 tokens.cache.read=0 tokens.cache.write=0 time.created=1781279754634 time.updated=1781279754634
+timestamp=2026-06-12T15:55:54.688Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=0
+timestamp=2026-06-12T15:55:54.706Z level=INFO run=df01b436 message="shell tool using shell" shell=/bin/bash
+timestamp=2026-06-12T15:55:54.753Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=true agent=title mode=primary
+timestamp=2026-06-12T15:55:54.781Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:55:54.845Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8c09c4001eojjIU2T7RTVeh
+timestamp=2026-06-12T15:55:54.847Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:55:54.849Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:55:58.498Z level=INFO run=df01b436 message=evaluated permission=bash pattern="apt-get update" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:55:58.498Z level=INFO run=df01b436 message=evaluated permission=bash pattern="apt-get install -y nginx sshpass" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:55:58.610Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=1
+timestamp=2026-06-12T15:55:58.659Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8c19150010vFrFttNuOrbzq
+timestamp=2026-06-12T15:55:58.660Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:55:58.663Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:56:01.003Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sudo apt-get update" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:01.003Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sudo apt-get install -y nginx sshpass" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:01.066Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=2
+timestamp=2026-06-12T15:56:01.095Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8c22ac001Zca9Y2lTl2fIUX
+timestamp=2026-06-12T15:56:01.096Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:56:01.107Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:56:03.497Z level=INFO run=df01b436 message="resolved path" arg=/etc/sudoers.d/* resolved=/etc/sudoers.d
+timestamp=2026-06-12T15:56:03.503Z level=INFO run=df01b436 message=evaluated permission=external_directory pattern=/etc/sudoers.d/* action.permission=external_directory action.pattern=* action.action=ask
+timestamp=2026-06-12T15:56:03.503Z level=INFO run=df01b436 message=asking id=per_ebc8c2c2f001WDDRhaV6vpoyYk permission=external_directory patterns="[\"/etc/sudoers.d/*\"]"
+timestamp=2026-06-12T15:56:11.001Z level=INFO run=df01b436 message=evaluated permission=bash pattern=whoami action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:11.001Z level=INFO run=df01b436 message=evaluated permission=bash pattern=id action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:11.001Z level=INFO run=df01b436 message=evaluated permission=bash pattern="cat /etc/sudoers.d/*" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:11.001Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sudo -n true 2>&1" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:11.040Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=3
+timestamp=2026-06-12T15:56:11.080Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8c49a2001K1lHBNPh7cDTMu
+timestamp=2026-06-12T15:56:11.081Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:56:11.083Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:56:13.438Z level=INFO run=df01b436 message=evaluated permission=bash pattern="echo bajingan357" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:13.438Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sudo -S apt-get update" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:13.438Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sudo apt-get install -y nginx sshpass" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:17.034Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=4
+timestamp=2026-06-12T15:56:17.069Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8c610d001vlSMQWX7r7KFr6
+timestamp=2026-06-12T15:56:17.070Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:56:17.085Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:56:20.786Z level=INFO run=df01b436 message=evaluated permission=bash pattern="echo bajingan357" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:20.786Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sudo -S apt-get update" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:20.786Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sudo -S apt-get install -y nginx sshpass" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:27.599Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=5
+timestamp=2026-06-12T15:56:27.618Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8c8a510010vgSFcyLcbgwhY
+timestamp=2026-06-12T15:56:27.619Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:56:27.621Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:56:31.221Z level=INFO run=df01b436 message=evaluated permission=bash pattern="echo bajingan357" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:31.221Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sudo -S systemctl start nginx" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:31.221Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sudo -S systemctl enable nginx" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:31.728Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=6
+timestamp=2026-06-12T15:56:31.749Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8c9a73001V3hApknkuvkOZj
+timestamp=2026-06-12T15:56:31.750Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:56:31.753Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:56:33.799Z level=INFO run=df01b436 message=evaluated permission=bash pattern="echo bajingan357" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:33.799Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sudo -S systemctl status nginx --no-pager" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:33.894Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=7
+timestamp=2026-06-12T15:56:33.938Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8ca2e90017y8n0DBXVnvr4c
+timestamp=2026-06-12T15:56:33.939Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:56:33.941Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:56:39.359Z level=INFO run=df01b436 message=evaluated permission=bash pattern="ping -c 2 -W 2 168.110.209.191" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:39.438Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=8
+timestamp=2026-06-12T15:56:39.487Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8cb891001mjsysXsQedsGsO
+timestamp=2026-06-12T15:56:39.489Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:56:39.501Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:56:42.214Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 mamad@168.110.209.191 \"echo connected\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:42.780Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=9
+timestamp=2026-06-12T15:56:42.812Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8cc59e00118iEfcZkC9C4sG
+timestamp=2026-06-12T15:56:42.813Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:56:42.823Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:56:46.858Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ExitOnForwardFailure=yes -f -N -R 80:localhost:80 -R 443:localhost:443 mamad@168.110.209.191" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:47.067Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=10
+timestamp=2026-06-12T15:56:47.098Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8cd65e001aIIPLWnd6U9rg8
+timestamp=2026-06-12T15:56:47.099Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:56:47.108Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:56:52.522Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no mamad@168.110.209.191 \"sudo -n ss -tlnp | grep -E ':(80|443)\\b' 2>/dev/null; echo '---'; sudo -n true 2>&1; echo 'exit: '$?\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:52.822Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=11
+timestamp=2026-06-12T15:56:52.858Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8cecd9001NQEnqMdaUPFRew
+timestamp=2026-06-12T15:56:52.859Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:56:52.869Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:56:56.439Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no mamad@168.110.209.191 \"ss -tlnp | grep -E ':(80|443)\\s' 2>/dev/null; echo '---'; nc -z localhost 80 2>&1; echo port80: $?; nc -z localhost 443 2>&1; echo port443: $?\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:56:56.707Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=12
+timestamp=2026-06-12T15:56:56.759Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8cfc050017vI2x1UwGSSa77
+timestamp=2026-06-12T15:56:56.760Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:56:56.770Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:57:03.559Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=13
+timestamp=2026-06-12T15:57:03.561Z level=INFO run=df01b436 message="exiting loop" session.id=ses_14373f675ffegkih6P6qcNrmCw
+timestamp=2026-06-12T15:58:26.968Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=0
+timestamp=2026-06-12T15:58:27.022Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8e5c9b0011pxDDxakOlfInS
+timestamp=2026-06-12T15:58:27.023Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:58:27.033Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:58:48.326Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no -t mamad@168.110.209.191 \"echo bajingan357 | sudo -S -v && echo 'sudo OK'\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:58:48.960Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=1
+timestamp=2026-06-12T15:58:49.002Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8eb283001SBpzB05RrB5clK
+timestamp=2026-06-12T15:58:49.004Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:58:49.006Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:59:01.907Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ExitOnForwardFailure=yes -f -N -R 8880:localhost:80 -R 8443:localhost:443 mamad@168.110.209.191" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:02.208Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=2
+timestamp=2026-06-12T15:59:02.230Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8ee64300142vMR55pZ4ZTCf
+timestamp=2026-06-12T15:59:02.231Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:59:02.233Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:59:05.331Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no -t mamad@168.110.209.191 \"echo bajingan357 | sudo -S iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8880 && echo bajingan357 | sudo -S iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 8443 && echo 'iptables OK'\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:05.667Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=3
+timestamp=2026-06-12T15:59:05.698Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8ef3c6001tcGm4tQHFoAjE7
+timestamp=2026-06-12T15:59:05.699Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:59:05.708Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:59:08.759Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no mamad@168.110.209.191 \"curl -sI http://localhost:80 | head -5\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:09.018Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=4
+timestamp=2026-06-12T15:59:09.039Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8f00dd001AePdLjMAxJDpkD
+timestamp=2026-06-12T15:59:09.040Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:59:09.042Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:59:13.448Z level=INFO run=df01b436 message=evaluated permission=bash pattern="curl -sI http://localhost:80" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:13.448Z level=INFO run=df01b436 message=evaluated permission=bash pattern="head -5" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:13.497Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=5
+timestamp=2026-06-12T15:59:13.536Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8f125c0013gGcBb7QtdOcL9
+timestamp=2026-06-12T15:59:13.537Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:59:13.539Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:59:16.155Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no mamad@168.110.209.191 \"curl -sI http://168.110.209.191:80 | head -5\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:16.472Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=6
+timestamp=2026-06-12T15:59:16.490Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8f1dfb001FK32C4lXIWUD2m
+timestamp=2026-06-12T15:59:16.491Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:59:16.492Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:59:18.940Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no mamad@168.110.209.191 \"curl -sI http://localhost:8880 | head -5\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:19.204Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=7
+timestamp=2026-06-12T15:59:19.233Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8f28a6001BcRQcPvyzcoDGr
+timestamp=2026-06-12T15:59:19.234Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:59:19.235Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:59:25.392Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no -t mamad@168.110.209.191 \"echo bajingan357 | sudo -S iptables -t nat -L -n\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:25.706Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=8
+timestamp=2026-06-12T15:59:25.743Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8f420e001Kw43WF9075BrhZ
+timestamp=2026-06-12T15:59:25.744Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:59:25.753Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:59:34.241Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no mamad@168.110.209.191 \"curl -sI http://168.110.209.191:80 --connect-timeout 5 2>&1; echo 'exit: '$?\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:34.509Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=9
+timestamp=2026-06-12T15:59:34.554Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8f6471001Sg14cXJvsoulFR
+timestamp=2026-06-12T15:59:34.555Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:59:34.557Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:59:38.025Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no mamad@168.110.209.191 \"curl -v http://168.110.209.191:80 --connect-timeout 5 2>&1 | head -20\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:38.286Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=10
+timestamp=2026-06-12T15:59:38.339Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8f7331001E8tF6cKAiHVko1
+timestamp=2026-06-12T15:59:38.340Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:59:38.342Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:59:51.614Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no -t mamad@168.110.209.191 \"echo bajingan357 | sudo -S iptables -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to-port 8880 && echo bajingan357 | sudo -S iptables -t nat -A OUTPUT -p tcp --dport 443 -j REDIRECT --to-port 8443 && echo 'OUTPUT rules OK'\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:52.240Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=11
+timestamp=2026-06-12T15:59:52.271Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8fa9b3001PBOnVYFf880obb
+timestamp=2026-06-12T15:59:52.272Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:59:52.274Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:59:54.856Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no mamad@168.110.209.191 \"curl -sI http://localhost:80 | head -5\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:55.122Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=12
+timestamp=2026-06-12T15:59:55.172Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8fb4f6001IVLxNBKBiGhdtU
+timestamp=2026-06-12T15:59:55.173Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:59:55.175Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T15:59:57.796Z level=INFO run=df01b436 message=evaluated permission=bash pattern="curl -sI http://168.110.209.191:80 --connect-timeout 10" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:57.796Z level=INFO run=df01b436 message=evaluated permission=bash pattern="head -5" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T15:59:57.863Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=13
+timestamp=2026-06-12T15:59:57.891Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8fbfa9001VBlH5RzouDSok6
+timestamp=2026-06-12T15:59:57.891Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T15:59:57.893Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:00:01.446Z level=INFO run=df01b436 message=evaluated permission=bash pattern="pgrep -a ssh" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:00:01.446Z level=INFO run=df01b436 message=evaluated permission=bash pattern="grep -E \"8880|8443\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:00:01.504Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=14
+timestamp=2026-06-12T16:00:01.534Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc8fcde30015FqEvzk2xlVlfn
+timestamp=2026-06-12T16:00:01.535Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:00:01.547Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:00:05.412Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=15
+timestamp=2026-06-12T16:00:05.415Z level=INFO run=df01b436 message="exiting loop" session.id=ses_14373f675ffegkih6P6qcNrmCw
+timestamp=2026-06-12T16:01:35.732Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=0
+timestamp=2026-06-12T16:01:35.754Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc913df8001ihRQ2ebw4rizyl
+timestamp=2026-06-12T16:01:35.756Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:01:35.758Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:01:47.276Z level=INFO run=df01b436 message=evaluated permission=bash pattern="pkill -f \"8880:localhost:80.*8443:localhost:443\" 2>/dev/null" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:01:47.276Z level=INFO run=df01b436 message=evaluated permission=bash pattern="echo \"killed old tunnel\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:01:48.472Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no -t mamad@168.110.209.191 \"echo bajingan357 | sudo -S iptables -t nat -D PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8880 2>/dev/null; echo bajingan357 | sudo -S iptables -t nat -D PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 8443 2>/dev/null; echo bajingan357 | sudo -S iptables -t nat -D OUTPUT -p tcp --dport 80 -j REDIRECT --to-port 8880 2>/dev/null; echo bajingan357 | sudo -S iptables -t nat -D OUTPUT -p tcp --dport 443 -j REDIRECT --to-port 8443 2>/dev/null; echo 'cleanup done'\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:03:47.408Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=1
+timestamp=2026-06-12T16:03:47.432Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc934054001mCEQXIdbmEvIhW
+timestamp=2026-06-12T16:03:47.433Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:03:47.435Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:03:52.730Z level=INFO run=df01b436 message=evaluated permission=bash pattern="echo bajingan357" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:03:52.730Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sudo -S systemctl stop nginx" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:03:52.846Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=2
+timestamp=2026-06-12T16:03:52.880Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc935591001uXPwzwAipzV3xX
+timestamp=2026-06-12T16:03:52.881Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:03:52.892Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:03:55.273Z level=INFO run=df01b436 message=evaluated permission=bash pattern="ss -tlnp" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:03:55.273Z level=INFO run=df01b436 message=evaluated permission=bash pattern="grep -E ':(80|443)\\s'" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:03:55.363Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=3
+timestamp=2026-06-12T16:03:55.396Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc935f660018DmGX05u6eBEEk
+timestamp=2026-06-12T16:03:55.397Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:03:55.399Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:04:23.263Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ExitOnForwardFailure=yes -f -N -L 80:168.110.209.191:80 -L 443:168.110.209.191:443 mamad@168.110.209.191" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:04:23.479Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=4
+timestamp=2026-06-12T16:04:23.561Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc93cd3b001EcpEuS6l2xoPd7
+timestamp=2026-06-12T16:04:23.563Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:04:23.566Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:04:28.294Z level=INFO run=df01b436 message=evaluated permission=bash pattern="echo bajingan357" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:04:28.294Z level=INFO run=df01b436 message=evaluated permission=bash pattern="sudo -S sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ExitOnForwardFailure=yes -f -N -L 80:168.110.209.191:80 -L 443:168.110.209.191:443 mamad@168.110.209.191" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:04:28.510Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=5
+timestamp=2026-06-12T16:04:28.557Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc93e0e2001SRJ7eLKuL7oBiO
+timestamp=2026-06-12T16:04:28.559Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:04:28.561Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:04:30.986Z level=INFO run=df01b436 message=evaluated permission=bash pattern="ss -tlnp" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:04:30.986Z level=INFO run=df01b436 message=evaluated permission=bash pattern="grep -E ':(80|443)\\s'" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:04:31.072Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=6
+timestamp=2026-06-12T16:04:31.102Z level=INFO run=df01b436 message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc93eae3001mEbhJeq88oSxR6
+timestamp=2026-06-12T16:04:31.103Z level=INFO run=df01b436 message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:04:31.104Z level=INFO run=df01b436 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:04:36.006Z level=INFO run=df01b436 message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=7
+timestamp=2026-06-12T16:04:36.009Z level=INFO run=df01b436 message="exiting loop" session.id=ses_14373f675ffegkih6P6qcNrmCw
+timestamp=2026-06-12T16:08:21.631Z level=INFO run=9dc4e2bb message="creating instance" directory=/home/mamad
+timestamp=2026-06-12T16:08:21.633Z level=INFO run=9dc4e2bb message=fromDirectory directory=/home/mamad
+timestamp=2026-06-12T16:08:21.665Z level=INFO run=9dc4e2bb message=bootstrapping directory=/home/mamad
+timestamp=2026-06-12T16:08:21.673Z level=INFO run=9dc4e2bb message=loading path=/home/mamad/.config/opencode/config.json
+timestamp=2026-06-12T16:08:21.681Z level=INFO run=9dc4e2bb message=loading path=/home/mamad/.config/opencode/opencode.json
+timestamp=2026-06-12T16:08:21.681Z level=INFO run=9dc4e2bb message=loading path=/home/mamad/.config/opencode/opencode.jsonc
+timestamp=2026-06-12T16:08:21.721Z level=INFO run=9dc4e2bb message="all LSPs are disabled"
+timestamp=2026-06-12T16:08:21.723Z level=INFO run=9dc4e2bb message="all formatters are disabled"
+timestamp=2026-06-12T16:08:21.723Z level=INFO run=9dc4e2bb message=init
+timestamp=2026-06-12T16:08:21.928Z level=INFO run=9dc4e2bb message="booting location services" directory=/home/mamad workspaceID=undefined
+timestamp=2026-06-12T16:08:22.503Z level=INFO run=9dc4e2bb message="watcher backend" directory=/home/mamad platform=linux backend=inotify
+timestamp=2026-06-12T16:08:23.552Z level=INFO run=9dc4e2bb message=init count=1
+timestamp=2026-06-12T16:08:31.556Z level=ERROR run=9dc4e2bb message="Failed to fetch models.dev" cause=Cause([Fail(TimeoutError)])
+timestamp=2026-06-12T16:10:05.720Z level=INFO run=9dc4e2bb message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=0
+timestamp=2026-06-12T16:10:05.740Z level=INFO run=9dc4e2bb message="shell tool using shell" shell=/bin/bash
+timestamp=2026-06-12T16:10:05.812Z level=INFO run=9dc4e2bb message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc99061f001kvfErdwuZd5R7S
+timestamp=2026-06-12T16:10:05.816Z level=INFO run=9dc4e2bb message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:10:05.827Z level=INFO run=9dc4e2bb message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:10:19.763Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="pkill -f \"ssh.*-L.*80:168.110.209.191\" 2>/dev/null" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:10:19.763Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="echo \"tunnel stopped\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:10:20.138Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="echo bajingan357" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:10:20.138Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="sudo -S systemctl start nginx" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:10:20.138Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="echo \"nginx started\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:10:20.545Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="ip -4 a show" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:10:20.545Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="grep inet" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:19.945Z level=INFO run=9dc4e2bb message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=1
+timestamp=2026-06-12T16:12:19.973Z level=INFO run=9dc4e2bb message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc9b126e0015Vdzl0W22S6iQG
+timestamp=2026-06-12T16:12:19.974Z level=INFO run=9dc4e2bb message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:12:19.988Z level=INFO run=9dc4e2bb message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:12:23.583Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="echo bajingan357" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:23.584Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="sudo -S nginx -t" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:23.685Z level=INFO run=9dc4e2bb message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=2
+timestamp=2026-06-12T16:12:23.721Z level=INFO run=9dc4e2bb message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc9b2109001kW1FmzkY2nPb25
+timestamp=2026-06-12T16:12:23.722Z level=INFO run=9dc4e2bb message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:12:23.731Z level=INFO run=9dc4e2bb message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:12:26.384Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="ss -tlnp" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:26.385Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="grep -E ':(80|443)\\s'" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:26.385Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="pgrep -f \"ssh.*-L\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:26.446Z level=INFO run=9dc4e2bb message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=3
+timestamp=2026-06-12T16:12:26.478Z level=INFO run=9dc4e2bb message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc9b2bd2001fBlvyP4De3S6KX
+timestamp=2026-06-12T16:12:26.478Z level=INFO run=9dc4e2bb message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:12:26.480Z level=INFO run=9dc4e2bb message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:12:29.042Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="kill 12891 2>/dev/null" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:29.042Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="sleep 1" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:29.042Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="ss -tlnp" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:29.042Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="grep -E ':(80|443)\\s'" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:30.081Z level=INFO run=9dc4e2bb message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=4
+timestamp=2026-06-12T16:12:30.116Z level=INFO run=9dc4e2bb message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc9b3a04001XCty71usii8Ml1
+timestamp=2026-06-12T16:12:30.117Z level=INFO run=9dc4e2bb message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:12:30.125Z level=INFO run=9dc4e2bb message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:12:32.521Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="ps aux" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:32.521Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="grep \"ssh.*-L\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:32.521Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="grep -v grep" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:32.602Z level=INFO run=9dc4e2bb message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=5
+timestamp=2026-06-12T16:12:32.633Z level=INFO run=9dc4e2bb message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc9b43de001kgGG4VtqJginsD
+timestamp=2026-06-12T16:12:32.634Z level=INFO run=9dc4e2bb message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:12:32.644Z level=INFO run=9dc4e2bb message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:12:35.347Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="echo bajingan357" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:35.347Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="sudo -S kill 12891" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:35.347Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="sleep 1" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:35.347Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="ss -tlnp" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:35.347Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="grep -E ':(80|443)\\s'" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:36.443Z level=INFO run=9dc4e2bb message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=6
+timestamp=2026-06-12T16:12:36.463Z level=INFO run=9dc4e2bb message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc9b52de0016uoXPPjizrY8jd
+timestamp=2026-06-12T16:12:36.464Z level=INFO run=9dc4e2bb message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:12:36.466Z level=INFO run=9dc4e2bb message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:12:38.938Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="echo bajingan357" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:38.938Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="sudo -S systemctl start nginx" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:38.938Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="echo \"nginx started OK\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:39.074Z level=INFO run=9dc4e2bb message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=7
+timestamp=2026-06-12T16:12:39.104Z level=INFO run=9dc4e2bb message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc9b5d25001keUycPJon9RUgm
+timestamp=2026-06-12T16:12:39.105Z level=INFO run=9dc4e2bb message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:12:39.107Z level=INFO run=9dc4e2bb message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:12:50.666Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no -t mamad@168.110.209.191 \"echo bajingan357 | sudo -S sysctl net.ipv4.ip_forward && echo bajingan357 | sudo -S iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.90.204.143:80 && echo bajingan357 | sudo -S iptables -t nat -A POSTROUTING -p tcp -d 10.90.204.143 --dport 80 -j MASQUERADE && echo 'DNAT + MASQUERADE done'\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:51.302Z level=INFO run=9dc4e2bb message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=8
+timestamp=2026-06-12T16:12:51.343Z level=INFO run=9dc4e2bb message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc9b8cea001gI9nDPezmlJHpI
+timestamp=2026-06-12T16:12:51.344Z level=INFO run=9dc4e2bb message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:12:51.345Z level=INFO run=9dc4e2bb message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:12:54.498Z level=INFO run=9dc4e2bb message=evaluated permission=bash pattern="sshpass -p 'bajingan357' ssh -o StrictHostKeyChecking=no mamad@168.110.209.191 \"curl -sI http://168.110.209.191:80 | head -5\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:12:54.755Z level=INFO run=9dc4e2bb message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=9
+timestamp=2026-06-12T16:12:54.789Z level=INFO run=9dc4e2bb message=process session.id=ses_14373f675ffegkih6P6qcNrmCw messageID=msg_ebc9b9a660019a1RIZJ4Lu9nM5
+timestamp=2026-06-12T16:12:54.789Z level=INFO run=9dc4e2bb message=stream providerID=opencode modelID=big-pickle session.id=ses_14373f675ffegkih6P6qcNrmCw small=false agent=build mode=primary
+timestamp=2026-06-12T16:12:54.798Z level=INFO run=9dc4e2bb message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:12:58.081Z level=INFO run=9dc4e2bb message=loop session.id=ses_14373f675ffegkih6P6qcNrmCw step=10
+timestamp=2026-06-12T16:12:58.084Z level=INFO run=9dc4e2bb message="exiting loop" session.id=ses_14373f675ffegkih6P6qcNrmCw
+timestamp=2026-06-12T16:24:35.273Z level=INFO run=14bf1191 message="booting location services" directory=/home/mamad workspaceID=undefined
+timestamp=2026-06-12T16:24:35.332Z level=INFO run=14bf1191 message="watcher backend" directory=/home/mamad platform=linux backend=inotify
+timestamp=2026-06-12T16:24:42.877Z level=ERROR run=14bf1191 message="Failed to fetch models.dev" cause=Cause([Fail(TimeoutError)])
+timestamp=2026-06-12T16:48:13.728Z level=INFO run=e69231c6 message="creating instance" directory=/home/mamad
+timestamp=2026-06-12T16:48:13.730Z level=INFO run=e69231c6 message=fromDirectory directory=/home/mamad
+timestamp=2026-06-12T16:48:13.762Z level=INFO run=e69231c6 message=bootstrapping directory=/home/mamad
+timestamp=2026-06-12T16:48:13.777Z level=INFO run=e69231c6 message=loading path=/home/mamad/.config/opencode/config.json
+timestamp=2026-06-12T16:48:13.778Z level=INFO run=e69231c6 message=loading path=/home/mamad/.config/opencode/opencode.json
+timestamp=2026-06-12T16:48:13.778Z level=INFO run=e69231c6 message=loading path=/home/mamad/.config/opencode/opencode.jsonc
+timestamp=2026-06-12T16:48:13.823Z level=INFO run=e69231c6 message="all LSPs are disabled"
+timestamp=2026-06-12T16:48:13.826Z level=INFO run=e69231c6 message="all formatters are disabled"
+timestamp=2026-06-12T16:48:13.826Z level=INFO run=e69231c6 message=init
+timestamp=2026-06-12T16:48:14.038Z level=INFO run=e69231c6 message="booting location services" directory=/home/mamad workspaceID=undefined
+timestamp=2026-06-12T16:48:14.621Z level=INFO run=e69231c6 message="watcher backend" directory=/home/mamad platform=linux backend=inotify
+timestamp=2026-06-12T16:48:15.669Z level=INFO run=e69231c6 message=init count=1
+timestamp=2026-06-12T16:51:22.311Z level=INFO run=e69231c6 message=created id=ses_143412fb8ffe616FjbFpI3k2pk slug=tidy-forest version=1.17.4 projectID=global directory=/home/mamad path=home/mamad workspaceID=undefined parentID=undefined title="New session - 2026-06-12T16:51:22.311Z" agent=build model.id=big-pickle model.providerID=opencode metadata=undefined permission=undefined cost=0 tokens.input=0 tokens.output=0 tokens.reasoning=0 tokens.cache.read=0 tokens.cache.write=0 time.created=1781283082311 time.updated=1781283082311
+timestamp=2026-06-12T16:51:22.366Z level=INFO run=e69231c6 message=loop session.id=ses_143412fb8ffe616FjbFpI3k2pk step=0
+timestamp=2026-06-12T16:51:22.386Z level=INFO run=e69231c6 message="shell tool using shell" shell=/bin/bash
+timestamp=2026-06-12T16:51:22.432Z level=INFO run=e69231c6 message=stream providerID=opencode modelID=big-pickle session.id=ses_143412fb8ffe616FjbFpI3k2pk small=true agent=title mode=primary
+timestamp=2026-06-12T16:51:22.457Z level=INFO run=e69231c6 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:51:22.519Z level=INFO run=e69231c6 message=process session.id=ses_143412fb8ffe616FjbFpI3k2pk messageID=msg_ebcbed083001C051Y5TeaBnorp
+timestamp=2026-06-12T16:51:22.521Z level=INFO run=e69231c6 message=stream providerID=opencode modelID=big-pickle session.id=ses_143412fb8ffe616FjbFpI3k2pk small=false agent=build mode=primary
+timestamp=2026-06-12T16:51:22.526Z level=INFO run=e69231c6 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:51:27.351Z level=INFO run=e69231c6 message=evaluated permission=bash pattern="git config --global user.email \"ahmadmishbah@student.uns.ac.id\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:51:27.352Z level=INFO run=e69231c6 message=evaluated permission=bash pattern="git config --global user.name \"mgi24\"" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:51:27.584Z level=INFO run=e69231c6 message=evaluated permission=bash pattern="ls -la /home/mamad" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:51:27.682Z level=INFO run=e69231c6 message=loop session.id=ses_143412fb8ffe616FjbFpI3k2pk step=1
+timestamp=2026-06-12T16:51:27.726Z level=INFO run=e69231c6 message=process session.id=ses_143412fb8ffe616FjbFpI3k2pk messageID=msg_ebcbee544001WoelQejnjuQP5z
+timestamp=2026-06-12T16:51:27.727Z level=INFO run=e69231c6 message=stream providerID=opencode modelID=big-pickle session.id=ses_143412fb8ffe616FjbFpI3k2pk small=false agent=build mode=primary
+timestamp=2026-06-12T16:51:27.729Z level=INFO run=e69231c6 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:51:30.065Z level=INFO run=e69231c6 message=evaluated permission=bash pattern="git init" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:51:30.126Z level=INFO run=e69231c6 message=loop session.id=ses_143412fb8ffe616FjbFpI3k2pk step=2
+timestamp=2026-06-12T16:51:30.153Z level=INFO run=e69231c6 message=process session.id=ses_143412fb8ffe616FjbFpI3k2pk messageID=msg_ebcbeeecf001JL799uqWfZjatn
+timestamp=2026-06-12T16:51:30.154Z level=INFO run=e69231c6 message=stream providerID=opencode modelID=big-pickle session.id=ses_143412fb8ffe616FjbFpI3k2pk small=false agent=build mode=primary
+timestamp=2026-06-12T16:51:30.156Z level=INFO run=e69231c6 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:51:32.904Z level=INFO run=e69231c6 message=evaluated permission=bash pattern="git branch -m main" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:51:32.969Z level=INFO run=e69231c6 message=loop session.id=ses_143412fb8ffe616FjbFpI3k2pk step=3
+timestamp=2026-06-12T16:51:32.994Z level=INFO run=e69231c6 message=process session.id=ses_143412fb8ffe616FjbFpI3k2pk messageID=msg_ebcbef9eb001lOq7aizvQ46BF0
+timestamp=2026-06-12T16:51:32.995Z level=INFO run=e69231c6 message=stream providerID=opencode modelID=big-pickle session.id=ses_143412fb8ffe616FjbFpI3k2pk small=false agent=build mode=primary
+timestamp=2026-06-12T16:51:32.996Z level=INFO run=e69231c6 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:51:38.549Z level=INFO run=e69231c6 message=evaluated permission=bash pattern="git remote add origin https://mgi24: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@github.com/mgi24/VPS-Vibe.git" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:51:38.625Z level=INFO run=e69231c6 message=loop session.id=ses_143412fb8ffe616FjbFpI3k2pk step=4
+timestamp=2026-06-12T16:51:38.656Z level=INFO run=e69231c6 message=process session.id=ses_143412fb8ffe616FjbFpI3k2pk messageID=msg_ebcbf1004001saSU9oJqsXhkQ9
+timestamp=2026-06-12T16:51:38.657Z level=INFO run=e69231c6 message=stream providerID=opencode modelID=big-pickle session.id=ses_143412fb8ffe616FjbFpI3k2pk small=false agent=build mode=primary
+timestamp=2026-06-12T16:51:38.659Z level=INFO run=e69231c6 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:51:40.881Z level=INFO run=e69231c6 message=evaluated permission=bash pattern="git fetch origin" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:51:41.443Z level=INFO run=e69231c6 message=loop session.id=ses_143412fb8ffe616FjbFpI3k2pk step=5
+timestamp=2026-06-12T16:51:41.471Z level=INFO run=e69231c6 message=process session.id=ses_143412fb8ffe616FjbFpI3k2pk messageID=msg_ebcbf1b05001W3C4z5eMUmygFW
+timestamp=2026-06-12T16:51:41.472Z level=INFO run=e69231c6 message=stream providerID=opencode modelID=big-pickle session.id=ses_143412fb8ffe616FjbFpI3k2pk small=false agent=build mode=primary
+timestamp=2026-06-12T16:51:41.473Z level=INFO run=e69231c6 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:51:43.689Z level=INFO run=e69231c6 message=evaluated permission=bash pattern="git branch -r" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:51:44.187Z level=INFO run=e69231c6 message=evaluated permission=bash pattern="git ls-remote origin 2>&1" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:51:44.187Z level=INFO run=e69231c6 message=evaluated permission=bash pattern=true action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:51:44.700Z level=INFO run=e69231c6 message=loop session.id=ses_143412fb8ffe616FjbFpI3k2pk step=6
+timestamp=2026-06-12T16:51:44.718Z level=INFO run=e69231c6 message=process session.id=ses_143412fb8ffe616FjbFpI3k2pk messageID=msg_ebcbf27be00146y5VqqmxBFX0N
+timestamp=2026-06-12T16:51:44.719Z level=INFO run=e69231c6 message=stream providerID=opencode modelID=big-pickle session.id=ses_143412fb8ffe616FjbFpI3k2pk small=false agent=build mode=primary
+timestamp=2026-06-12T16:51:44.721Z level=INFO run=e69231c6 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:51:49.593Z level=INFO run=e69231c6 message=evaluated permission=bash pattern="git add -A" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:51:49.593Z level=INFO run=e69231c6 message=evaluated permission=bash pattern="git status" action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:51:52.834Z level=INFO run=e69231c6 message=loop session.id=ses_143412fb8ffe616FjbFpI3k2pk step=7
+timestamp=2026-06-12T16:51:52.877Z level=INFO run=e69231c6 message=process session.id=ses_143412fb8ffe616FjbFpI3k2pk messageID=msg_ebcbf4784001zMIEaXJey3sk4L
+timestamp=2026-06-12T16:51:52.878Z level=INFO run=e69231c6 message=stream providerID=opencode modelID=big-pickle session.id=ses_143412fb8ffe616FjbFpI3k2pk small=false agent=build mode=primary
+timestamp=2026-06-12T16:51:52.881Z level=INFO run=e69231c6 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle
+timestamp=2026-06-12T16:51:57.338Z level=INFO run=e69231c6 message=evaluated permission=edit pattern=home/mamad/.gitignore action.permission=* action.action=allow action.pattern=*
+timestamp=2026-06-12T16:51:57.348Z level=INFO run=e69231c6 message=formatting file=/home/mamad/.gitignore
+timestamp=2026-06-12T16:51:57.349Z level=INFO run=e69231c6 message="touching file" file=/home/mamad/.gitignore
+timestamp=2026-06-12T16:51:57.389Z level=INFO run=e69231c6 message=loop session.id=ses_143412fb8ffe616FjbFpI3k2pk step=8
+timestamp=2026-06-12T16:51:57.431Z level=INFO run=e69231c6 message=process session.id=ses_143412fb8ffe616FjbFpI3k2pk messageID=msg_ebcbf59500014kDrn8IQFKLvNo
+timestamp=2026-06-12T16:51:57.432Z level=INFO run=e69231c6 message=stream providerID=opencode modelID=big-pickle session.id=ses_143412fb8ffe616FjbFpI3k2pk small=false agent=build mode=primary
+timestamp=2026-06-12T16:51:57.434Z level=INFO run=e69231c6 message="llm runtime selected" llm.runtime=ai-sdk llm.provider=opencode llm.model=big-pickle

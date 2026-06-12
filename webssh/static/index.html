@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebSSH</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+html,body{height:100%}
+#terminal-container{flex:1;position:relative;min-height:0}
+#terminal{height:100%;width:100%}
+.xterm{height:100%;padding:4px}
+.xterm-viewport{scrollbar-width:thin;scrollbar-color:#0f3460 transparent}
+#login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1000}
+#login-overlay.show{display:flex}
+#login-form{background:#16213e;padding:32px;border-radius:12px;width:380px;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+#login-form h2{margin-bottom:24px;font-size:22px;font-weight:600;text-align:center;color:#fff}
+#login-form input{width:100%;padding:12px 14px;margin-bottom:12px;background:#0f3460;border:1px solid #1a1a4e;color:#fff;border-radius:6px;font-size:15px;outline:none;transition:border-color 0.2s}
+#login-form input:focus{border-color:#e94560}
+#login-form input::placeholder{color:#6a6a8a}
+#login-form button{width:100%;padding:12px;background:#e94560;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:15px;font-weight:600;transition:background 0.2s;margin-top:4px}
+#login-form button:hover{background:#d63850}
+#login-form .error{color:#e94560;margin-bottom:12px;display:none;font-size:13px;text-align:center}
+#login-form .status{color:#aaa;margin-bottom:12px;display:none;font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+
+<div id="login-overlay" class="show">
+  <div id="login-form">
+    <h2>WebSSH Login</h2>
+    <div class="error" id="login-error"></div>
+    <div class="status" id="login-status"></div>
+    <input type="text" id="login-username" placeholder="Username" autocomplete="off">
+    <div style="position:relative">
+      <input type="password" id="login-password" placeholder="Password" autocomplete="off" style="padding-right:40px">
+      <span id="toggle-pw" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#6a6a8a;font-size:18px;user-select:none">&#128065;</span>
+    </div>
+    <button id="login-btn">Login</button>
+  </div>
+</div>
+
+<div id="terminal-container"><div id="terminal"></div></div>
+<div id="logout-btn" style="position:fixed;top:8px;right:10px;z-index:999;display:none;background:#e94560;color:#fff;border:none;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:600" onclick="logout()">Logout</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
+<script>
+(function(){
+let authToken = localStorage.getItem('webssh_token');
+let terminalStarted = false;
+
+async function checkAuth() {
+  if (!authToken) { showLogin(); return false; }
+  try {
+    const res = await fetch('/api/me?token=' + encodeURIComponent(authToken));
+    if (!res.ok) { authToken = null; localStorage.removeItem('webssh_token'); showLogin(); return false; }
+    const data = await res.json();
+    if (!data.authenticated) { authToken = null; localStorage.removeItem('webssh_token'); showLogin(); return false; }
+    showApp();
+    return true;
+  } catch(e) {
+    showLogin();
+    return false;
+  }
+}
+
+function showLogin() {
+  document.getElementById('login-overlay').classList.add('show');
+  document.getElementById('login-username').focus();
+}
+
+function showApp() {
+  document.getElementById('login-overlay').classList.remove('show');
+  document.getElementById('logout-btn').style.display = 'block';
+}
+
+window.logout = function() {
+  if (ws) { try { ws.close(); } catch(_) {} ws = null; }
+  destroyTerminal();
+  authToken = null;
+  localStorage.removeItem('webssh_token');
+  document.getElementById('logout-btn').style.display = 'none';
+  showLogin();
+};
+
+function doLogin(username, password) {
+  const formData = new FormData();
+  formData.append('username', username);
+  formData.append('password', password);
+  const statusEl = document.getElementById('login-status');
+  const errorEl = document.getElementById('login-error');
+  statusEl.style.display = 'block';
+  statusEl.textContent = 'Logging in...';
+  errorEl.style.display = 'none';
+  fetch('/api/login', { method: 'POST', body: formData })
+    .then(res => {
+      if (!res.ok) { throw new Error('Invalid username or password'); }
+      return res.json();
+    })
+    .then(data => {
+      authToken = data.token;
+      localStorage.setItem('webssh_token', authToken);
+      statusEl.style.display = 'none';
+      showApp();
+      startTerminal();
+    })
+    .catch(err => {
+      statusEl.style.display = 'none';
+      errorEl.textContent = err.message;
+      errorEl.style.display = 'block';
+    });
+}
+
+let ws = null;
+let term = null;
+let fitAddon = null;
+
+function destroyTerminal() {
+  terminalStarted = false;
+  if (ws) {
+    try { ws.close(); } catch(_) {}
+    ws = null;
+  }
+  if (term) {
+    try { term.dispose(); } catch(_) {}
+    term = null;
+    fitAddon = null;
+  }
+}
+
+function startTerminal() {
+  if (terminalStarted) return;
+  terminalStarted = true;
+
+  if (term) {
+    try { term.dispose(); } catch(_) {}
+  }
+
+  term = new Terminal({
+    cursorBlink: true,
+    cursorStyle: 'block',
+    fontSize: 14,
+    fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+    theme: {
+      background: '#1a1a2e',
+      foreground: '#e0e0e0',
+      cursor: '#e94560',
+      selectionBackground: '#e9456040',
+      black: '#1a1a2e',
+      red: '#e94560',
+      green: '#0ceda0',
+      yellow: '#f5c542',
+      blue: '#5b8def',
+      magenta: '#b87cf5',
+      cyan: '#5ce0e8',
+      white: '#e0e0e0',
+      brightBlack: '#4a4a6a',
+      brightRed: '#ff6b81',
+      brightGreen: '#3dffb0',
+      brightYellow: '#ffd555',
+      brightBlue: '#7aa2f7',
+      brightMagenta: '#c792f7',
+      brightCyan: '#7ae0e8',
+      brightWhite: '#ffffff',
+    },
+  });
+
+  fitAddon = new FitAddon.FitAddon();
+  term.loadAddon(fitAddon);
+  term.open(document.getElementById('terminal'));
+  fitAddon.fit();
+  term.focus();
+
+  const wsUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://')
+    + location.host + '/ws?token=' + encodeURIComponent(authToken);
+  ws = new WebSocket(wsUrl);
+  let connected = false;
+
+  ws.onopen = () => {
+    connected = true;
+    ws.send(JSON.stringify({type: 'start', cols: term.cols, rows: term.rows}));
+  };
+
+  ws.onmessage = (ev) => {
+    try {
+      const msg = JSON.parse(ev.data);
+      if (msg.type === 'data') {
+        term.write(msg.data);
+      } else if (msg.type === 'error') {
+        connected = false;
+        term.write('\r\n\x1b[31mERROR: ' + msg.message + '\x1b[0m\r\n');
+      }
+    } catch(e) {
+    }
+  };
+
+  ws.onclose = () => {
+    connected = false;
+    term.write('\r\n\x1b[33mConnection closed. Refresh page to reconnect.\x1b[0m\r\n');
+  };
+
+  ws.onerror = () => {
+    connected = false;
+  };
+
+  term.attachCustomKeyEventHandler((e) => {
+    if (e.type === 'keydown' && e.ctrlKey && e.key === 'c') {
+      if (term.hasSelection()) {
+        const sel = term.getSelection();
+        navigator.clipboard.writeText(sel).catch(() => {
+          try { document.execCommand('copy'); } catch(_) {}
+        });
+        term.clearSelection();
+        return false;
+      }
+    }
+    return true;
+  });
+
+  let resizeTimer = null;
+  term.onResize(({cols, rows}) => {
+    if (connected) {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        ws.send(JSON.stringify({type:'resize', cols, rows}));
+      }, 150);
+    }
+  });
+
+  term.onData((data) => {
+    if (connected || data === '\r' || data === '\x03') {
+      if (ws.readyState === WebSocket.OPEN) {
+        try { ws.send(JSON.stringify({type:'data', data})); } catch(_) {}
+      }
+    }
+  });
+
+  const ro = new ResizeObserver(() => {
+    try { fitAddon.fit(); } catch(_) {}
+  });
+  ro.observe(document.getElementById('terminal'));
+}
+
+document.getElementById('login-btn').addEventListener('click', () => {
+  const u = document.getElementById('login-username').value.trim();
+  const p = document.getElementById('login-password').value;
+  if (!u || !p) {
+    document.getElementById('login-error').textContent = 'Username and password required';
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('login-error').style.display = 'none';
+  doLogin(u, p);
+});
+
+document.getElementById('login-password').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    document.getElementById('login-btn').click();
+  }
+});
+
+window.addEventListener('resize', () => {
+  if (fitAddon) { try { fitAddon.fit(); } catch(_) {} }
+});
+
+window.togglePassword = function() {
+  const el = document.getElementById('login-password');
+  el.type = el.type === 'password' ? 'text' : 'password';
+};
+
+document.getElementById('toggle-pw').addEventListener('click', window.togglePassword);
+
+window.addEventListener('storage', (e) => {
+  if (e.key === 'webssh_token' && e.newValue !== e.oldValue) {
+    if (!e.newValue) {
+      window.logout();
+    } else if (e.newValue !== authToken) {
+      if (term) {
+        term.write('\r\n\x1b[33mSession changed in another tab. Refreshing...\x1b[0m\r\n');
+      }
+      setTimeout(() => location.reload(), 1000);
+    }
+  }
+});
+
+checkAuth().then(authenticated => {
+  if (authenticated) startTerminal();
+});
+})();
+</script>
+</body>
+</html>
