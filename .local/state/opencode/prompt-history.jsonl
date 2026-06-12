@@ -1,6 +1,0 @@
-{"input":"edit python code disini agar pas login itu bukan diisi ke sqlite tapi diset coba login ke bash machine ini sendiri, jadi klo user dan passnya gak cocok sama credentials user gabisa login, selain itu hapus db dan sqlite dari requirement.txt karena udah gak diperlukan","parts":[],"mode":"normal"}
-{"input":"isntall nginx disini dan kemudian ssh ke mamad@168.110.209.191 password bajingan357 untuk forward port 80 dan 443 ke nginx ini, jangan setup nginx tunggu prompt berikutnya","parts":[],"mode":"normal"}
-{"input":"\nmamad@vnic-main:~$ lsof -i :80\nmamad@vnic-main:~$ lsof -i :443\ngaada kok, coba lagi deh","parts":[],"mode":"normal"}
-{"input":"salah! maksud saya adalah port forward dari ip a machine ini:80 ke 168.110.209.191:80 dan 443 coba lagi!","parts":[],"mode":"normal"}
-{"input":"coba cek lagi sampai nginx bisa jalan di server ini lalu lanjut dengan ssh mamad@168.110.209.191 pass: bajingan357 dan add preroute 80 ke 10.90.204.143:80","parts":[],"mode":"normal"}
-{"input":"login ke git dengan email: ahmadmishbah@student.uns.ac.id username: mgi24 pat key: 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 lalu coba start git pada /home/mamad lalu push ke main dari repo https://github.com/mgi24/VPS-Vibe.git","parts":[],"mode":"normal"}
