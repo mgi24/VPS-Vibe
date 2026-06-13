@@ -5,3 +5,5 @@
 !portofolio/**
 !.gitignore
 !README.md
+!yolo/
+!yolo/**
