@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="card card-profile">
+    <div class="card-body profile-grid">
+      <div class="profile-left">
+        <div class="hero-name">{{ content.hero_name }}</div>
+        <div class="slot-wrapper">
+          <div class="slot-track">
+            <div class="slot-item">{{ content.slot_1 }}</div>
+            <div class="slot-item">{{ content.slot_2 }}</div>
+            <div class="slot-item">{{ content.slot_3 }}</div>
+            <div class="slot-item">{{ content.slot_4 }}</div>
+            <div class="slot-item">{{ content.slot_1 }}</div>
+          </div>
+        </div>
+        <div class="hero-title">{{ content.hero_title }}</div>
+      </div>
+      <div class="profile-right">
+        <img src="/static/profile.jpg" alt="Profile" class="profile-img">
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-video">
+    <div class="card-body video-grid">
+      <div class="video-left">
+        <div class="video-wrapper">
+          <iframe width="100%" height="280" src="https://www.youtube.com/embed/RBTahfNUpwM?si=SkGctvb87fn6as3a" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+      </div>
+      <div class="video-right">
+        <div class="hero-desc">{{ content.hero_desc }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-demo">
+    <div class="card-body demo-center">
+      <div class="hero-tagline">{{ content.demo_tagline }}</div>
+      <a href="/demo" class="btn-demo">{{ content.demo_button }}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

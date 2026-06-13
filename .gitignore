@@ -1,5 +1,7 @@
 *
 !webssh/
 !webssh/**
+!portofolio/
+!portofolio/**
 !.gitignore
 !README.md
