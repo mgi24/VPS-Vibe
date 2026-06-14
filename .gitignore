@@ -1,6 +1,7 @@
 *
 !webssh/
 !webssh/**
+webssh/users.db
 !portofolio/
 !portofolio/**
 !.gitignore
