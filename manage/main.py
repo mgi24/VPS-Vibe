@@ -119,31 +119,97 @@ async def get_iptables(
     return {"table": table, "chain": chain.upper(), "output": output}
 
 
-@app.get("/api/iptables/chains")
-async def get_iptables_chains(token: str = Query(...), table: str = Query("filter")):
+def parse_iptables_rules(table: str, chain: str) -> list[dict]:
+    output = run_iptables(["-t", table, "-L", chain, "-n", "-v", "--line-numbers"])
+    if output.startswith("Error"):
+        return []
+    rules = []
+    started = False
+    for line in output.strip().split("\n"):
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("Chain "):
+            started = False
+            continue
+        if s.startswith("num "):
+            started = True
+            continue
+        if started:
+            parts = s.split(None, 10)
+            if len(parts) >= 10:
+                rules.append({
+                    "num": int(parts[0]),
+                    "pkts": parts[1],
+                    "bytes": parts[2],
+                    "target": parts[3],
+                    "prot": parts[4],
+                    "opt": parts[5],
+                    "in": parts[6],
+                    "out": parts[7],
+                    "source": parts[8],
+                    "destination": parts[9],
+                    "extra": " ".join(parts[10:]) if len(parts) > 10 else "",
+                })
+    return rules
+
+
+@app.get("/api/iptables/all")
+async def get_all_iptables(token: str = Query(...)):
     session = sessions.get(token)
     if not session or datetime.utcnow() > session["expires"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    if table not in ("filter", "nat", "mangle", "raw", "security"):
-        raise HTTPException(status_code=400, detail="Invalid table")
-    output = run_iptables(["-t", table, "-L", "-v", "-n", "--line-numbers"])
-    return {"table": table, "output": output}
+    return {
+        "nat": {c: parse_iptables_rules("nat", c)
+                for c in ["PREROUTING", "INPUT", "OUTPUT", "POSTROUTING"]},
+        "filter": {c: parse_iptables_rules("filter", c)
+                   for c in ["INPUT", "FORWARD", "OUTPUT"]},
+    }
 
 
-@app.get("/api/iptables/tables")
-async def get_iptables_tables(token: str = Query(...)):
+@app.get("/api/interfaces")
+async def get_interfaces(token: str = Query(...)):
     session = sessions.get(token)
     if not session or datetime.utcnow() > session["expires"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    tables = []
-    for t in ("filter", "nat", "mangle", "raw", "security"):
-        try:
-            out = run_iptables(["-t", t, "-L", "-v", "-n", "--line-numbers"])
-            if not out.startswith("Error"):
-                tables.append({"name": t, "has_rules": bool(out.strip())})
-        except Exception:
-            pass
-    return {"tables": tables}
+    try:
+        result = subprocess.run(
+            ["ip", "-j", "a"], capture_output=True, text=True, timeout=5
+        )
+        if result.returncode == 0:
+            import json
+            data = json.loads(result.stdout)
+            ifaces = [x["ifname"] for x in data if x.get("ifname") and x["ifname"] != "lo"]
+        else:
+            ifaces = []
+            for line in result.stdout.split("\n"):
+                import re
+                m = re.match(r"^\d+:\s+(\S+):", line.strip())
+                if m and m.group(1) != "lo":
+                    ifaces.append(m.group(1))
+        return {"interfaces": ifaces}
+    except Exception as e:
+        return {"interfaces": [], "error": str(e)}
+
+
+@app.put("/api/iptables")
+async def edit_iptables_rule(
+    token: str = Form(...),
+    table: str = Form(...),
+    chain: str = Form(...),
+    line: int = Form(...),
+    rule: str = Form(...),
+):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    del_out = run_iptables(["-t", table, "-D", chain.upper(), str(line)])
+    if del_out.startswith("Error"):
+        return {"success": False, "error": del_out}
+    add_out = run_iptables(["-t", table, "-I", chain.upper(), str(line)] + rule.split())
+    if add_out.startswith("Error"):
+        return {"success": False, "error": add_out}
+    return {"success": True}
 
 
 @app.post("/api/iptables")

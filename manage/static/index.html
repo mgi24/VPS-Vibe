@@ -45,27 +45,50 @@ input,button,select,textarea{font-family:inherit}
 .overview-card h3{font-size:13px;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
 .overview-card pre{font-size:12px;color:var(--text);white-space:pre-wrap;word-break:break-all;font-family:'Consolas','Courier New',monospace;line-height:1.5}
 /* iptables */
+.iptables-section{margin-bottom:24px}
+.section-header{font-size:16px;font-weight:700;color:#fff;padding:10px 16px;background:var(--surface);border-radius:8px 8px 0 0;border:1px solid var(--border);border-bottom:none;display:flex;align-items:center;gap:8px}
+.section-header .badge{font-size:11px;background:var(--accent2);padding:2px 8px;border-radius:10px;color:#fff;font-weight:600}
+.chain-card{background:var(--surface);border:1px solid var(--border);border-top:none;margin-bottom:2px}
+.chain-card:last-child{border-radius:0 0 8px 8px;margin-bottom:0}
+.chain-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface2);font-weight:600;font-size:13px;color:var(--accent2);border-bottom:1px solid var(--border)}
+.chain-header .chain-actions{display:flex;gap:6px}
+.chain-header .chain-actions button{padding:4px 10px;background:var(--accent2);border:none;color:#fff;border-radius:4px;font-size:11px;cursor:pointer;font-weight:600;transition:opacity 0.15s}
+.chain-header .chain-actions button:hover{opacity:0.8}
+.chain-header .chain-actions button.add-btn{background:var(--green);color:#000}
+.rule-table{width:100%;border-collapse:collapse;font-size:11px;font-family:'Consolas','Courier New',monospace}
+.rule-table th{padding:7px 8px;text-align:left;background:var(--surface);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.3px;border-bottom:1px solid var(--border);white-space:nowrap}
+.rule-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text);white-space:nowrap}
+.rule-table tr:hover td{background:rgba(255,255,255,0.03)}
+.rule-table tr:last-child td{border-bottom:none}
+.rule-table .col-edit{text-align:center}
+.rule-table .edit-btn{padding:3px 8px;background:var(--accent2);border:none;color:#fff;border-radius:3px;font-size:10px;cursor:pointer;font-weight:600;transition:opacity 0.15s}
+.rule-table .edit-btn:hover{opacity:0.8}
+.rule-table .col-target{font-weight:600}
+.rule-target-ACCEPT{color:var(--green)}
+.rule-target-DROP{color:var(--accent)}
+.rule-target-REJECT{color:#f0a030}
+.rule-target-MASQUERADE{color:#a78bfa}
+.rule-target-DNAT{color:#60a5fa}
+.rule-target-SNAT{color:#f472b6}
+.rule-target-LOG{color:var(--text2)}
+.iptables-empty{padding:16px;text-align:center;color:var(--text2);font-size:12px}
 .iptables-controls{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-.iptables-controls select,.iptables-controls button{padding:8px 14px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;outline:none;cursor:pointer}
-.iptables-controls select:focus{border-color:var(--accent2)}
-.iptables-controls button{background:var(--accent2);border-color:var(--accent2);font-weight:600;transition:opacity 0.15s}
+.iptables-controls button{padding:8px 14px;background:var(--accent2);border:1px solid var(--border);color:#fff;border-radius:6px;font-size:13px;font-weight:600;outline:none;cursor:pointer;transition:opacity 0.15s}
 .iptables-controls button:hover{opacity:0.85}
-.iptables-controls button.danger{background:var(--accent);border-color:var(--accent)}
-.iptables-output{background:var(--surface);border-radius:8px;border:1px solid var(--border);overflow-x:auto}
-.iptables-output pre{padding:16px;font-size:12px;font-family:'Consolas','Courier New',monospace;line-height:1.6;white-space:pre;color:var(--text);min-height:200px}
-/* Add Rule Form */
-.add-rule-form{background:var(--surface);border-radius:8px;border:1px solid var(--border);padding:16px;margin-top:16px;display:none}
-.add-rule-form.show{display:block}
-.add-rule-form h4{font-size:14px;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px}
-.add-rule-form .form-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
-.add-rule-form .form-row input,.add-rule-form .form-row select{flex:1;min-width:120px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);color:#fff;border-radius:6px;font-size:13px;outline:none}
-.add-rule-form .form-row input:focus,.add-rule-form .form-row select:focus{border-color:var(--accent2)}
-.add-rule-form .form-row button{padding:8px 20px;background:var(--green);color:#000;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px}
-.add-rule-form .form-row button:hover{opacity:0.85}
-.add-rule-form .form-row button.cancel{background:var(--text2);color:#fff}
-/* Delete mode */
-.delete-mode .iptables-output pre{cursor:pointer}
-.delete-mode .iptables-output pre:hover{background:rgba(233,69,96,0.08)}
+/* Rule Form (add/edit) */
+.rule-form-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:999}
+.rule-form-overlay.show{display:flex}
+.rule-form{background:var(--surface);border-radius:12px;padding:24px;width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+.rule-form h4{font-size:14px;color:var(--text2);margin-bottom:16px;text-transform:uppercase;letter-spacing:0.5px}
+.rule-form .form-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.rule-form .form-row input,.rule-form .form-row select{flex:1;min-width:100px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);color:#fff;border-radius:6px;font-size:13px;outline:none}
+.rule-form .form-row input:focus,.rule-form .form-row select:focus{border-color:var(--accent2)}
+.rule-form .form-row .field-label{font-size:11px;color:var(--text2);width:100%;margin-bottom:-4px;margin-top:4px}
+.rule-form .form-row button{padding:8px 20px;background:var(--green);color:#000;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px}
+.rule-form .form-row button:hover{opacity:0.85}
+.rule-form .form-row button.cancel{background:var(--text2);color:#fff}
+.rule-form .form-row button.danger{background:var(--accent);color:#fff}
+.rule-form .form-note{font-size:11px;color:var(--text2);margin-top:8px;text-align:center}
 /* Scrollbar */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -214,255 +237,333 @@ async function loadOverview() {
 }
 
 // iptables
-let iptablesState = { table: 'filter', chain: 'INPUT' };
+let iptablesEditContext = null;
+let iptablesInterfaces = [];
+const chainFormConfig = {
+  'nat/PREROUTING':  { showIn:1, showOut:0, showPorts:0, showTo:1, toLbl:'DNAT target (--to-destination)', defTarget:'DNAT' },
+  'nat/INPUT':       { showIn:1, showOut:0, showPorts:1, showTo:0, defTarget:'' },
+  'nat/OUTPUT':      { showIn:0, showOut:1, showPorts:1, showTo:1, toLbl:'SNAT target (--to-source)', defTarget:'SNAT' },
+  'nat/POSTROUTING': { showIn:0, showOut:1, showPorts:0, showTo:1, toLbl:'SNAT/MASQ target (--to-source)', defTarget:'MASQUERADE' },
+  'filter/INPUT':    { showIn:1, showOut:0, showPorts:1, showTo:0, defTarget:'' },
+  'filter/FORWARD':  { showIn:1, showOut:1, showPorts:1, showTo:0, defTarget:'' },
+  'filter/OUTPUT':   { showIn:0, showOut:1, showPorts:1, showTo:0, defTarget:'' },
+};
+
+function setFormFields(table, chain) {
+  const c = chainFormConfig[table+'/'+chain] || { showIn:1, showOut:1, showPorts:1, showTo:0, defTarget:'' };
+  document.getElementById('ipt-form-in-row').style.display = c.showIn ? 'flex' : 'none';
+  document.getElementById('ipt-form-out-row').style.display = c.showOut ? 'flex' : 'none';
+  document.getElementById('ipt-form-port-row').style.display = c.showPorts ? 'flex' : 'none';
+  const toRow = document.getElementById('ipt-form-to-row');
+  toRow.style.display = c.showTo ? 'flex' : 'none';
+  if (c.showTo) document.getElementById('ipt-form-to-label').textContent = c.toLbl;
+  if (c.defTarget && !document.getElementById('ipt-form-target').value) {
+    document.getElementById('ipt-form-target').value = c.defTarget;
+  }
+}
+
+function populateInterfaces() {
+  ['ipt-form-in','ipt-form-out'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const v = sel.value;
+    sel.innerHTML = '<option value="">any</option>';
+    iptablesInterfaces.forEach(iface => {
+      const o = document.createElement('option');
+      o.value = iface;
+      o.textContent = iface;
+      if (iface === v) o.selected = true;
+      sel.appendChild(o);
+    });
+  });
+}
 
 async function loadIptables() {
   const el = document.getElementById('tab-iptables');
   el.innerHTML = `
     <div class="iptables-controls">
-      <select id="ipt-table">
-        <option value="filter">filter</option>
-        <option value="nat">nat</option>
-        <option value="mangle">mangle</option>
-        <option value="raw">raw</option>
-        <option value="security">security</option>
-      </select>
-      <select id="ipt-chain">
-        <option value="INPUT">INPUT</option>
-        <option value="OUTPUT">OUTPUT</option>
-        <option value="FORWARD">FORWARD</option>
-      </select>
       <button id="ipt-refresh">&#8635; Refresh</button>
-      <button id="ipt-add-rule">+ Add Rule</button>
-      <button id="ipt-delete-mode" class="danger">&#10005; Delete Mode</button>
-      <button id="ipt-flush" class="danger" style="margin-left:auto">&#9888; Flush Chain</button>
     </div>
-    <div class="iptables-output" id="ipt-output"><pre>Select a table and chain, then click Refresh.</pre></div>
-    <div class="add-rule-form" id="ipt-add-form">
-      <h4>Add Rule</h4>
-      <div class="form-row">
-        <select id="ipt-new-table">
-          <option value="filter">filter</option>
-          <option value="nat">nat</option>
-          <option value="mangle">mangle</option>
-          <option value="raw">raw</option>
-          <option value="security">security</option>
-        </select>
-        <select id="ipt-new-chain">
-          <option value="INPUT">INPUT</option>
-          <option value="OUTPUT">OUTPUT</option>
-          <option value="FORWARD">FORWARD</option>
-        </select>
-        <input type="number" id="ipt-new-pos" placeholder="Position (0=append)" min="0" value="0">
+    <div id="iptables-sections">
+      <div class="iptables-section" id="ipt-nat-section">
+        <div class="section-header">NAT <span class="badge">nat</span></div>
+        <div id="ipt-nat-chains"></div>
       </div>
-      <div class="form-row">
-        <select id="ipt-new-target" style="max-width:130px">
-          <option value="">Target</option>
-          <option value="ACCEPT">ACCEPT</option>
-          <option value="DROP">DROP</option>
-          <option value="REJECT">REJECT</option>
-          <option value="LOG">LOG</option>
-          <option value="MASQUERADE">MASQUERADE</option>
-          <option value="DNAT">DNAT</option>
-          <option value="SNAT">SNAT</option>
-          <option value="RETURN">RETURN</option>
-        </select>
-        <select id="ipt-new-proto" style="max-width:100px">
-          <option value="">Proto</option>
-          <option value="tcp">tcp</option>
-          <option value="udp">udp</option>
-          <option value="icmp">icmp</option>
-        </select>
-        <input type="text" id="ipt-new-src" placeholder="Source (e.g. 10.0.0.0/24)">
-        <input type="text" id="ipt-new-dst" placeholder="Destination (e.g. 10.0.0.1)">
-        <input type="text" id="ipt-new-dport" placeholder="dport (e.g. 80,443)">
-        <input type="text" id="ipt-new-extra" placeholder="Extra flags (e.g. -i eth0)">
+      <div class="iptables-section" id="ipt-filter-section">
+        <div class="section-header">FILTER <span class="badge">filter</span></div>
+        <div id="ipt-filter-chains"></div>
       </div>
-      <div class="form-row">
-        <button id="ipt-apply-rule">Apply Rule</button>
-        <button class="cancel" id="ipt-cancel-rule">Cancel</button>
+    </div>
+    <div class="rule-form-overlay" id="ipt-form-overlay">
+      <div class="rule-form">
+        <h4 id="ipt-form-title">Add Rule</h4>
+        <div class="form-row">
+          <select id="ipt-form-target" style="max-width:130px">
+            <option value="">Target</option>
+            <option value="ACCEPT">ACCEPT</option>
+            <option value="DROP">DROP</option>
+            <option value="REJECT">REJECT</option>
+            <option value="LOG">LOG</option>
+            <option value="MASQUERADE">MASQUERADE</option>
+            <option value="DNAT">DNAT</option>
+            <option value="SNAT">SNAT</option>
+            <option value="RETURN">RETURN</option>
+          </select>
+          <select id="ipt-form-proto" style="max-width:100px">
+            <option value="">Proto</option>
+            <option value="tcp">tcp</option>
+            <option value="udp">udp</option>
+            <option value="icmp">icmp</option>
+            <option value="all">all</option>
+          </select>
+        </div>
+        <div class="form-row" id="ipt-form-in-row">
+          <span class="field-label">In interface</span>
+          <select id="ipt-form-in"><option value="">any</option></select>
+        </div>
+        <div class="form-row" id="ipt-form-out-row">
+          <span class="field-label">Out interface</span>
+          <select id="ipt-form-out"><option value="">any</option></select>
+        </div>
+        <div class="form-row">
+          <input type="text" id="ipt-form-src" placeholder="Source (e.g. 10.0.0.0/24)">
+          <input type="text" id="ipt-form-dst" placeholder="Destination (e.g. 10.0.0.1)">
+        </div>
+        <div class="form-row" id="ipt-form-port-row">
+          <input type="text" id="ipt-form-dport" placeholder="dport (e.g. 80,443)">
+          <input type="text" id="ipt-form-sport" placeholder="sport">
+        </div>
+        <div class="form-row" id="ipt-form-to-row">
+          <span class="field-label" id="ipt-form-to-label">DNAT target</span>
+          <input type="text" id="ipt-form-to" placeholder="e.g. 10.90.204.143 or 10.90.204.143:80">
+        </div>
+        <div class="form-row">
+          <input type="text" id="ipt-form-extra" placeholder="Extra flags">
+        </div>
+        <div class="form-row" style="justify-content:flex-end">
+          <button class="cancel" id="ipt-form-cancel">Cancel</button>
+          <button id="ipt-form-submit">Apply</button>
+          <button class="danger" id="ipt-form-delete" style="display:none">Delete</button>
+        </div>
+        <div class="form-note" id="ipt-form-note"></div>
       </div>
     </div>
   `;
-  document.getElementById('ipt-table').value = iptablesState.table;
-  document.getElementById('ipt-chain').value = iptablesState.chain;
   document.getElementById('ipt-refresh').addEventListener('click', refreshIptables);
-  document.getElementById('ipt-add-rule').addEventListener('click', () => {
-    document.getElementById('ipt-add-form').classList.add('show');
-  });
-  document.getElementById('ipt-cancel-rule').addEventListener('click', () => {
-    document.getElementById('ipt-add-form').classList.remove('show');
-  });
-  document.getElementById('ipt-apply-rule').addEventListener('click', addIptablesRule);
-  document.getElementById('ipt-delete-mode').addEventListener('click', toggleDeleteMode);
-  document.getElementById('ipt-flush').addEventListener('click', flushChain);
-  document.getElementById('ipt-table').addEventListener('change', () => {
-    iptablesState.table = document.getElementById('ipt-table').value;
-    refreshIptables();
-  });
-  document.getElementById('ipt-chain').addEventListener('change', () => {
-    iptablesState.chain = document.getElementById('ipt-chain').value;
-    refreshIptables();
-  });
+  document.getElementById('ipt-form-cancel').addEventListener('click', closeIptablesForm);
+  document.getElementById('ipt-form-submit').addEventListener('click', submitIptablesForm);
+  document.getElementById('ipt-form-delete').addEventListener('click', deleteFromForm);
+  await fetchInterfaces();
   refreshIptables();
 }
 
-async function refreshIptables() {
-  const table = document.getElementById('ipt-table').value;
-  const chain = document.getElementById('ipt-chain').value;
-  const outputEl = document.getElementById('ipt-output');
-  outputEl.innerHTML = '<pre><span class="spinner"></span> Loading...</pre>';
+async function fetchInterfaces() {
   try {
-    const res = await fetch('/api/iptables?token=' + encodeURIComponent(authToken) + '&table=' + table + '&chain=' + chain);
+    const res = await fetch('/api/interfaces?token=' + encodeURIComponent(authToken));
+    if (res.ok) {
+      const data = await res.json();
+      if (data.interfaces) iptablesInterfaces = data.interfaces;
+    }
+  } catch(e) {}
+}
+
+async function refreshIptables() {
+  document.querySelectorAll('#ipt-nat-chains, #ipt-filter-chains').forEach(e => {
+    e.innerHTML = '<div class="iptables-empty"><span class="spinner"></span> Loading...</div>';
+  });
+  await fetchInterfaces();
+  try {
+    const res = await fetch('/api/iptables/all?token=' + encodeURIComponent(authToken));
     if (!res.ok) throw new Error('Failed to load rules');
     const data = await res.json();
-    outputEl.innerHTML = '<pre>' + escapeHtml(data.output || 'No rules') + '</pre>';
-    if (iptablesDeleteMode) {
-      outputEl.classList.add('delete-mode');
-      outputEl.querySelector('pre').addEventListener('dblclick', deleteRuleAtLine);
-      outputEl.querySelector('pre').title = 'Double-click a line number to delete that rule';
-    }
+    renderChainGroup('ipt-nat-chains', 'nat', data.nat, ['PREROUTING', 'INPUT', 'OUTPUT', 'POSTROUTING']);
+    renderChainGroup('ipt-filter-chains', 'filter', data.filter, ['INPUT', 'FORWARD', 'OUTPUT']);
   } catch(e) {
-    outputEl.innerHTML = '<pre style="color:var(--accent)">Error: ' + escapeHtml(e.message) + '</pre>';
+    document.querySelectorAll('#ipt-nat-chains, #ipt-filter-chains').forEach(el => {
+      el.innerHTML = '<div class="iptables-empty" style="color:var(--accent)">Error: ' + escapeHtml(e.message) + '</div>';
+    });
   }
 }
 
-async function addIptablesRule() {
-  const formData = new FormData();
-  formData.append('token', authToken);
-  formData.append('table', document.getElementById('ipt-new-table').value);
-  formData.append('chain', document.getElementById('ipt-new-chain').value);
-  const target = document.getElementById('ipt-new-target').value;
-  const proto = document.getElementById('ipt-new-proto').value;
-  const src = document.getElementById('ipt-new-src').value.trim();
-  const dst = document.getElementById('ipt-new-dst').value.trim();
-  const dport = document.getElementById('ipt-new-dport').value.trim();
-  const extra = document.getElementById('ipt-new-extra').value.trim();
-  const pos = parseInt(document.getElementById('ipt-new-pos').value) || 0;
-  formData.append('position', pos.toString());
+function renderChainGroup(containerId, table, chains, chainOrder) {
+  const container = document.getElementById(containerId);
+  let html = '';
+  for (const name of chainOrder) {
+    const rules = chains[name] || [];
+    html += '<div class="chain-card">';
+    html += '<div class="chain-header"><span>' + name + '</span>';
+    html += '<div class="chain-actions">';
+    html += '<button class="add-btn" onclick="openAddForm(\'' + table + '\',\'' + name + '\')">+ Add</button>';
+    html += '</div></div>';
+    if (rules.length === 0) {
+      html += '<div class="iptables-empty">No rules</div>';
+    } else {
+      html += '<table class="rule-table"><thead><tr>';
+      html += '<th>#</th><th>pkts</th><th>bytes</th><th>target</th><th>prot</th><th>in</th><th>out</th><th>source</th><th>destination</th><th>extra</th><th class="col-edit"></th>';
+      html += '</tr></thead><tbody>';
+      for (const r of rules) {
+        const cls = 'rule-target-' + r.target;
+        html += '<tr>';
+        html += '<td>' + r.num + '</td>';
+        html += '<td>' + r.pkts + '</td>';
+        html += '<td>' + r.bytes + '</td>';
+        html += '<td class="col-target ' + cls + '">' + r.target + '</td>';
+        html += '<td>' + r.prot + '</td>';
+        html += '<td>' + r.in + '</td>';
+        html += '<td>' + r.out + '</td>';
+        html += '<td>' + r.source + '</td>';
+        html += '<td>' + r.destination + '</td>';
+        html += '<td style="color:var(--text2)">' + escapeHtml(r.extra) + '</td>';
+        html += '<td class="col-edit"><button class="edit-btn" onclick="openEditForm(\'' + table + '\',\'' + name + '\',' + r.num + ',\'' + escapeAttr(r.target) + '\',\'' + escapeAttr(r.prot) + '\',\'' + escapeAttr(r.in) + '\',\'' + escapeAttr(r.out) + '\',\'' + escapeAttr(r.source) + '\',\'' + escapeAttr(r.destination) + '\',\'' + escapeAttr(r.extra) + '\')">Edit</button></td>';
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+    }
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function escapeAttr(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function openAddForm(table, chain) {
+  iptablesEditContext = { mode:'add', table, chain, line:0 };
+  document.getElementById('ipt-form-title').textContent = 'Add Rule — ' + table + '/' + chain;
+  ['src','dst','dport','sport','to','extra'].forEach(id => document.getElementById('ipt-form-'+id).value = '');
+  document.getElementById('ipt-form-target').value = '';
+  document.getElementById('ipt-form-proto').value = '';
+  setFormFields(table, chain);
+  populateInterfaces();
+  document.getElementById('ipt-form-delete').style.display = 'none';
+  document.getElementById('ipt-form-note').textContent = '';
+  showIptablesForm();
+}
+
+function openEditForm(table, chain, line, target, prot, inIf, outIf, src, dst, extra) {
+  iptablesEditContext = { mode:'edit', table, chain, line };
+  document.getElementById('ipt-form-title').textContent = 'Edit Rule #' + line + ' — ' + table + '/' + chain;
+  setFormFields(table, chain);
+  populateInterfaces();
+  const u = s => s === '*' ? '' : unescapeAttr(s);
+  document.getElementById('ipt-form-src').value = u(src);
+  document.getElementById('ipt-form-dst').value = u(dst);
+  document.getElementById('ipt-form-in').value = u(inIf);
+  document.getElementById('ipt-form-out').value = u(outIf);
+  document.getElementById('ipt-form-target').value = unescapeAttr(target);
+  document.getElementById('ipt-form-proto').value = unescapeAttr(prot) === 'all' ? 'all' : unescapeAttr(prot);
+  document.getElementById('ipt-form-to').value = '';
+  document.getElementById('ipt-form-sport').value = '';
+  document.getElementById('ipt-form-dport').value = '';
+  let extraStr = unescapeAttr(extra);
+  const dpm = extraStr.match(/(?:^|\s)(tcp|udp) dpt:(\S+)/);
+  if (dpm) { document.getElementById('ipt-form-dport').value = dpm[2]; extraStr = extraStr.replace(dpm[0], ''); }
+  const spm = extraStr.match(/(?:^|\s)(tcp|udp) spt:(\S+)/);
+  if (spm) { document.getElementById('ipt-form-sport').value = spm[2]; extraStr = extraStr.replace(spm[0], ''); }
+  const tom = extraStr.match(/to:\S+/);
+  if (tom) { document.getElementById('ipt-form-to').value = tom[0]; extraStr = extraStr.replace(tom[0], ''); }
+  document.getElementById('ipt-form-extra').value = extraStr.trim();
+  document.getElementById('ipt-form-delete').style.display = 'inline-block';
+  document.getElementById('ipt-form-note').textContent = '';
+  showIptablesForm();
+}
+
+function unescapeAttr(s) {
+  if (!s) return '';
+  return s.replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&amp;/g,'&');
+}
+
+function showIptablesForm() {
+  document.getElementById('ipt-form-overlay').classList.add('show');
+}
+
+function closeIptablesForm() {
+  document.getElementById('ipt-form-overlay').classList.remove('show');
+  iptablesEditContext = null;
+}
+
+function getRuleFromForm() {
+  const f = id => document.getElementById('ipt-form-'+id);
+  const target = f('target').value;
+  const proto = f('proto').value;
+  const src = f('src').value.trim();
+  const dst = f('dst').value.trim();
+  const inIf = f('in').value;
+  const outIf = f('out').value;
+  const dport = f('dport').value.trim();
+  const sport = f('sport').value.trim();
+  const toVal = f('to').value.trim();
+  const extra = f('extra').value.trim();
   let rule = '';
-  if (target) rule += '-j ' + target + ' ';
-  if (proto) rule += '-p ' + proto + ' ';
+  if (proto && proto !== 'all') rule += '-p ' + proto + ' ';
   if (src) rule += '-s ' + src + ' ';
   if (dst) rule += '-d ' + dst + ' ';
+  if (inIf) rule += '-i ' + inIf + ' ';
+  if (outIf) rule += '-o ' + outIf + ' ';
   if (dport) rule += '--dport ' + dport + ' ';
+  if (sport) rule += '--sport ' + sport + ' ';
   if (extra) rule += extra + ' ';
-  formData.append('rule', rule.trim());
+  if (target) rule += '-j ' + target + ' ';
+  if (toVal) {
+    const dest = toVal.replace(/^to:\s*/i, '');
+    const isSnat = target === 'SNAT' || target === 'MASQUERADE';
+    rule += (isSnat ? '--to-source ' : '--to-destination ') + dest + ' ';
+  }
+  return rule.trim();
+}
+
+async function submitIptablesForm() {
+  const ctx = iptablesEditContext;
+  if (!ctx) return;
+  const noteEl = document.getElementById('ipt-form-note');
+  const rule = getRuleFromForm();
+  if (!rule) { noteEl.textContent = 'Rule cannot be empty'; return; }
   try {
-    const res = await fetch('/api/iptables', { method: 'POST', body: formData });
-    const data = await res.json();
-    if (!data.success) {
-      alert('Error: ' + data.error);
-      return;
+    if (ctx.mode === 'add') {
+      const fd = new FormData();
+      fd.append('token', authToken);
+      fd.append('table', ctx.table);
+      fd.append('chain', ctx.chain);
+      fd.append('position', '0');
+      fd.append('rule', rule);
+      const res = await fetch('/api/iptables', { method:'POST', body:fd });
+      const d = await res.json();
+      if (!d.success) { noteEl.textContent = 'Error: ' + d.error; return; }
+    } else {
+      const fd = new FormData();
+      fd.append('token', authToken);
+      fd.append('table', ctx.table);
+      fd.append('chain', ctx.chain);
+      fd.append('line', ctx.line.toString());
+      fd.append('rule', rule);
+      const res = await fetch('/api/iptables', { method:'PUT', body:fd });
+      const d = await res.json();
+      if (!d.success) { noteEl.textContent = 'Error: ' + d.error; return; }
     }
-    document.getElementById('ipt-add-form').classList.remove('show');
-    document.getElementById('ipt-table').value = document.getElementById('ipt-new-table').value;
-    document.getElementById('ipt-chain').value = document.getElementById('ipt-new-chain').value;
+    closeIptablesForm();
     refreshIptables();
-  } catch(e) {
-    alert('Error adding rule: ' + e.message);
-  }
+  } catch(e) { noteEl.textContent = 'Error: ' + e.message; }
 }
 
-function toggleDeleteMode() {
-  iptablesDeleteMode = !iptablesDeleteMode;
-  const btn = document.getElementById('ipt-delete-mode');
-  btn.textContent = iptablesDeleteMode ? '&#10003; Done Deleting' : '&#10005; Delete Mode';
-  btn.style.background = iptablesDeleteMode ? 'var(--green)' : 'var(--accent)';
-  btn.style.borderColor = iptablesDeleteMode ? 'var(--green)' : 'var(--accent)';
-  btn.style.color = iptablesDeleteMode ? '#000' : '#fff';
-  const outputEl = document.getElementById('ipt-output');
-  if (iptablesDeleteMode) {
-    outputEl.classList.add('delete-mode');
-    const pre = outputEl.querySelector('pre');
-    if (pre) {
-      pre.addEventListener('dblclick', deleteRuleAtLine);
-      pre.title = 'Double-click a line number to delete that rule';
-    }
-  } else {
-    outputEl.classList.remove('delete-mode');
-    const pre = outputEl.querySelector('pre');
-    if (pre) {
-      pre.removeEventListener('dblclick', deleteRuleAtLine);
-      pre.title = '';
-    }
-  }
-}
-
-async function deleteRuleAtLine(e) {
-  const pre = e.currentTarget;
-  const text = pre.textContent;
-  const lines = text.split('\n');
-  let lineIdx = -1;
-  for (let i = 0; i < lines.length; i++) {
-    const rects = getLineRects(pre, i);
-    const y = e.clientY;
-    for (const r of rects) {
-      if (y >= r.top && y <= r.bottom && e.clientX >= r.left && e.clientX <= r.right) {
-        lineIdx = i;
-        break;
-      }
-    }
-    if (lineIdx >= 0) break;
-  }
-  if (lineIdx < 0) return;
-  const line = lines[lineIdx].trim();
-  const numMatch = line.match(/^(\d+)/);
-  if (!numMatch) return;
-  const lineNum = parseInt(numMatch[1]);
-  if (!confirm('Delete rule #' + lineNum + ' from ' + iptablesState.chain + '?')) return;
-  const table = document.getElementById('ipt-table').value;
-  const chain = document.getElementById('ipt-chain').value;
+async function deleteFromForm() {
+  const ctx = iptablesEditContext;
+  if (!ctx || ctx.mode !== 'edit') return;
+  if (!confirm('Delete rule #' + ctx.line + ' from ' + ctx.table + '/' + ctx.chain + '?')) return;
   try {
     const res = await fetch('/api/iptables?token=' + encodeURIComponent(authToken) +
-      '&table=' + table + '&chain=' + chain + '&line=' + lineNum, { method: 'DELETE' });
-    const data = await res.json();
-    if (!data.success) {
-      alert('Error: ' + data.error);
-      return;
-    }
+      '&table=' + ctx.table + '&chain=' + ctx.chain + '&line=' + ctx.line, { method:'DELETE' });
+    const d = await res.json();
+    if (!d.success) { document.getElementById('ipt-form-note').textContent = 'Error: ' + d.error; return; }
+    closeIptablesForm();
     refreshIptables();
-  } catch(e) {
-    alert('Error deleting rule: ' + e.message);
-  }
+  } catch(e) { document.getElementById('ipt-form-note').textContent = 'Error: ' + e.message; }
 }
 
-function getLineRects(pre, lineIndex) {
-  const lines = pre.textContent.split('\n');
-  let targetLine = lines[lineIndex] || '';
-  const range = document.createRange();
-  const textNode = pre.firstChild;
-  if (!textNode) return [];
-  let charIndex = 0;
-  for (let i = 0; i < lineIndex; i++) {
-    charIndex += lines[i].length + 1;
-  }
-  range.setStart(textNode, charIndex);
-  range.setEnd(textNode, charIndex + targetLine.length);
-  const rects = range.getClientRects();
-  return rects.length > 0 ? rects : [pre.getBoundingClientRect()];
-}
-
-async function flushChain() {
-  const table = document.getElementById('ipt-table').value;
-  const chain = document.getElementById('ipt-chain').value;
-  if (!confirm('Are you sure you want to flush all rules in ' + table + '/' + chain + '?')) return;
-  const formData = new FormData();
-  formData.append('token', authToken);
-  formData.append('table', table);
-  formData.append('chain', chain);
-  try {
-    const res = await fetch('/api/iptables/flush', { method: 'POST', body: formData });
-    const data = await res.json();
-    if (!data.success) {
-      alert('Error: ' + data.error);
-      return;
-    }
-    refreshIptables();
-  } catch(e) {
-    alert('Error flushing chain: ' + e.message);
-  }
-}
+document.addEventListener('click', e => {
+  if (e.target.id === 'ipt-form-overlay') closeIptablesForm();
+});
 
 function escapeHtml(str) {
   if (!str) return '';
