@@ -12,6 +12,8 @@
   "hero_desc": "<strong>Vision AI</strong> Engineer dengan 2 tahun pengalaman implementasi object detection, pengumpulan dataset, pelatihan model. SelfHosting LLM dan integrasi AI Tools saya sendiri. Perubahan dunia nyata dengan keahlian <strong>IoT</strong> dan menghubungkan semuanya menjadi satu <strong>Network Infrastructure</strong>! selama tidak melanggar hukum fisika saya bisa melakukannya 😉",
   "video_desc": "Tonton demo terbaru saya untuk melihat AI object detection beraksi — mendeteksi dan melacak secara real-time. Ini hanya sedikit dari apa yang bisa saya bangun.",
   "demo_tagline": "Jangan percaya kata saya, lihat demo saya sekarang!",
+  "demo_title": "Demo Deteksi Objek",
+  "demo_desc": "Deteksi objek, segmentasi, pembaca plat nomor. Ada ide lain?",
   "demo_button": "Lihat Demo",
   "contact_title": "Mari Terhubung!",
   "contact_wa_name": "WhatsApp",
