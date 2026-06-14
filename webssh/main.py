@@ -64,6 +64,7 @@ async def bash_loop(websocket: WebSocket, username: str, term_size=(24, 80)):
         master_fd, slave_fd = pty.openpty()
         buf = struct.pack('HHHH', term_size[0], term_size[1], 0, 0)
         fcntl.ioctl(master_fd, termios.TIOCSWINSZ, buf)
+        os.set_blocking(master_fd, False)
         child_pid = os.fork()
 
         if child_pid == 0:
@@ -92,14 +93,29 @@ async def bash_loop(websocket: WebSocket, username: str, term_size=(24, 80)):
         os.close(slave_fd)
 
         loop = asyncio.get_running_loop()
+        pty_read_ready = None
+
+        def on_pty_readable():
+            nonlocal pty_read_ready
+            if pty_read_ready is not None and not pty_read_ready.done():
+                pty_read_ready.set_result(None)
+
+        loop.add_reader(master_fd, on_pty_readable)
 
         async def read_pty():
+            nonlocal pty_read_ready
             try:
                 while True:
-                    data = await loop.run_in_executor(None, os.read, master_fd, 65536)
-                    if not data:
-                        break
-                    await websocket.send_json({"type": "data", "data": data.decode("utf-8", errors="replace")})
+                    pty_read_ready = loop.create_future()
+                    await pty_read_ready
+                    while True:
+                        try:
+                            data = os.read(master_fd, 65536)
+                            if not data:
+                                return
+                            await websocket.send_json({"type": "data", "data": data.decode("utf-8", errors="replace")})
+                        except BlockingIOError:
+                            break
             except Exception:
                 pass
 
@@ -109,7 +125,14 @@ async def bash_loop(websocket: WebSocket, username: str, term_size=(24, 80)):
                     msg = await websocket.receive_json()
                     t = msg.get("type")
                     if t == "data":
-                        await loop.run_in_executor(None, os.write, master_fd, msg["data"].encode("utf-8"))
+                        data = msg["data"].encode("utf-8")
+                        offset = 0
+                        while offset < len(data):
+                            try:
+                                written = os.write(master_fd, data[offset:])
+                                offset += written
+                            except BlockingIOError:
+                                await asyncio.sleep(0.005)
                     elif t == "resize":
                         try:
                             buf = struct.pack('HHHH', msg["rows"], msg["cols"], 0, 0)
@@ -140,10 +163,14 @@ async def bash_loop(websocket: WebSocket, username: str, term_size=(24, 80)):
         except Exception:
             pass
     finally:
+        try:
+            loop.remove_reader(master_fd)
+        except Exception:
+            pass
         if child_pid and child_pid > 0:
             try:
-                os.kill(child_pid, signal.SIGTERM)
-                os.waitpid(child_pid, os.WNOHANG)
+                os.kill(child_pid, signal.SIGKILL)
+                os.waitpid(child_pid, 0)
             except Exception:
                 pass
         if master_fd is not None:
