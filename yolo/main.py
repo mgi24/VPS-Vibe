@@ -24,6 +24,9 @@ REQUEST_DELAY_LIMIT: float = 0.5
 model = YOLO(BASE_DIR / "yolov8s.pt")
 class_names = model.names
 
+seg_model = YOLO(BASE_DIR / "yolo11n-seg.pt")
+seg_class_names = seg_model.names
+
 app = FastAPI()
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
@@ -65,9 +68,86 @@ def draw_detections(img: np.ndarray, results) -> np.ndarray:
             cv2.putText(img, label, (x1 + 4, y1 - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
     return img
 
+def draw_segmentations(img: np.ndarray, results) -> np.ndarray:
+    overlay = img.copy()
+    for r in results:
+        if r.masks is not None:
+            for mask, box in zip(r.masks.xy, r.boxes):
+                cls_id = int(box.cls[0])
+                color = get_color(cls_id)
+                pts = np.array(mask, dtype=np.int32).reshape((-1, 1, 2))
+                cv2.fillPoly(overlay, [pts], color)
+        for box in r.boxes:
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
+            conf = float(box.conf[0])
+            cls_id = int(box.cls[0])
+            label = f"{seg_class_names[cls_id]} {conf:.2f}"
+            color = get_color(cls_id)
+            cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+            (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+            cv2.rectangle(img, (x1, y1 - th - 8), (x1 + tw + 8, y1), color, -1)
+            cv2.putText(img, label, (x1 + 4, y1 - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+    cv2.addWeighted(overlay, 0.35, img, 0.65, 0, img)
+    return img
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(request, "index.html", {})
+
+@app.get("/segment", response_class=HTMLResponse)
+async def segment_page(request: Request):
+    return templates.TemplateResponse(request, "segment.html", {})
+
+@app.post("/segment")
+async def segment(req: DetectRequest, request: Request):
+    client_ip = request.client.host if request.client else "unknown"
+
+    if REQUEST_DELAY_LIMIT > 0:
+        now = time.time()
+        last = session_last_time.get(client_ip, 0)
+        if now - last < REQUEST_DELAY_LIMIT:
+            raise HTTPException(status_code=429, detail="Rate limit: 1 FPS")
+        session_last_time[client_ip] = now
+
+    try:
+        image_data = base64.b64decode(req.base64)
+        np_arr = np.frombuffer(image_data, np.uint8)
+        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        if img is None:
+            raise HTTPException(status_code=400, detail="Invalid image data")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid base64 image data")
+
+    kwargs = {}
+    if req.conf is not None:
+        kwargs["conf"] = req.conf
+    if req.iou is not None:
+        kwargs["iou"] = req.iou
+    if req.imgsz is not None:
+        kwargs["imgsz"] = req.imgsz
+
+    results = seg_model(img, **kwargs)
+
+    drawn = draw_segmentations(img.copy(), results)
+
+    _, buffer = cv2.imencode(".jpg", drawn, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    result_b64 = base64.b64encode(buffer).decode("utf-8")
+
+    detections = []
+    for r in results:
+        for box in r.boxes:
+            cls_id = int(box.cls[0])
+            detections.append({
+                "class": seg_class_names[cls_id],
+                "class_id": cls_id,
+                "confidence": round(float(box.conf[0]), 4),
+                "bbox": [int(x) for x in box.xyxy[0].tolist()],
+            })
+
+    return JSONResponse({
+        "image": result_b64,
+        "detections": detections,
+    })
 
 @app.post("/detect")
 async def detect(req: DetectRequest, request: Request):

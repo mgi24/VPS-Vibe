@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MMV Detection</title>
+  <title>MMV Segmentation</title>
   <link rel="icon" type="image/png" href="/assets/mmvlogo.png">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -57,13 +57,6 @@ nav {
   color: #00d4aa;
   font-weight: 700;
   font-size: 18px;
-}
-.coming-soon {
-  font-size: 10px;
-  color: #ffaa00;
-  margin-left: 4px;
-  font-weight: 600;
-  vertical-align: super;
 }
 .container {
   width: 100%;
@@ -444,11 +437,11 @@ input[type="range"]::-moz-range-thumb {
 <body>
 <nav>
   <div class="nav-left">
-    <span class="nav-brand">MMV Detect</span>
+    <span class="nav-brand">MMV Segment</span>
   </div>
   <div class="nav-right">
-    <a class="nav-item active" href="/">Object</a>
-    <a class="nav-item" href="/segment">Segment</a>
+    <a class="nav-item" href="/">Object</a>
+    <a class="nav-item active" href="/segment">Segment</a>
     <a class="nav-item" href="#"><span>License Plate</span><span class="coming-soon">Coming Soon!</span></a>
   </div>
 </nav>
@@ -484,7 +477,7 @@ input[type="range"]::-moz-range-thumb {
           <div class="preview-wrapper">
             <img id="result-img" alt="result" style="display:block;">
             <div id="result-placeholder" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#555;font-size:16px;text-align:center;">
-              Detection results will appear here
+              Segmentation results (bbox + mask) will appear here
             </div>
           </div>
           <div id="detections-container">
@@ -517,7 +510,7 @@ input[type="range"]::-moz-range-thumb {
     <div class="card-body">
       <div class="upload-header">
         <strong>Want to send image instead?</strong>
-        <p>Drag &amp; drop an image file to run detection instantly.</p>
+        <p>Drag &amp; drop an image file to run segmentation instantly.</p>
       </div>
       <div class="drop-zone" id="drop-zone">
         <div class="dz-icon">&#128247;</div>
@@ -534,7 +527,7 @@ input[type="range"]::-moz-range-thumb {
             </div>
           </div>
           <div class="upload-result-col">
-            <div class="upload-label">IMAGE HASIL DETECT</div>
+            <div class="upload-label">IMAGE HASIL SEGMENT</div>
             <div class="preview-wrapper" id="result-preview-wrapper">
               <img id="upload-result-img" alt="result" style="display:none">
               <div class="upload-loading" id="upload-loading" style="display:none">
@@ -694,7 +687,7 @@ async function sendUploadImage(base64) {
   uploadResultImg.src = '';
 
   try {
-    const res = await fetch('/detect', {
+    const res = await fetch('/segment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ base64, conf, iou, imgsz })
@@ -725,11 +718,11 @@ async function sendUploadImage(base64) {
       uploadDetectionsBody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:#555;font-size:13px;padding:12px;">No detections</td></tr>';
     }
   } catch (e) {
-    console.error('Upload detection error:', e);
+    console.error('Upload segmentation error:', e);
     uploadLoading.style.display = 'none';
     uploadErrorText.textContent = e.message || 'Connection failed. Backend may be down.';
     uploadError.style.display = 'flex';
-    uploadDetectionsBody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:#555;font-size:13px;padding:12px;">Detection failed</td></tr>';
+    uploadDetectionsBody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:#555;font-size:13px;padding:12px;">Segmentation failed</td></tr>';
   }
 }
 
@@ -782,7 +775,7 @@ async function sendFrame(base64) {
   const iou = parseFloat(iouSlider.value);
 
   try {
-    const res = await fetch('/detect', {
+    const res = await fetch('/segment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ base64, conf, iou, imgsz })
@@ -815,7 +808,7 @@ async function sendFrame(base64) {
       detectionsBody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:#555;font-size:13px;padding:12px;">No detections</td></tr>';
     }
   } catch (e) {
-    console.error('Detection error:', e);
+    console.error('Segmentation error:', e);
   }
 }
 
