@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VPS Manager</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#1a1a2e;--surface:#16213e;--surface2:#0f3460;--accent:#e94560;--accent2:#5b8def;--text:#e0e0e0;--text2:#6a6a8a;--green:#0ceda0;--border:#1a1a4e}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;height:100vh;overflow:hidden}
+input,button,select,textarea{font-family:inherit}
+/* Login Overlay */
+#login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1000}
+#login-overlay.show{display:flex}
+#login-form{background:var(--surface);padding:32px;border-radius:12px;width:380px;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+#login-form h2{margin-bottom:24px;font-size:22px;font-weight:600;text-align:center;color:#fff}
+#login-form input{width:100%;padding:12px 14px;margin-bottom:12px;background:var(--surface2);border:1px solid var(--border);color:#fff;border-radius:6px;font-size:15px;outline:none;transition:border-color 0.2s}
+#login-form input:focus{border-color:var(--accent)}
+#login-form button{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:15px;font-weight:600;transition:background 0.2s;margin-top:4px}
+#login-form button:hover{background:#d63850}
+#login-form .error{color:var(--accent);margin-bottom:12px;display:none;font-size:13px;text-align:center}
+#login-form .status{color:var(--text2);margin-bottom:12px;display:none;font-size:13px;text-align:center}
+/* Layout */
+#app{display:none;height:100vh}
+#app.show{display:flex}
+/* Sidebar */
+#sidebar{width:220px;min-width:220px;background:var(--surface);display:flex;flex-direction:column;border-right:1px solid var(--border)}
+#sidebar-header{padding:20px 16px;font-size:16px;font-weight:700;color:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+#sidebar-header .logo{width:8px;height:8px;background:var(--green);border-radius:50%;display:inline-block}
+#sidebar-user{padding:10px 16px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)}
+#sidebar-nav{flex:1;padding:8px 0;overflow-y:auto}
+.nav-item{padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--text);font-size:14px;transition:all 0.15s;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,0.05);color:#fff}
+.nav-item.active{background:rgba(233,69,96,0.12);color:var(--accent);border-left-color:var(--accent)}
+.nav-item .icon{font-size:16px;width:20px;text-align:center}
+#sidebar-logout{padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--text2);font-size:13px;border-top:1px solid var(--border);transition:color 0.15s}
+#sidebar-logout:hover{color:var(--accent)}
+/* Main Content */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#main-header{padding:16px 24px;border-bottom:1px solid var(--border);font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px;min-height:60px}
+#main-content{flex:1;padding:20px 24px;overflow-y:auto}
+/* Overview */
+.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.overview-card{background:var(--surface);border-radius:8px;padding:16px;border:1px solid var(--border)}
+.overview-card h3{font-size:13px;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.overview-card pre{font-size:12px;color:var(--text);white-space:pre-wrap;word-break:break-all;font-family:'Consolas','Courier New',monospace;line-height:1.5}
+/* iptables */
+.iptables-controls{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.iptables-controls select,.iptables-controls button{padding:8px 14px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;outline:none;cursor:pointer}
+.iptables-controls select:focus{border-color:var(--accent2)}
+.iptables-controls button{background:var(--accent2);border-color:var(--accent2);font-weight:600;transition:opacity 0.15s}
+.iptables-controls button:hover{opacity:0.85}
+.iptables-controls button.danger{background:var(--accent);border-color:var(--accent)}
+.iptables-output{background:var(--surface);border-radius:8px;border:1px solid var(--border);overflow-x:auto}
+.iptables-output pre{padding:16px;font-size:12px;font-family:'Consolas','Courier New',monospace;line-height:1.6;white-space:pre;color:var(--text);min-height:200px}
+/* Add Rule Form */
+.add-rule-form{background:var(--surface);border-radius:8px;border:1px solid var(--border);padding:16px;margin-top:16px;display:none}
+.add-rule-form.show{display:block}
+.add-rule-form h4{font-size:14px;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px}
+.add-rule-form .form-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.add-rule-form .form-row input,.add-rule-form .form-row select{flex:1;min-width:120px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);color:#fff;border-radius:6px;font-size:13px;outline:none}
+.add-rule-form .form-row input:focus,.add-rule-form .form-row select:focus{border-color:var(--accent2)}
+.add-rule-form .form-row button{padding:8px 20px;background:var(--green);color:#000;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px}
+.add-rule-form .form-row button:hover{opacity:0.85}
+.add-rule-form .form-row button.cancel{background:var(--text2);color:#fff}
+/* Delete mode */
+.delete-mode .iptables-output pre{cursor:pointer}
+.delete-mode .iptables-output pre:hover{background:rgba(233,69,96,0.08)}
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent2)}
+/* Loading */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--text2);border-top-color:var(--accent2);border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="login-overlay" class="show">
+  <div id="login-form">
+    <h2>VPS Manager Login</h2>
+    <div class="error" id="login-error">Please enter your credentials</div>
+    <div class="status" id="login-status" style="display:none">Logging in...</div>
+    <input type="text" id="login-username" placeholder="Username" autocomplete="off">
+    <input type="password" id="login-password" placeholder="Password" autocomplete="off">
+    <button id="login-btn">Login</button>
+  </div>
+</div>
+
+<div id="app">
+  <div id="sidebar">
+    <div id="sidebar-header"><span class="logo"></span> VPS Manager</div>
+    <div id="sidebar-user"></div>
+    <div id="sidebar-nav">
+      <div class="nav-item active" data-tab="overview"><span class="icon">&#9679;</span> Overview</div>
+      <div class="nav-item" data-tab="wireguard"><span class="icon">&#9881;</span> WireGuard</div>
+      <div class="nav-item" data-tab="iptables"><span class="icon">&#9632;</span> iptables</div>
+      <div class="nav-item" data-tab="service"><span class="icon">&#9776;</span> Service</div>
+    </div>
+    <div id="sidebar-logout">&#8592; Logout</div>
+  </div>
+  <div id="main">
+    <div id="main-header"></div>
+    <div id="main-content">
+      <div id="tab-overview"></div>
+      <div id="tab-wireguard" style="display:none">
+        <div class="overview-card"><h3>WireGuard</h3><pre style="color:var(--text2)">WireGuard management coming soon.</pre></div>
+      </div>
+      <div id="tab-iptables" style="display:none"></div>
+      <div id="tab-service" style="display:none">
+        <div class="overview-card"><h3>Service Status</h3><pre style="color:var(--text2)">Service management coming soon.</pre></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let authToken = localStorage.getItem('vpsm_token');
+let currentTab = 'overview';
+let iptablesDeleteMode = false;
+
+async function checkAuth() {
+  if (!authToken) { showLogin(); return false; }
+  try {
+    const res = await fetch('/api/me?token=' + encodeURIComponent(authToken));
+    if (!res.ok) { authToken = null; localStorage.removeItem('vpsm_token'); showLogin(); return false; }
+    const data = await res.json();
+    if (!data.authenticated) { authToken = null; localStorage.removeItem('vpsm_token'); showLogin(); return false; }
+    document.getElementById('sidebar-user').textContent = data.username;
+    showApp();
+    return true;
+  } catch(e) {
+    showLogin();
+    return false;
+  }
+}
+
+function showLogin() {
+  document.getElementById('login-overlay').classList.add('show');
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('login-username').focus();
+}
+
+function showApp() {
+  document.getElementById('login-overlay').classList.remove('show');
+  document.getElementById('app').classList.add('show');
+  switchTab('overview');
+}
+
+async function doLogin(username, password) {
+  const formData = new FormData();
+  formData.append('username', username);
+  formData.append('password', password);
+  const statusEl = document.getElementById('login-status');
+  const errorEl = document.getElementById('login-error');
+  statusEl.style.display = 'block';
+  statusEl.innerHTML = '<span class="spinner"></span> Authenticating...';
+  errorEl.style.display = 'none';
+  try {
+    const res = await fetch('/api/login', { method: 'POST', body: formData });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Login failed');
+    }
+    const data = await res.json();
+    authToken = data.token;
+    localStorage.setItem('vpsm_token', authToken);
+    statusEl.style.display = 'none';
+    document.getElementById('sidebar-user').textContent = username;
+    showApp();
+  } catch(err) {
+    statusEl.style.display = 'none';
+    errorEl.textContent = err.message;
+    errorEl.style.display = 'block';
+  }
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
+  document.querySelectorAll('#main-content > div[id^="tab-"]').forEach(el => el.style.display = 'none');
+  const tabNames = {overview:'Overview', wireguard:'WireGuard', iptables:'iptables', service:'Service'};
+  document.getElementById('main-header').textContent = tabNames[tab] || tab;
+  const tabEl = document.getElementById('tab-' + tab);
+  if (tabEl) tabEl.style.display = 'block';
+  if (tab === 'overview') loadOverview();
+  if (tab === 'iptables') loadIptables();
+}
+
+// Overview
+async function loadOverview() {
+  const el = document.getElementById('tab-overview');
+  el.innerHTML = '<div style="text-align:center;padding:40px"><span class="spinner"></span> Loading...</div>';
+  try {
+    const res = await fetch('/api/overview?token=' + encodeURIComponent(authToken));
+    if (!res.ok) throw new Error('Failed to load');
+    const data = await res.json();
+    el.innerHTML = '<div class="overview-grid">' +
+      card('Hostname', data.hostname) +
+      card('Kernel', data.kernel) +
+      card('Uptime', data.uptime) +
+      card('Memory', data.memory) +
+      card('Disk Usage', data.disk) +
+      card('Top Processes (by mem)', data.top_processes) +
+    '</div>';
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--accent);padding:20px">Failed to load overview: ' + e.message + '</div>';
+  }
+  function card(title, content) {
+    return '<div class="overview-card"><h3>' + title + '</h3><pre>' + escapeHtml(content) + '</pre></div>';
+  }
+}
+
+// iptables
+let iptablesState = { table: 'filter', chain: 'INPUT' };
+
+async function loadIptables() {
+  const el = document.getElementById('tab-iptables');
+  el.innerHTML = `
+    <div class="iptables-controls">
+      <select id="ipt-table">
+        <option value="filter">filter</option>
+        <option value="nat">nat</option>
+        <option value="mangle">mangle</option>
+        <option value="raw">raw</option>
+        <option value="security">security</option>
+      </select>
+      <select id="ipt-chain">
+        <option value="INPUT">INPUT</option>
+        <option value="OUTPUT">OUTPUT</option>
+        <option value="FORWARD">FORWARD</option>
+      </select>
+      <button id="ipt-refresh">&#8635; Refresh</button>
+      <button id="ipt-add-rule">+ Add Rule</button>
+      <button id="ipt-delete-mode" class="danger">&#10005; Delete Mode</button>
+      <button id="ipt-flush" class="danger" style="margin-left:auto">&#9888; Flush Chain</button>
+    </div>
+    <div class="iptables-output" id="ipt-output"><pre>Select a table and chain, then click Refresh.</pre></div>
+    <div class="add-rule-form" id="ipt-add-form">
+      <h4>Add Rule</h4>
+      <div class="form-row">
+        <select id="ipt-new-table">
+          <option value="filter">filter</option>
+          <option value="nat">nat</option>
+          <option value="mangle">mangle</option>
+          <option value="raw">raw</option>
+          <option value="security">security</option>
+        </select>
+        <select id="ipt-new-chain">
+          <option value="INPUT">INPUT</option>
+          <option value="OUTPUT">OUTPUT</option>
+          <option value="FORWARD">FORWARD</option>
+        </select>
+        <input type="number" id="ipt-new-pos" placeholder="Position (0=append)" min="0" value="0">
+      </div>
+      <div class="form-row">
+        <select id="ipt-new-target" style="max-width:130px">
+          <option value="">Target</option>
+          <option value="ACCEPT">ACCEPT</option>
+          <option value="DROP">DROP</option>
+          <option value="REJECT">REJECT</option>
+          <option value="LOG">LOG</option>
+          <option value="MASQUERADE">MASQUERADE</option>
+          <option value="DNAT">DNAT</option>
+          <option value="SNAT">SNAT</option>
+          <option value="RETURN">RETURN</option>
+        </select>
+        <select id="ipt-new-proto" style="max-width:100px">
+          <option value="">Proto</option>
+          <option value="tcp">tcp</option>
+          <option value="udp">udp</option>
+          <option value="icmp">icmp</option>
+        </select>
+        <input type="text" id="ipt-new-src" placeholder="Source (e.g. 10.0.0.0/24)">
+        <input type="text" id="ipt-new-dst" placeholder="Destination (e.g. 10.0.0.1)">
+        <input type="text" id="ipt-new-dport" placeholder="dport (e.g. 80,443)">
+        <input type="text" id="ipt-new-extra" placeholder="Extra flags (e.g. -i eth0)">
+      </div>
+      <div class="form-row">
+        <button id="ipt-apply-rule">Apply Rule</button>
+        <button class="cancel" id="ipt-cancel-rule">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('ipt-table').value = iptablesState.table;
+  document.getElementById('ipt-chain').value = iptablesState.chain;
+  document.getElementById('ipt-refresh').addEventListener('click', refreshIptables);
+  document.getElementById('ipt-add-rule').addEventListener('click', () => {
+    document.getElementById('ipt-add-form').classList.add('show');
+  });
+  document.getElementById('ipt-cancel-rule').addEventListener('click', () => {
+    document.getElementById('ipt-add-form').classList.remove('show');
+  });
+  document.getElementById('ipt-apply-rule').addEventListener('click', addIptablesRule);
+  document.getElementById('ipt-delete-mode').addEventListener('click', toggleDeleteMode);
+  document.getElementById('ipt-flush').addEventListener('click', flushChain);
+  document.getElementById('ipt-table').addEventListener('change', () => {
+    iptablesState.table = document.getElementById('ipt-table').value;
+    refreshIptables();
+  });
+  document.getElementById('ipt-chain').addEventListener('change', () => {
+    iptablesState.chain = document.getElementById('ipt-chain').value;
+    refreshIptables();
+  });
+  refreshIptables();
+}
+
+async function refreshIptables() {
+  const table = document.getElementById('ipt-table').value;
+  const chain = document.getElementById('ipt-chain').value;
+  const outputEl = document.getElementById('ipt-output');
+  outputEl.innerHTML = '<pre><span class="spinner"></span> Loading...</pre>';
+  try {
+    const res = await fetch('/api/iptables?token=' + encodeURIComponent(authToken) + '&table=' + table + '&chain=' + chain);
+    if (!res.ok) throw new Error('Failed to load rules');
+    const data = await res.json();
+    outputEl.innerHTML = '<pre>' + escapeHtml(data.output || 'No rules') + '</pre>';
+    if (iptablesDeleteMode) {
+      outputEl.classList.add('delete-mode');
+      outputEl.querySelector('pre').addEventListener('dblclick', deleteRuleAtLine);
+      outputEl.querySelector('pre').title = 'Double-click a line number to delete that rule';
+    }
+  } catch(e) {
+    outputEl.innerHTML = '<pre style="color:var(--accent)">Error: ' + escapeHtml(e.message) + '</pre>';
+  }
+}
+
+async function addIptablesRule() {
+  const formData = new FormData();
+  formData.append('token', authToken);
+  formData.append('table', document.getElementById('ipt-new-table').value);
+  formData.append('chain', document.getElementById('ipt-new-chain').value);
+  const target = document.getElementById('ipt-new-target').value;
+  const proto = document.getElementById('ipt-new-proto').value;
+  const src = document.getElementById('ipt-new-src').value.trim();
+  const dst = document.getElementById('ipt-new-dst').value.trim();
+  const dport = document.getElementById('ipt-new-dport').value.trim();
+  const extra = document.getElementById('ipt-new-extra').value.trim();
+  const pos = parseInt(document.getElementById('ipt-new-pos').value) || 0;
+  formData.append('position', pos.toString());
+  let rule = '';
+  if (target) rule += '-j ' + target + ' ';
+  if (proto) rule += '-p ' + proto + ' ';
+  if (src) rule += '-s ' + src + ' ';
+  if (dst) rule += '-d ' + dst + ' ';
+  if (dport) rule += '--dport ' + dport + ' ';
+  if (extra) rule += extra + ' ';
+  formData.append('rule', rule.trim());
+  try {
+    const res = await fetch('/api/iptables', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (!data.success) {
+      alert('Error: ' + data.error);
+      return;
+    }
+    document.getElementById('ipt-add-form').classList.remove('show');
+    document.getElementById('ipt-table').value = document.getElementById('ipt-new-table').value;
+    document.getElementById('ipt-chain').value = document.getElementById('ipt-new-chain').value;
+    refreshIptables();
+  } catch(e) {
+    alert('Error adding rule: ' + e.message);
+  }
+}
+
+function toggleDeleteMode() {
+  iptablesDeleteMode = !iptablesDeleteMode;
+  const btn = document.getElementById('ipt-delete-mode');
+  btn.textContent = iptablesDeleteMode ? '&#10003; Done Deleting' : '&#10005; Delete Mode';
+  btn.style.background = iptablesDeleteMode ? 'var(--green)' : 'var(--accent)';
+  btn.style.borderColor = iptablesDeleteMode ? 'var(--green)' : 'var(--accent)';
+  btn.style.color = iptablesDeleteMode ? '#000' : '#fff';
+  const outputEl = document.getElementById('ipt-output');
+  if (iptablesDeleteMode) {
+    outputEl.classList.add('delete-mode');
+    const pre = outputEl.querySelector('pre');
+    if (pre) {
+      pre.addEventListener('dblclick', deleteRuleAtLine);
+      pre.title = 'Double-click a line number to delete that rule';
+    }
+  } else {
+    outputEl.classList.remove('delete-mode');
+    const pre = outputEl.querySelector('pre');
+    if (pre) {
+      pre.removeEventListener('dblclick', deleteRuleAtLine);
+      pre.title = '';
+    }
+  }
+}
+
+async function deleteRuleAtLine(e) {
+  const pre = e.currentTarget;
+  const text = pre.textContent;
+  const lines = text.split('\n');
+  let lineIdx = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const rects = getLineRects(pre, i);
+    const y = e.clientY;
+    for (const r of rects) {
+      if (y >= r.top && y <= r.bottom && e.clientX >= r.left && e.clientX <= r.right) {
+        lineIdx = i;
+        break;
+      }
+    }
+    if (lineIdx >= 0) break;
+  }
+  if (lineIdx < 0) return;
+  const line = lines[lineIdx].trim();
+  const numMatch = line.match(/^(\d+)/);
+  if (!numMatch) return;
+  const lineNum = parseInt(numMatch[1]);
+  if (!confirm('Delete rule #' + lineNum + ' from ' + iptablesState.chain + '?')) return;
+  const table = document.getElementById('ipt-table').value;
+  const chain = document.getElementById('ipt-chain').value;
+  try {
+    const res = await fetch('/api/iptables?token=' + encodeURIComponent(authToken) +
+      '&table=' + table + '&chain=' + chain + '&line=' + lineNum, { method: 'DELETE' });
+    const data = await res.json();
+    if (!data.success) {
+      alert('Error: ' + data.error);
+      return;
+    }
+    refreshIptables();
+  } catch(e) {
+    alert('Error deleting rule: ' + e.message);
+  }
+}
+
+function getLineRects(pre, lineIndex) {
+  const lines = pre.textContent.split('\n');
+  let targetLine = lines[lineIndex] || '';
+  const range = document.createRange();
+  const textNode = pre.firstChild;
+  if (!textNode) return [];
+  let charIndex = 0;
+  for (let i = 0; i < lineIndex; i++) {
+    charIndex += lines[i].length + 1;
+  }
+  range.setStart(textNode, charIndex);
+  range.setEnd(textNode, charIndex + targetLine.length);
+  const rects = range.getClientRects();
+  return rects.length > 0 ? rects : [pre.getBoundingClientRect()];
+}
+
+async function flushChain() {
+  const table = document.getElementById('ipt-table').value;
+  const chain = document.getElementById('ipt-chain').value;
+  if (!confirm('Are you sure you want to flush all rules in ' + table + '/' + chain + '?')) return;
+  const formData = new FormData();
+  formData.append('token', authToken);
+  formData.append('table', table);
+  formData.append('chain', chain);
+  try {
+    const res = await fetch('/api/iptables/flush', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (!data.success) {
+      alert('Error: ' + data.error);
+      return;
+    }
+    refreshIptables();
+  } catch(e) {
+    alert('Error flushing chain: ' + e.message);
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Event listeners
+document.getElementById('login-btn').addEventListener('click', () => {
+  const u = document.getElementById('login-username').value.trim();
+  const p = document.getElementById('login-password').value;
+  if (!u || !p) {
+    document.getElementById('login-error').textContent = 'Username and password required';
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('login-error').style.display = 'none';
+  doLogin(u, p);
+});
+
+document.getElementById('login-password').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('login-btn').click();
+});
+
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => switchTab(el.dataset.tab));
+});
+
+document.getElementById('sidebar-logout').addEventListener('click', () => {
+  authToken = null;
+  localStorage.removeItem('vpsm_token');
+  showLogin();
+});
+
+checkAuth();
+</script>
+</body>
+</html>
