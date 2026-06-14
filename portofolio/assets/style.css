@@ -149,12 +149,15 @@ nav {
 
 .profile-left {
   flex: 7;
+  min-width: 0;
 }
 
 .profile-right {
   flex: 3;
   display: flex;
   justify-content: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .hero-name {
@@ -164,6 +167,8 @@ nav {
   letter-spacing: 3px;
   line-height: 1.1;
   margin-bottom: 12px;
+  max-width: 100%;
+  word-break: break-word;
 }
 
 /* ===== Slot Machine ===== */
@@ -172,6 +177,7 @@ nav {
   overflow: hidden;
   margin-bottom: 8px;
   position: relative;
+  max-width: 100%;
 }
 
 .slot-track {
@@ -184,7 +190,6 @@ nav {
   font-size: 42px;
   font-weight: 800;
   color: #00d4aa;
-  white-space: nowrap;
 }
 
 @keyframes slotRoll {
@@ -209,6 +214,7 @@ nav {
   border-radius: 50%;
   border: 3px solid #00d4aa;
   object-fit: cover;
+  max-width: 100%;
 }
 
 /* ===== Video Card ===== */
@@ -652,6 +658,18 @@ nav {
   object-fit: contain;
 }
 
+.brand-logos {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.brand-logo {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+
 .network-right {
   flex: 1;
   display: flex;
@@ -724,6 +742,23 @@ nav {
 }
 
 /* ===== Responsive ===== */
+@media (max-width: 992px) and (min-width: 769px) {
+  .container {
+    padding: 40px 30px;
+  }
+  .profile-grid {
+    gap: 24px;
+  }
+  .hero-name {
+    font-size: 40px;
+    letter-spacing: 2px;
+  }
+  .profile-img {
+    width: 180px;
+    height: 180px;
+  }
+}
+
 @media (max-width: 768px) {
   nav {
     padding: 10px 16px;
@@ -758,26 +793,34 @@ nav {
   }
 
   .hero-name {
-    font-size: 32px;
+    font-size: 28px;
     letter-spacing: 1px;
+    line-height: 1.2;
+    word-spacing: 100vw;
   }
 
   .slot-wrapper {
-    height: 44px;
+    height: 56px;
   }
 
   .slot-item {
-    height: 44px;
-    line-height: 44px;
-    font-size: 28px;
+    height: 56px;
+    line-height: 1.3;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    word-break: break-word;
+    padding: 0 4px;
   }
 
   @keyframes slotRoll {
     0%, 18% { transform: translateY(0); }
-    22%, 38% { transform: translateY(-44px); }
-    42%, 58% { transform: translateY(-88px); }
-    62%, 78% { transform: translateY(-132px); }
-    82%, 96% { transform: translateY(-176px); }
+    22%, 38% { transform: translateY(-56px); }
+    42%, 58% { transform: translateY(-112px); }
+    62%, 78% { transform: translateY(-168px); }
+    82%, 96% { transform: translateY(-224px); }
     100% { transform: translateY(0); }
   }
 
