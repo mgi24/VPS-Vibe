@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Roles{% endblock %}
+{% block content %}
+<div class="roles-page">
+    <div class="roles-card">
+        <h2>Manajemen Role & User</h2>
+
+        <div id="posterRequestsSection">
+            <h3>Request Jadi Poster</h3>
+            <div id="posterRequestList"></div>
+        </div>
+
+        <hr>
+
+        <div id="allUsersSection">
+            <h3>Semua User</h3>
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Username</th><th>Role</th><th>Approved</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="userTableBody"></tbody>
+            </table>
+        </div>
+
+        <p class="auth-link"><a href="/settings">Kembali ke Settings</a></p>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+loadUser().then(() => {
+    if (!currentUser || currentUser.role !== 'admin') {
+        document.body.innerHTML = '<div class="auth-page"><div class="auth-card"><h2>Akses Ditolak</h2><p>Halaman ini hanya untuk admin.</p><a href="/">Kembali</a></div></div>';
+        return;
+    }
+    loadPosterRequests();
+    loadUsers();
+});
+
+async function loadPosterRequests() {
+    try {
+        const users = await api('/api/admin/poster-requests');
+        const div = document.getElementById('posterRequestList');
+        if (users.length === 0) {
+            div.innerHTML = '<p class="no-data">Tidak ada request.</p>';
+            return;
+        }
+        div.innerHTML = users.map(u => `
+            <div class="request-item">
+                <span><strong>${escapeHtml(u.username)}</strong> — request jadi poster</span>
+                <button class="btn-sm" onclick="approveAsPoster(${u.id})">Setujui</button>
+            </div>
+        `).join('');
+    } catch (e) {
+        document.getElementById('posterRequestList').innerHTML = '<p>Gagal memuat request.</p>';
+    }
+}
+
+async function approveAsPoster(id) {
+    await api('/api/admin/users/' + id + '/role', { method: 'POST', body: { role: 'poster' } });
+    loadPosterRequests();
+    loadUsers();
+}
+
+async function loadUsers() {
+    const users = await api('/api/admin/users');
+    const tbody = document.getElementById('userTableBody');
+    tbody.innerHTML = users.map(u => `
+        <tr>
+            <td>${u.id}</td>
+            <td>${escapeHtml(u.username)}</td>
+            <td>${u.role}</td>
+            <td>${u.approved ? 'Ya' : 'Tidak'}</td>
+            <td>
+                ${!u.approved ? `<button class="btn-sm" onclick="approveUser(${u.id})">Approve</button>` : ''}
+                <select onchange="changeRole(${u.id}, this.value)" ${u.role === 'admin' ? 'disabled' : ''}>
+                    <option value="general" ${u.role === 'general' ? 'selected' : ''}>General</option>
+                    <option value="poster" ${u.role === 'poster' ? 'selected' : ''}>Poster</option>
+                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                </select>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function approveUser(id) {
+    await api('/api/admin/users/' + id + '/approve', { method: 'POST' });
+    loadUsers();
+}
+
+async function changeRole(id, role) {
+    await api('/api/admin/users/' + id + '/role', { method: 'POST', body: { role } });
+    loadPosterRequests();
+    loadUsers();
+}
+</script>
+{% endblock %}

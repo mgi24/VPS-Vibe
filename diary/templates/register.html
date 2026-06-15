@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Daftar{% endblock %}
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <img src="/assets/mmvlogo.png" alt="MMV" class="auth-logo">
+        <h2>Daftar ke MMV</h2>
+        <form id="registerForm">
+            <input type="text" id="regUser" placeholder="Username" required>
+            <input type="password" id="regPass" placeholder="Password" required>
+            <p class="error-msg" id="regError"></p>
+            <button type="submit">Daftar</button>
+        </form>
+        <p class="auth-link">Sudah punya akun? <a href="/login">Masuk</a></p>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const err = document.getElementById('regError');
+    try {
+        await api('/api/register', {
+            method: 'POST',
+            body: { username: document.getElementById('regUser').value, password: document.getElementById('regPass').value },
+        });
+        err.style.color = '#4ade80';
+        err.textContent = 'Pendaftaran berhasil! Tunggu approve admin.';
+    } catch (e) {
+        err.style.color = '#f87171';
+        err.textContent = e.message;
+    }
+});
+</script>
+{% endblock %}

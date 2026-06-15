@@ -8,5 +8,11 @@ webssh/users.db
 !README.md
 !yolo/
 !yolo/**
+!diary/
+!diary/**
+diary/.env
+diary/.venv/
+diary/__pycache__/
+diary/*.pyc
 doc.md
 __pycache__/

@@ -1,0 +1,796 @@
+{% extends "base.html" %}
+{% block title %}{% if single %}Post{% else %}Beranda{% endif %}{% endblock %}
+{% block content %}
+<script>
+let singlePostId = null;
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('post')) {
+    singlePostId = parseInt(urlParams.get('post'));
+}
+
+function pageInit() {
+    if (currentUser) {
+        if (currentUser.role === 'admin' || currentUser.role === 'poster') {
+            document.getElementById('createPostBox').style.display = 'block';
+        } else {
+            document.getElementById('posterRequestMsg').style.display = 'block';
+        }
+    }
+    if (singlePostId) {
+        loadSinglePost(singlePostId);
+    } else {
+        loadPosts();
+    }
+
+    if (singlePostId) {
+        document.querySelector('.logo').onclick = function(e) {
+            e.preventDefault();
+            window.location.href = '/';
+        };
+    }
+}
+</script>
+<div id="feed">
+    <div id="createPostSection">
+        <div id="posterRequestMsg" class="post-card" style="display:none">
+            <p>Request jadi poster ke admin dulu yak <span class="blink">😉</span></p>
+        </div>
+        <div id="createPostBox" class="post-card" style="display:none">
+            <div class="post-input-area" id="dropZone">
+                <textarea id="postContent" placeholder="Apa yang Anda pikirkan?" rows="3"></textarea>
+                <div class="file-previews" id="filePreviews"></div>
+            </div>
+            <div class="post-toolbar">
+                <div class="toolbar-left">
+                    <button type="button" class="toolbar-btn" id="photoBtn" title="Upload Foto">📷</button>
+                    <button type="button" class="toolbar-btn" id="videoBtn" title="Upload Video">🎬</button>
+                </div>
+                <div class="toolbar-right">
+                    <select id="postSegment" class="segment-select">
+                        <option value="">Segmen</option>
+                        <option value="umum">Umum</option>
+                        <option value="teknologi">Teknologi</option>
+                        <option value="hiburan">Hiburan</option>
+                        <option value="olahraga">Olahraga</option>
+                        <option value="pendidikan">Pendidikan</option>
+                        <option value="berita">Berita</option>
+                    </select>
+                    <button id="submitPost">Kirim</button>
+                </div>
+            </div>
+            <p class="error-msg" id="postError"></p>
+        </div>
+    </div>
+
+    <div id="postsFeed"></div>
+</div>
+
+<div id="commentModal" class="modal-overlay" style="display:none">
+    <div class="modal comment-modal-wide">
+        <div class="modal-header">
+            <h3>Post & Komentar</h3>
+            <span class="modal-close" onclick="closeCommentModal()">&times;</span>
+        </div>
+        <div id="commentPostContainer" class="comment-post-container"></div>
+        <div id="commentList" class="comment-list"></div>
+        <div class="comment-input-area">
+            <div id="guestNameField" style="display:none">
+                <input type="text" id="commentGuestName" placeholder="Nama Anda">
+            </div>
+            <textarea id="commentContent" placeholder="Tulis komentar..." rows="2"></textarea>
+            <button onclick="submitComment()">Kirim</button>
+            <p class="error-msg" id="commentError"></p>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="fileInput" accept="image/*,video/*" multiple style="display:none">
+{% endblock %}
+{% block scripts %}
+<script>
+const SEGMENT_COLORS = {
+    'umum': '#3b82f6', 'teknologi': '#10b981', 'hiburan': '#f59e0b',
+    'olahraga': '#ef4444', 'pendidikan': '#8b5cf6', 'berita': '#ec4899'
+};
+let pendingFiles = [];
+let currentPostId = null;
+
+/* === FILE HANDLING === */
+document.getElementById('photoBtn').addEventListener('click', () => {
+    const input = document.getElementById('fileInput');
+    input.accept = 'image/*';
+    input.value = '';
+    input.click();
+});
+
+document.getElementById('videoBtn').addEventListener('click', () => {
+    const input = document.getElementById('fileInput');
+    input.accept = 'video/*';
+    input.value = '';
+    input.click();
+});
+
+document.getElementById('fileInput').addEventListener('change', function() {
+    addFiles(this.files);
+    this.value = '';
+});
+
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    addFiles(e.dataTransfer.files);
+});
+
+dropZone.addEventListener('paste', e => {
+    const items = e.clipboardData.items;
+    const files = [];
+    for (const item of items) {
+        if (item.type.startsWith('image/') || item.type.startsWith('video/')) {
+            files.push(item.getAsFile());
+        }
+    }
+    if (files.length) addFiles(files);
+});
+
+function addFiles(fileList) {
+    for (const f of fileList) {
+        if (f.type.startsWith('image/') || f.type.startsWith('video/')) {
+            pendingFiles.push(f);
+        }
+    }
+    renderPreviews();
+}
+
+function renderPreviews() {
+    const container = document.getElementById('filePreviews');
+    container.innerHTML = pendingFiles.map((f, i) => {
+        const url = URL.createObjectURL(f);
+        const isVideo = f.type.startsWith('video/');
+        return `<div class="file-preview" data-idx="${i}">
+            ${isVideo ? `<video src="${url}" muted></video>` : `<img src="${url}">`}
+            ${isVideo ? '' : `<button class="file-edit" onclick="editFile(${i})">✏️</button>`}
+            <span class="file-remove" onclick="removeFile(${i})">&times;</span>
+            <span class="file-name">${f.name}</span>
+        </div>`;
+    }).join('');
+}
+
+function removeFile(idx) {
+    pendingFiles.splice(idx, 1);
+    renderPreviews();
+}
+
+/* === SUBMIT POST === */
+document.getElementById('submitPost').addEventListener('click', async function() {
+    const err = document.getElementById('postError');
+    const content = document.getElementById('postContent').value;
+    if (!content.trim() && pendingFiles.length === 0) {
+        err.textContent = 'Isi post atau upload file';
+        return;
+    }
+
+    let mediaUrl = '';
+    if (pendingFiles.length > 0) {
+        const formData = new FormData();
+        for (const f of pendingFiles) formData.append('files', f);
+        try {
+            const res = await fetch('/api/posts/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Upload gagal');
+            mediaUrl = data.urls.join(',');
+        } catch (e) {
+            err.textContent = 'Upload gagal: ' + e.message;
+            return;
+        }
+    }
+
+    try {
+        await api('/api/posts', {
+            method: 'POST',
+            body: {
+                type: 'text',
+                content: content,
+                media_url: mediaUrl || null,
+                segment: document.getElementById('postSegment').value || null,
+            },
+        });
+        document.getElementById('postContent').value = '';
+        document.getElementById('postSegment').value = '';
+        pendingFiles = [];
+        renderPreviews();
+        err.textContent = '';
+        if (singlePostId) {
+            loadSinglePost(singlePostId);
+        } else {
+            loadPosts();
+        }
+    } catch (e) {
+        err.textContent = e.message;
+    }
+});
+
+/* === LOAD POSTS === */
+async function loadPosts() {
+    const posts = await api('/api/posts');
+    const feed = document.getElementById('postsFeed');
+    feed.innerHTML = posts.map(p => renderPost(p)).join('');
+    attachPostListeners();
+}
+
+async function loadSinglePost(id) {
+    const post = await api('/api/posts/' + id);
+    const feed = document.getElementById('postsFeed');
+    feed.innerHTML = renderPost(post, true);
+    attachPostListeners();
+}
+
+function renderPost(p, full = false) {
+    const mediaHtml = renderMediaList(p.media_list || [], full);
+    const segmentHtml = p.segment ? `<span class="segment-blob" style="background:${p.segment_color}">${p.segment}</span>` : '';
+    const reactedClass = p.user_reacted ? 'reacted' : '';
+    const postLink = p.type === 'link' ? extractLink(p.content) : null;
+    const canEdit = currentUser && (currentUser.id === p.author.id || currentUser.role === 'admin');
+    return `
+        <div class="post-card ${full ? 'post-card-full' : ''}" data-post-id="${p.id}">
+            <div class="post-header">
+                <a href="/?post=${p.id}" class="post-header-link">
+                    <img src="${p.author.profile_pic}" alt="" class="post-avatar">
+                    <div class="post-author-info">
+                        <strong>${escapeHtml(p.author.username)}</strong>
+                        <span class="post-time">${timeAgo(p.created_at)}</span>
+                    </div>
+                </a>
+                ${segmentHtml}
+                ${canEdit ? `<div class="post-menu-wrap"><button class="post-menu-btn" onclick="toggleMenu(${p.id})">•••</button><div class="post-menu" id="menu_${p.id}"><div onclick="editPost(${p.id})">✏️ Edit</div><div onclick="deletePost(${p.id})">🗑️ Hapus</div></div></div>` : ''}
+            </div>
+            <div class="post-body">
+                ${postLink ? renderLinkPost(p.content) : `<p>${escapeHtml(p.content || '')}</p>`}
+                ${mediaHtml}
+            </div>
+            <div class="post-stats">
+                <span class="stat-count" id="reactCount_${p.id}">${p.react_count} Suka</span>
+                <span class="stat-count" onclick="openCommentModal(${p.id})">${p.comment_count} Komentar</span>
+            </div>
+            <div class="post-actions">
+                <button class="action-btn ${reactedClass}" onclick="toggleReact(${p.id})">
+                    <span class="action-icon">👍</span> Suka
+                </button>
+                <button class="action-btn" onclick="openCommentModal(${p.id})">
+                    <span class="action-icon">💬</span> Komentar
+                </button>
+                <button class="action-btn" onclick="sharePost(${p.id})">
+                    <span class="action-icon">🔗</span> Bagikan
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function renderLinkPost(content) {
+    const link = extractLink(content);
+    const text = content.replace(link, '').trim();
+    return `<p>${escapeHtml(text)}</p>
+        <a href="${escapeHtml(link)}" target="_blank" class="post-link" onclick="event.stopPropagation()">
+            <span class="link-icon">🔗</span> ${escapeHtml(link)}
+        </a>`;
+}
+
+function extractLink(text) {
+    if (!text) return null;
+    const m = text.match(/https?:\/\/[^\s]+/);
+    return m ? m[0] : null;
+}
+
+function renderMediaList(list, full) {
+    if (!list || list.length === 0) return '';
+    return '<div class="media-grid">' +
+        list.map(url => {
+            const isVideo = url.match(/\.(mp4|webm|ogg|mov|avi)(\?|$)/i);
+            return isVideo
+                ? `<video src="${url}" controls ${full ? 'autoplay' : ''} class="post-media"></video>`
+                : `<img src="${url}" alt="" class="post-media" loading="lazy" onclick="openImgPopup(this.src)">`;
+        }).join('') +
+    '</div>';
+}
+
+function attachPostListeners() {}
+
+async function toggleReact(postId) {
+    const data = await api('/api/posts/' + postId + '/react', { method: 'POST' });
+    if (data.anon_id) {
+        document.cookie = 'anon_id=' + data.anon_id + ';path=/;max-age=31536000';
+    }
+    const countEl = document.getElementById('reactCount_' + postId);
+    if (countEl) countEl.textContent = data.count + ' Suka';
+    const btn = document.querySelector(`.post-card[data-post-id="${postId}"] .action-btn:first-child`);
+    if (btn) btn.classList.toggle('reacted', data.reacted);
+}
+
+/* === COMMENT MODAL WITH POST === */
+async function openCommentModal(postId) {
+    currentPostId = postId;
+    const modal = document.getElementById('commentModal');
+
+    document.getElementById('commentContent').value = '';
+    document.getElementById('commentError').textContent = '';
+    document.getElementById('commentList').innerHTML = '<p>Memuat...</p>';
+    document.getElementById('commentPostContainer').innerHTML = '<p>Memuat post...</p>';
+
+    const guestField = document.getElementById('guestNameField');
+    guestField.style.display = currentUser ? 'none' : 'block';
+
+    try {
+        const post = await api('/api/posts/' + postId);
+        const mediaHtml = renderMediaList(post.media_list || [], false);
+        const segmentHtml = post.segment ? `<span class="segment-blob" style="background:${post.segment_color}">${post.segment}</span>` : '';
+        document.getElementById('commentPostContainer').innerHTML = `
+            <div class="comment-post-preview">
+                <div class="post-header">
+                    <img src="${post.author.profile_pic}" alt="" class="post-avatar">
+                    <div class="post-author-info">
+                        <strong>${escapeHtml(post.author.username)}</strong>
+                        <span class="post-time">${timeAgo(post.created_at)}</span>
+                    </div>
+                    ${segmentHtml}
+                </div>
+                <div class="post-body">
+                    <p>${escapeHtml(post.content || '')}</p>
+                    ${mediaHtml}
+                </div>
+                <div class="post-stats">
+                    <span class="stat-count">${post.react_count} Suka</span>
+                </div>
+            </div>
+        `;
+    } catch {
+        document.getElementById('commentPostContainer').innerHTML = '<p>Gagal memuat post.</p>';
+    }
+
+    modal.style.display = 'flex';
+
+    api('/api/posts/' + postId + '/comments').then(comments => {
+        const list = document.getElementById('commentList');
+        if (comments.length === 0) {
+            list.innerHTML = '<p class="no-comments">Belum ada komentar.</p>';
+            return;
+        }
+        list.innerHTML = comments.map(c => `
+            <div class="comment-item">
+                <img src="${c.author_pic}" alt="" class="comment-avatar">
+                <div class="comment-body">
+                    <strong>${escapeHtml(c.author_name)}</strong>
+                    <p>${escapeHtml(c.content)}</p>
+                    <span class="comment-time">${timeAgo(c.created_at)}</span>
+                </div>
+            </div>
+        `).join('');
+    }).catch(() => {
+        document.getElementById('commentList').innerHTML = '<p>Gagal memuat komentar.</p>';
+    });
+}
+
+function closeCommentModal() {
+    document.getElementById('commentModal').style.display = 'none';
+}
+
+async function submitComment() {
+    const err = document.getElementById('commentError');
+    const content = document.getElementById('commentContent').value;
+    if (!content.trim()) { err.textContent = 'Komentar tidak boleh kosong'; return; }
+    const body = { content };
+    if (!currentUser) {
+        const name = document.getElementById('commentGuestName').value;
+        if (!name.trim()) { err.textContent = 'Isi nama Anda'; return; }
+        body.guest_name = name;
+    }
+    try {
+        await api('/api/posts/' + currentPostId + '/comments', { method: 'POST', body });
+        document.getElementById('commentContent').value = '';
+        document.getElementById('commentError').textContent = '';
+        openCommentModal(currentPostId);
+        if (!singlePostId) {
+            const countEl = document.querySelector(`.post-card[data-post-id="${currentPostId}"] .stat-count:last-child`);
+            if (countEl) {
+                const match = countEl.textContent.match(/(\d+)/);
+                const cnt = match ? parseInt(match[1]) + 1 : 1;
+                countEl.textContent = cnt + ' Komentar';
+            }
+        }
+    } catch (e) {
+        err.textContent = e.message;
+    }
+}
+
+function sharePost(postId) {
+    const url = window.location.origin + '/?post=' + postId;
+    showModal(`
+        <h3>Bagikan Post</h3>
+        <div class="share-box">
+            <input type="text" value="${url}" readonly id="shareUrl">
+            <button onclick="copyShareUrl()" id="copyBtn">
+                <span id="copyIcon">📋</span> Copy
+            </button>
+        </div>
+        <p id="copyConfirm" style="display:none;color:#4ade80">✓ Tercopy ke clipboard!</p>
+    `);
+}
+
+function copyShareUrl() {
+    const input = document.getElementById('shareUrl');
+    input.select();
+    navigator.clipboard.writeText(input.value).then(() => {
+        document.getElementById('copyIcon').textContent = '✅';
+        document.getElementById('copyConfirm').style.display = 'block';
+        setTimeout(() => {
+            document.getElementById('modalOverlay').style.display = 'none';
+        }, 1000);
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/* === THREE-DOT MENU === */
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.post-menu-wrap')) {
+        document.querySelectorAll('.post-menu').forEach(m => m.classList.remove('show'));
+    }
+});
+
+function toggleMenu(id) {
+    const menu = document.getElementById('menu_' + id);
+    const all = document.querySelectorAll('.post-menu');
+    all.forEach(m => { if (m !== menu) m.classList.remove('show'); });
+    menu.classList.toggle('show');
+}
+
+async function deletePost(id) {
+    await api('/api/posts/' + id, { method: 'DELETE' });
+    if (singlePostId) {
+        window.location.href = '/';
+    } else {
+        loadPosts();
+    }
+}
+
+async function editPost(id) {
+    const post = await api('/api/posts/' + id);
+    const modal = document.getElementById('modalOverlay');
+    const mediaList = post.media_list || [];
+    document.getElementById('modalContent').innerHTML = `
+        <div class="edit-modal" data-media="${escapeHtml(post.media_url || '')}">
+            <h3>Edit Post</h3>
+            <textarea id="editContent" rows="4" placeholder="Apa yang Anda pikirkan?">${escapeHtml(post.content || '')}</textarea>
+            ${mediaList.length ? `<div class="edit-media-section">
+                ${mediaList.map(u =>
+                    u.match(/\.(mp4|webm|ogg|mov|avi)/i)
+                        ? `<div class="edit-media-item"><video src="${u}" class="edit-media-preview"></video></div>`
+                        : `<div class="edit-media-item"><img src="${u}" class="edit-media-preview"></div>`
+                ).join('')}
+            </div>` : ''}
+            <div class="post-toolbar" style="margin-top:12px">
+                <div class="toolbar-left">
+                    <select id="editSegment" class="segment-select">
+                        <option value="">Segmen</option>
+                        <option value="umum" ${post.segment === 'umum' ? 'selected' : ''}>Umum</option>
+                        <option value="teknologi" ${post.segment === 'teknologi' ? 'selected' : ''}>Teknologi</option>
+                        <option value="hiburan" ${post.segment === 'hiburan' ? 'selected' : ''}>Hiburan</option>
+                        <option value="olahraga" ${post.segment === 'olahraga' ? 'selected' : ''}>Olahraga</option>
+                        <option value="pendidikan" ${post.segment === 'pendidikan' ? 'selected' : ''}>Pendidikan</option>
+                        <option value="berita" ${post.segment === 'berita' ? 'selected' : ''}>Berita</option>
+                    </select>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn-cancel" onclick="document.getElementById('modalOverlay').style.display='none'">Batal</button>
+                    <button onclick="saveEdit(${id})">Simpan</button>
+                </div>
+            </div>
+            <p class="error-msg" id="editError"></p>
+        </div>
+    `;
+    modal.style.display = 'flex';
+}
+
+async function saveEdit(id) {
+    const err = document.getElementById('editError');
+    const el = document.querySelector('.edit-modal');
+    const mediaUrl = el ? el.dataset.media : '';
+    try {
+        await api('/api/posts/' + id, {
+            method: 'PUT',
+            body: {
+                type: 'text',
+                content: document.getElementById('editContent').value,
+                media_url: mediaUrl || null,
+                segment: document.getElementById('editSegment').value || null,
+            },
+        });
+        document.getElementById('modalOverlay').style.display = 'none';
+        document.getElementById('modalContent').classList.remove('modal-full');
+        if (singlePostId) loadSinglePost(id);
+        else loadPosts();
+    } catch (e) {
+        err.textContent = e.message;
+    }
+}
+
+/* === IMAGE EDITOR === */
+let editFileIdx = -1;
+let editRotation = 0;
+let editCrop = null;
+
+function editFile(idx) {
+    editFileIdx = idx;
+    editRotation = 0;
+    editCrop = null;
+    const f = pendingFiles[idx];
+    const url = URL.createObjectURL(f);
+    const mc = document.getElementById('modalContent');
+    mc.classList.add('modal-full');
+    showModal(`
+        <div class="img-editor">
+            <h3>Edit Gambar</h3>
+            <div class="img-editor-canvas-wrap">
+                <img src="${url}" id="editImg" class="edit-img">
+                <div class="crop-overlay" id="cropOverlay">
+                    <div class="crop-area" id="cropArea">
+                        <div class="crop-handle nw"></div>
+                        <div class="crop-handle ne"></div>
+                        <div class="crop-handle sw"></div>
+                        <div class="crop-handle se"></div>
+                        <div class="crop-handle n"></div>
+                        <div class="crop-handle s"></div>
+                        <div class="crop-handle w"></div>
+                        <div class="crop-handle e"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="img-editor-tools">
+                <button onclick="rotateImg(-90)">↺ 90°</button>
+                <button onclick="rotateImg(90)">↻ 90°</button>
+                <button onclick="toggleCrop()" id="cropBtn">✂️ Crop</button>
+                <button onclick="applyEdit()">✅ Simpan</button>
+                <button class="btn-cancel" onclick="closeEditor()">Batal</button>
+            </div>
+        </div>
+    `);
+    const img = document.getElementById('editImg');
+    img.onload = function() {
+        img.style.transform = 'rotate(0deg)';
+    };
+}
+
+function closeEditor() {
+    document.getElementById('modalContent').classList.remove('modal-full');
+    document.getElementById('modalOverlay').style.display = 'none';
+}
+
+function rotateImg(deg) {
+    editRotation = (editRotation + deg) % 360;
+    const img = document.getElementById('editImg');
+    img.style.transform = 'rotate(' + editRotation + 'deg)';
+}
+
+/* === CROP WITH DRAGGABLE EDGES === */
+let cropHandle = null;
+let cropStartX, cropStartY, cropStartW, cropStartH;
+let cropDragOffX, cropDragOffY;
+
+function toggleCrop() {
+    const overlay = document.getElementById('cropOverlay');
+    const area = document.getElementById('cropArea');
+    if (overlay.style.display === 'block') {
+        overlay.style.display = 'none';
+        document.getElementById('cropBtn').textContent = '✂️ Crop';
+        cropStartX = cropStartY = cropEndX = cropEndY = null;
+    } else {
+        overlay.style.display = 'block';
+        const img = document.getElementById('editImg');
+        const iw = img.clientWidth, ih = img.clientHeight;
+        const margin = 0.15;
+        area.style.left = (iw * margin) + 'px';
+        area.style.top = (ih * margin) + 'px';
+        area.style.width = (iw * (1 - 2 * margin)) + 'px';
+        area.style.height = (ih * (1 - 2 * margin)) + 'px';
+        cropStartX = iw * margin;
+        cropStartY = ih * margin;
+        cropEndX = iw * (1 - margin);
+        cropEndY = ih * (1 - margin);
+        document.getElementById('cropBtn').textContent = '✂️ Selesai';
+        initCropDrag(area, img);
+    }
+}
+
+function initCropDrag(area, img) {
+    const wrap = img.parentElement;
+
+    area.addEventListener('mousedown', function(e) {
+        if (e.target.classList.contains('crop-handle')) {
+            cropHandle = e.target.className.split(' ')[1];
+            const r = area.getBoundingClientRect();
+            const wr = wrap.getBoundingClientRect();
+            cropDragOffX = e.clientX - r.left;
+            cropDragOffY = e.clientY - r.top;
+            cropStartX = r.left - wr.left;
+            cropStartY = r.top - wr.top;
+            cropStartW = r.width;
+            cropStartH = r.height;
+            return;
+        }
+        cropHandle = 'move';
+        const r = area.getBoundingClientRect();
+        const wr = wrap.getBoundingClientRect();
+        cropDragOffX = e.clientX - r.left;
+        cropDragOffY = e.clientY - r.top;
+        cropStartX = r.left - wr.left;
+        cropStartY = r.top - wr.top;
+        cropStartW = r.width;
+        cropStartH = r.height;
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!cropHandle) return;
+        const wr = wrap.getBoundingClientRect();
+        let l = parseFloat(area.style.left) || 0;
+        let t = parseFloat(area.style.top) || 0;
+        let w = parseFloat(area.style.width) || 0;
+        let h = parseFloat(area.style.height) || 0;
+        const mx = e.clientX - wr.left;
+        const my = e.clientY - wr.top;
+        const iw = img.clientWidth, ih = img.clientHeight;
+
+        if (cropHandle === 'move') {
+            let nl = mx - cropDragOffX;
+            let nt = my - cropDragOffY;
+            nl = Math.max(0, Math.min(iw - w, nl));
+            nt = Math.max(0, Math.min(ih - h, nt));
+            area.style.left = nl + 'px';
+            area.style.top = nt + 'px';
+        } else if (cropHandle === 'se') {
+            w = Math.max(20, mx - l);
+            h = Math.max(20, my - t);
+            w = Math.min(iw - l, w);
+            h = Math.min(ih - t, h);
+            area.style.width = w + 'px';
+            area.style.height = h + 'px';
+        } else if (cropHandle === 'sw') {
+            const nr = Math.min(l + w, mx);
+            w = Math.max(20, l + w - nr);
+            l = nr;
+            h = Math.max(20, my - t);
+            h = Math.min(ih - t, h);
+            l = Math.max(0, l);
+            area.style.left = l + 'px';
+            area.style.width = w + 'px';
+            area.style.height = h + 'px';
+        } else if (cropHandle === 'ne') {
+            const nb = Math.min(t + h, my);
+            h = Math.max(20, t + h - nb);
+            t = nb;
+            w = Math.max(20, mx - l);
+            w = Math.min(iw - l, w);
+            t = Math.max(0, t);
+            area.style.top = t + 'px';
+            area.style.width = w + 'px';
+            area.style.height = h + 'px';
+        } else if (cropHandle === 'nw') {
+            const nr = Math.min(l + w, mx);
+            w = Math.max(20, l + w - nr);
+            l = nr;
+            const nb = Math.min(t + h, my);
+            h = Math.max(20, t + h - nb);
+            t = nb;
+            l = Math.max(0, l);
+            t = Math.max(0, t);
+            area.style.left = l + 'px';
+            area.style.top = t + 'px';
+            area.style.width = w + 'px';
+            area.style.height = h + 'px';
+        } else if (cropHandle === 'n') {
+            const nb = Math.min(t + h, my);
+            h = Math.max(20, t + h - nb);
+            t = nb;
+            t = Math.max(0, t);
+            area.style.top = t + 'px';
+            area.style.height = h + 'px';
+        } else if (cropHandle === 's') {
+            h = Math.max(20, my - t);
+            h = Math.min(ih - t, h);
+            area.style.height = h + 'px';
+        } else if (cropHandle === 'w') {
+            const nr = Math.min(l + w, mx);
+            w = Math.max(20, l + w - nr);
+            l = nr;
+            l = Math.max(0, l);
+            area.style.left = l + 'px';
+            area.style.width = w + 'px';
+        } else if (cropHandle === 'e') {
+            w = Math.max(20, mx - l);
+            w = Math.min(iw - l, w);
+            area.style.width = w + 'px';
+        }
+
+        cropStartX = l;
+        cropStartY = t;
+        cropEndX = l + w;
+        cropEndY = t + h;
+    });
+
+    document.addEventListener('mouseup', function() {
+        cropHandle = null;
+    });
+}
+
+async function applyEdit() {
+    const img = document.getElementById('editImg');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const natW = img.naturalWidth, natH = img.naturalHeight;
+    const dispW = img.clientWidth, dispH = img.clientHeight;
+    const scaleX = natW / dispW, scaleY = natH / dispH;
+
+    const rotated = editRotation % 360 !== 0;
+    let cropX, cropY, cropW, cropH;
+
+    if (cropStartX != null && cropEndX != null) {
+        cropX = Math.min(cropStartX, cropEndX) * scaleX;
+        cropY = Math.min(cropStartY, cropEndY) * scaleY;
+        cropW = Math.abs(cropEndX - cropStartX) * scaleX;
+        cropH = Math.abs(cropEndY - cropStartY) * scaleY;
+    } else {
+        cropX = 0; cropY = 0; cropW = natW; cropH = natH;
+    }
+
+    if (rotated) {
+        const rad = editRotation * Math.PI / 180;
+        const cx = cropX + cropW / 2;
+        const cy = cropY + cropH / 2;
+
+        canvas.width = cropH;
+        canvas.height = cropW;
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(rad);
+        ctx.drawImage(img, -cx, -cy, natW, natH);
+    } else {
+        canvas.width = cropW;
+        canvas.height = cropH;
+        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+    }
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+    const newFile = new File([blob], pendingFiles[editFileIdx].name, { type: 'image/jpeg' });
+    pendingFiles[editFileIdx] = newFile;
+    document.getElementById('modalContent').classList.remove('modal-full');
+    document.getElementById('modalOverlay').style.display = 'none';
+    renderPreviews();
+}
+
+function timeAgo(iso) {
+    if (!iso) return '';
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'baru saja';
+    if (mins < 60) return mins + 'm';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'j';
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return days + 'h';
+    return new Date(iso).toLocaleDateString('id-ID');
+}
+
+/* Back to home from single post view */
+if (singlePostId) {
+    document.querySelector('.logo').onclick = function(e) {
+        e.preventDefault();
+        window.location.href = '/';
+    };
+}
+</script>
+{% endblock %}

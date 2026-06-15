@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<div class="settings-page">
+    <div class="settings-card">
+        <h2>Pengaturan Akun</h2>
+        <div class="settings-avatar" id="settingsAvatar">
+            <img src="/assets/default-profile.png" alt="" id="settingsProfilePic">
+            <button id="changeProfileBtn">Ganti Foto</button>
+        </div>
+        <div id="changeProfileForm" style="display:none">
+            <input type="file" id="profileFileInput" accept="image/*">
+            <button id="saveProfileBtn">Simpan</button>
+            <p class="error-msg" id="profileError"></p>
+        </div>
+        <hr>
+        <form id="usernameForm">
+            <label>Username</label>
+            <input type="text" id="settingsUsername" placeholder="Username baru">
+            <button type="submit">Simpan Username</button>
+            <p class="error-msg" id="usernameError"></p>
+        </form>
+        <hr>
+        <form id="passwordForm">
+            <label>Password Lama</label>
+            <input type="password" id="oldPass" placeholder="Password lama">
+            <label>Password Baru</label>
+            <input type="password" id="newPass" placeholder="Password baru">
+            <button type="submit">Simpan Password</button>
+            <p class="error-msg" id="passwordError"></p>
+        </form>
+        <hr>
+        <div id="adminLinkSection" style="display:none">
+            <button class="btn-full" onclick="window.location.href='/roles'">Users Role</button>
+            <hr>
+        </div>
+        <button class="btn-full btn-logout" id="logoutBtn">Logout</button>
+        <p class="auth-link"><a href="/">Kembali ke Beranda</a></p>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+loadUser().then(() => {
+    if (!currentUser) { window.location.href = '/login'; return; }
+    document.getElementById('settingsProfilePic').src = currentUser.profile_pic;
+    document.getElementById('settingsUsername').placeholder = currentUser.username;
+    if (currentUser.role === 'admin') {
+        document.getElementById('adminLinkSection').style.display = 'block';
+    }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await api('/api/logout', { method: 'POST' });
+    window.location.href = '/login';
+});
+
+document.getElementById('changeProfileBtn').addEventListener('click', () => {
+    const f = document.getElementById('changeProfileForm');
+    f.style.display = f.style.display === 'none' ? 'block' : 'none';
+});
+
+document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+    const err = document.getElementById('profileError');
+    const fileInput = document.getElementById('profileFileInput');
+    if (!fileInput.files.length) { err.textContent = 'Pilih file dulu'; return; }
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    try {
+        const res = await fetch('/api/settings/profile', { method: 'PUT', body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Gagal');
+        document.getElementById('settingsProfilePic').src = data.profile_pic;
+        document.getElementById('navProfilePic').src = data.profile_pic;
+        err.style.color = '#4ade80';
+        err.textContent = 'Foto profil diperbarui!';
+    } catch (e) {
+        err.style.color = '#f87171';
+        err.textContent = e.message;
+    }
+});
+
+document.getElementById('usernameForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const err = document.getElementById('usernameError');
+    try {
+        await api('/api/settings/username', {
+            method: 'PUT',
+            body: { new_username: document.getElementById('settingsUsername').value },
+        });
+        err.style.color = '#4ade80';
+        err.textContent = 'Username diganti!';
+        currentUser.username = document.getElementById('settingsUsername').value;
+    } catch (e) {
+        err.style.color = '#f87171';
+        err.textContent = e.message;
+    }
+});
+
+document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const err = document.getElementById('passwordError');
+    try {
+        await api('/api/settings/password', {
+            method: 'PUT',
+            body: { old_password: document.getElementById('oldPass').value, new_password: document.getElementById('newPass').value },
+        });
+        err.style.color = '#4ade80';
+        err.textContent = 'Password diganti!';
+        document.getElementById('oldPass').value = '';
+        document.getElementById('newPass').value = '';
+    } catch (e) {
+        err.style.color = '#f87171';
+        err.textContent = e.message;
+    }
+});
+</script>
+{% endblock %}

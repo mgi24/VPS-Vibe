@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<div class="admin-page">
+    <div class="admin-card">
+        <h2>Panel Admin</h2>
+        <div id="adminTabs">
+            <button class="tab-btn active" data-tab="users">Users</button>
+            <button class="tab-btn" data-tab="requests">Poster Requests</button>
+        </div>
+
+        <div id="tab-users" class="tab-content active">
+            <h3>Semua User</h3>
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Username</th><th>Role</th><th>Approved</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="userTableBody"></tbody>
+            </table>
+        </div>
+
+        <div id="tab-requests" class="tab-content">
+            <h3>Request Jadi Poster</h3>
+            <div id="requestList"></div>
+        </div>
+
+        <p class="auth-link"><a href="/">Kembali ke Beranda</a></p>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+loadUser().then(() => {
+    if (!currentUser || currentUser.role !== 'admin') { window.location.href = '/'; return; }
+    loadUsers();
+    loadRequests();
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+    });
+});
+
+async function loadUsers() {
+    const users = await api('/api/admin/users');
+    const tbody = document.getElementById('userTableBody');
+    tbody.innerHTML = users.map(u => `
+        <tr>
+            <td>${u.id}</td>
+            <td>${u.username}</td>
+            <td>${u.role}</td>
+            <td>${u.approved ? 'Ya' : 'Tidak'}</td>
+            <td>
+                ${!u.approved ? `<button class="btn-sm" onclick="approveUser(${u.id})">Approve</button>` : ''}
+                <select onchange="changeRole(${u.id}, this.value)" ${u.role === 'admin' ? 'disabled' : ''}>
+                    <option value="general" ${u.role === 'general' ? 'selected' : ''}>General</option>
+                    <option value="poster" ${u.role === 'poster' ? 'selected' : ''}>Poster</option>
+                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                </select>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function loadRequests() {
+    const users = await api('/api/admin/poster-requests');
+    const div = document.getElementById('requestList');
+    if (users.length === 0) {
+        div.innerHTML = '<p>Tidak ada request.</p>';
+        return;
+    }
+    div.innerHTML = users.map(u => `
+        <div class="request-item">
+            <span>${u.username} (${u.role})</span>
+            <button class="btn-sm" onclick="approvePoster(${u.id})">Jadikan Poster</button>
+        </div>
+    `).join('');
+}
+
+async function approveUser(id) {
+    await api('/api/admin/users/' + id + '/approve', { method: 'POST' });
+    loadUsers();
+}
+
+async function changeRole(id, role) {
+    await api('/api/admin/users/' + id + '/role', { method: 'POST', body: { role } });
+    loadUsers();
+    loadRequests();
+}
+
+async function approvePoster(id) {
+    await changeRole(id, 'poster');
+}
+</script>
+{% endblock %}

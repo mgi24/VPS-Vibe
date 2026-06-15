@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMV - {% block title %}Diary{% endblock %}</title>
+    <link rel="icon" type="image/png" href="/assets/mmvlogo.png">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="/"><img src="/assets/mmvlogo.png" alt="MMV" class="logo"></a>
+            <div class="search-box">
+                <input type="text" placeholder="Cari di MMV..." id="searchInput">
+            </div>
+        </div>
+        <div class="header-right" id="headerRight">
+            <div class="header-icon" id="notifIcon" title="Notifikasi" onclick="openNotifications()">
+                <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+            </div>
+            <div class="profile-trigger" id="profileTrigger">
+                <img src="/assets/default-profile.png" alt="Profile" class="nav-profile-pic" id="navProfilePic">
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <div class="modal-overlay" id="modalOverlay" style="display:none">
+        <div class="modal" id="modalContent"></div>
+    </div>
+
+    <script>
+        const API = window.location.origin;
+
+        async function api(path, opts = {}) {
+            const res = await fetch(API + path, {
+                headers: { 'Content-Type': 'application/json', ...opts.headers },
+                method: opts.method || 'GET',
+                body: opts.body ? JSON.stringify(opts.body) : undefined,
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || JSON.stringify(data));
+            return data;
+        }
+
+        let currentUser = null;
+
+        async function loadUser() {
+            try {
+                const data = await api('/api/me');
+                currentUser = data.user;
+                if (currentUser) {
+                    document.getElementById('navProfilePic').src = currentUser.profile_pic;
+                } else {
+                    document.getElementById('profileTrigger').innerHTML =
+                        '<div class="guest-icon" title="Login / Daftar">?</div>';
+                    document.getElementById('profileTrigger').onclick = () => window.location.href = '/login';
+                }
+            } catch {
+                currentUser = null;
+            }
+        }
+
+        document.getElementById('profileTrigger').addEventListener('click', function(e) {
+            if (currentUser) {
+                window.location.href = '/settings';
+            } else {
+                window.location.href = '/login';
+            }
+        });
+
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+                document.getElementById('modalContent').classList.remove('modal-full');
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('modalOverlay').style.display = 'none';
+                document.getElementById('modalContent').classList.remove('modal-full');
+                document.getElementById('imgPopup').style.display = 'none';
+            }
+        });
+
+        function showModal(html) {
+            document.getElementById('modalContent').innerHTML = html;
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
+
+        function hideModal() {
+            document.getElementById('modalContent').classList.remove('modal-full');
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+
+        async function loadNotifCount() {
+            try {
+                const data = await api('/api/notifications/unread-count');
+                const badge = document.getElementById('notifBadge');
+                if (data.count > 0) {
+                    badge.textContent = data.count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch {}
+        }
+
+        async function openNotifications() {
+            if (!currentUser) { window.location.href = '/login'; return; }
+            try {
+                const notifs = await api('/api/notifications');
+                let html = '<div class="notif-panel"><div class="notif-header"><h3>Notifikasi</h3><button onclick="readAllNotifs()" class="btn-sm">Read All</button></div>';
+                if (notifs.length === 0) {
+                    html += '<p class="no-data">Tidak ada notifikasi.</p>';
+                } else {
+                    html += '<div class="notif-list">';
+                    for (const n of notifs) {
+                        const cls = n.read ? 'notif-item read' : 'notif-item unread';
+                        html += `<div class="${cls}" ${n.read ? '' : `onclick="markNotifRead(${n.id})"`}>
+                            <div class="notif-msg">${escapeHtml(n.message)}</div>
+                            <div class="notif-time">${timeAgo(n.created_at)}</div>
+                        </div>`;
+                    }
+                    html += '</div>';
+                }
+                html += '</div>';
+                showModal(html);
+            } catch {}
+        }
+
+        async function markNotifRead(id) {
+            await api('/api/notifications/' + id + '/read', { method: 'POST' });
+            openNotifications();
+            loadNotifCount();
+        }
+
+        async function readAllNotifs() {
+            await api('/api/notifications/read-all', { method: 'POST' });
+            document.getElementById('modalOverlay').style.display = 'none';
+            loadNotifCount();
+        }
+    </script>
+
+    <div class="img-popup-overlay" id="imgPopup" onclick="closeImgPopup(event)">
+        <span class="img-popup-close" onclick="closeImgPopup()">&times;</span>
+        <div class="img-popup-zoom-tools">
+            <button onclick="zoomImg(-0.25)">−</button>
+            <span id="imgZoomLevel">100%</span>
+            <button onclick="zoomImg(0.25)">+</button>
+        </div>
+        <img src="" alt="" id="imgPopupSrc" class="img-popup-content">
+    </div>
+
+    <script>
+        let imgZoom = 1;
+        function openImgPopup(src) {
+            imgZoom = 1;
+            document.getElementById('imgPopupSrc').style.transform = 'scale(1)';
+            document.getElementById('imgZoomLevel').textContent = '100%';
+            document.getElementById('imgPopupSrc').src = src;
+            document.getElementById('imgPopup').style.display = 'flex';
+        }
+        function closeImgPopup(e) {
+            if (e && e.target !== e.currentTarget && !e.target.closest('.img-popup-close') && !e.target.closest('.img-popup-zoom-tools')) return;
+            document.getElementById('imgPopup').style.display = 'none';
+            document.getElementById('imgPopupSrc').src = '';
+        }
+        function zoomImg(delta) {
+            imgZoom = Math.max(0.25, Math.min(5, imgZoom + delta));
+            document.getElementById('imgPopupSrc').style.transform = 'scale(' + imgZoom + ')';
+            document.getElementById('imgZoomLevel').textContent = Math.round(imgZoom * 100) + '%';
+        }
+    </script>
+
+    {% block scripts %}{% endblock %}
+    <script>
+        loadUser().then(() => {
+            try { pageInit(); } catch(e) {}
+            loadNotifCount();
+        });
+    </script>
+</body>
+</html>
