@@ -1,7 +1,7 @@
 import os
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Query
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,8 +23,15 @@ SEGMENTS = {
 
 
 @router.get("")
-async def list_posts(request: Request, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Post).order_by(desc(Post.created_at)).limit(50))
+async def list_posts(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    limit: int = Query(10),
+    offset: int = Query(0),
+):
+    result = await db.execute(
+        select(Post).order_by(desc(Post.created_at)).offset(offset).limit(limit)
+    )
     posts = result.scalars().all()
 
     out = []

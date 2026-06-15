@@ -213,12 +213,63 @@ document.getElementById('submitPost').addEventListener('click', async function()
 });
 
 /* === LOAD POSTS === */
+let postsPage = 0;
+const POSTS_PER_PAGE = 5;
+let loadingPosts = false;
+let allPostsLoaded = false;
+
 async function loadPosts() {
-    const posts = await api('/api/posts');
+    postsPage = 0;
+    allPostsLoaded = false;
     const feed = document.getElementById('postsFeed');
-    feed.innerHTML = posts.map(p => renderPost(p)).join('');
-    attachPostListeners();
+    feed.innerHTML = '';
+    await loadMorePosts();
 }
+
+async function loadMorePosts() {
+    if (loadingPosts || allPostsLoaded) return;
+    loadingPosts = true;
+    showLoading();
+    try {
+        const posts = await api(`/api/posts?limit=${POSTS_PER_PAGE}&offset=${postsPage * POSTS_PER_PAGE}`);
+        const feed = document.getElementById('postsFeed');
+        if (posts.length < POSTS_PER_PAGE) allPostsLoaded = true;
+        feed.insertAdjacentHTML('beforeend', posts.map(p => renderPost(p)).join(''));
+        attachPostListeners();
+        postsPage++;
+    } catch (e) {
+        // silent
+    } finally {
+        hideLoading();
+        loadingPosts = false;
+    }
+}
+
+function showLoading() {
+    let el = document.getElementById('postsLoading');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'postsLoading';
+        el.className = 'posts-loading';
+        el.innerHTML = '<div class="spinner"></div>';
+        document.getElementById('postsFeed').after(el);
+    }
+    el.style.display = 'flex';
+}
+
+function hideLoading() {
+    const el = document.getElementById('postsLoading');
+    if (el) el.style.display = 'none';
+}
+
+window.addEventListener('scroll', function() {
+    if (singlePostId) return;
+    const scrollY = window.scrollY + window.innerHeight;
+    const threshold = document.documentElement.scrollHeight - 400;
+    if (scrollY >= threshold) {
+        loadMorePosts();
+    }
+});
 
 async function loadSinglePost(id) {
     const post = await api('/api/posts/' + id);
