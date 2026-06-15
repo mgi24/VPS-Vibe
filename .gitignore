@@ -8,3 +8,5 @@ webssh/users.db
 !README.md
 !yolo/
 !yolo/**
+doc.md
+__pycache__/
