@@ -464,16 +464,23 @@ async function editPost(id) {
     const modal = document.getElementById('modalOverlay');
     const mediaList = post.media_list || [];
     document.getElementById('modalContent').innerHTML = `
-        <div class="edit-modal" data-media="${escapeHtml(post.media_url || '')}">
+        <div class="edit-modal">
             <h3>Edit Post</h3>
             <textarea id="editContent" rows="4" placeholder="Apa yang Anda pikirkan?">${escapeHtml(post.content || '')}</textarea>
-            ${mediaList.length ? `<div class="edit-media-section">
-                ${mediaList.map(u =>
-                    u.match(/\.(mp4|webm|ogg|mov|avi)/i)
-                        ? `<div class="edit-media-item"><video src="${u}" class="edit-media-preview"></video></div>`
-                        : `<div class="edit-media-item"><img src="${u}" class="edit-media-preview"></div>`
-                ).join('')}
-            </div>` : ''}
+            <div class="edit-media-section" id="editMediaSection">
+                ${mediaList.map((u, i) => {
+                    const isVideo = u.match(/\.(mp4|webm|ogg|mov|avi)/i);
+                    return `<div class="file-preview edit-existing" data-idx="${i}" data-url="${escapeHtml(u)}">
+                        ${isVideo ? `<video src="${u}" muted></video>` : `<img src="${u}">`}
+                        ${isVideo ? '' : `<button class="file-edit" onclick="editEditFile(${i})">✏️</button>`}
+                        <span class="file-remove" onclick="removeEditMedia(${i})">&times;</span>
+                    </div>`;
+                }).join('')}
+                <div class="edit-paste-zone" id="editPasteZone">
+                    <span>+ Tambah media (paste / tarik)</span>
+                    <div class="edit-new-previews" id="editNewPreviews"></div>
+                </div>
+            </div>
             <div class="post-toolbar" style="margin-top:12px">
                 <div class="toolbar-left">
                     <select id="editSegment" class="segment-select">
@@ -495,19 +502,219 @@ async function editPost(id) {
         </div>
     `;
     modal.style.display = 'flex';
+    initEditPaste(post, mediaList);
+}
+
+/* === EDIT MEDIA STATE === */
+let editKeptMedia = [];
+let editNewFiles = [];
+let editExistingMediaList = [];
+
+function initEditPaste(post, mediaList) {
+    editKeptMedia = (post.media_url || '').split(',').filter(Boolean);
+    editNewFiles = [];
+    editExistingMediaList = mediaList;
+
+    const zone = document.getElementById('editPasteZone');
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        addEditFiles(e.dataTransfer.files);
+    });
+    zone.addEventListener('paste', e => {
+        const items = e.clipboardData.items;
+        const files = [];
+        for (const item of items) {
+            if (item.type.startsWith('image/') || item.type.startsWith('video/')) {
+                files.push(item.getAsFile());
+            }
+        }
+        if (files.length) addEditFiles(files);
+    });
+    document.getElementById('editContent').addEventListener('paste', e => {
+        const items = e.clipboardData.items;
+        const files = [];
+        for (const item of items) {
+            if (item.type.startsWith('image/') || item.type.startsWith('video/')) {
+                files.push(item.getAsFile());
+            }
+        }
+        if (files.length) {
+            e.preventDefault();
+            addEditFiles(files);
+        }
+    });
+}
+
+function addEditFiles(fileList) {
+    for (const f of fileList) {
+        if (f.type.startsWith('image/') || f.type.startsWith('video/')) {
+            editNewFiles.push(f);
+        }
+    }
+    renderEditNewPreviews();
+}
+
+function renderEditNewPreviews() {
+    const container = document.getElementById('editNewPreviews');
+    if (!container) return;
+    container.innerHTML = editNewFiles.map((f, i) => {
+        const url = URL.createObjectURL(f);
+        const isVideo = f.type.startsWith('video/');
+        return `<div class="file-preview" data-new-idx="${i}">
+            ${isVideo ? `<video src="${url}" muted></video>` : `<img src="${url}">`}
+            ${isVideo ? '' : `<button class="file-edit" onclick="editNewFile(${i})">✏️</button>`}
+            <span class="file-remove" onclick="removeEditNewFile(${i})">&times;</span>
+        </div>`;
+    }).join('');
+}
+
+function removeEditMedia(idx) {
+    editKeptMedia.splice(idx, 1);
+    editExistingMediaList.splice(idx, 1);
+    const section = document.getElementById('editMediaSection');
+    const items = section.querySelectorAll('.edit-existing');
+    items.forEach((el, i) => {
+        if (i === idx) el.remove();
+    });
+    // re-index remaining
+    const remaining = section.querySelectorAll('.edit-existing');
+    remaining.forEach((el, i) => {
+        el.dataset.idx = i;
+        el.querySelector('.file-remove').onclick = () => removeEditMedia(i);
+        const editBtn = el.querySelector('.file-edit');
+        if (editBtn) editBtn.onclick = () => editEditFile(i);
+    });
+}
+
+function removeEditNewFile(idx) {
+    editNewFiles.splice(idx, 1);
+    renderEditNewPreviews();
+}
+
+async function editEditFile(idx) {
+    const url = editExistingMediaList[idx];
+    if (!url) return;
+    try {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const f = new File([blob], 'edit_img.jpg', { type: 'image/jpeg' });
+        const totalExisting = editKeptMedia.length;
+        editNewFiles.push(f);
+        renderEditNewPreviews();
+    } catch (e) {
+        console.error('Failed to edit existing image', e);
+    }
+}
+
+function editNewFile(idx) {
+    editFileIdx = -1;
+    editRotation = 0;
+    editCrop = null;
+    const f = editNewFiles[idx];
+    const url = URL.createObjectURL(f);
+    const mc = document.getElementById('modalContent');
+    mc.classList.add('modal-full');
+    showModal(`
+        <div class="img-editor">
+            <h3>Edit Gambar</h3>
+            <div class="img-editor-canvas-wrap">
+                <img src="${url}" id="editImg" class="edit-img">
+                <div class="crop-overlay" id="cropOverlay">
+                    <div class="crop-area" id="cropArea">
+                        <div class="crop-handle nw"></div>
+                        <div class="crop-handle ne"></div>
+                        <div class="crop-handle sw"></div>
+                        <div class="crop-handle se"></div>
+                        <div class="crop-handle n"></div>
+                        <div class="crop-handle s"></div>
+                        <div class="crop-handle w"></div>
+                        <div class="crop-handle e"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="img-editor-tools">
+                <button onclick="rotateImg(-90)">↺ 90°</button>
+                <button onclick="rotateImg(90)">↻ 90°</button>
+                <button onclick="toggleCrop()" id="cropBtn">✂️ Crop</button>
+                <button onclick="applyEditNewFile(${idx})">✅ Simpan</button>
+                <button class="btn-cancel" onclick="closeEditor()">Batal</button>
+            </div>
+        </div>
+    `);
+    const img = document.getElementById('editImg');
+    img.onload = function() {
+        img.style.transform = 'rotate(0deg)';
+    };
+}
+
+async function applyEditNewFile(idx) {
+    const img = document.getElementById('editImg');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const natW = img.naturalWidth, natH = img.naturalHeight;
+    const dispW = img.clientWidth, dispH = img.clientHeight;
+    const scaleX = natW / dispW, scaleY = natH / dispH;
+
+    const rotated = editRotation % 360 !== 0;
+    let cropX, cropY, cropW, cropH;
+
+    if (cropStartX != null && cropEndX != null) {
+        cropX = Math.min(cropStartX, cropEndX) * scaleX;
+        cropY = Math.min(cropStartY, cropEndY) * scaleY;
+        cropW = Math.abs(cropEndX - cropStartX) * scaleX;
+        cropH = Math.abs(cropEndY - cropStartY) * scaleY;
+    } else {
+        cropX = 0; cropY = 0; cropW = natW; cropH = natH;
+    }
+
+    if (rotated) {
+        const rad = editRotation * Math.PI / 180;
+        const cx = cropX + cropW / 2;
+        const cy = cropY + cropH / 2;
+        canvas.width = cropH;
+        canvas.height = cropW;
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(rad);
+        ctx.drawImage(img, -cx, -cy, natW, natH);
+    } else {
+        canvas.width = cropW;
+        canvas.height = cropH;
+        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+    }
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+    const newFile = new File([blob], editNewFiles[idx].name, { type: 'image/jpeg' });
+    editNewFiles[idx] = newFile;
+    document.getElementById('modalContent').classList.remove('modal-full');
+    document.getElementById('modalOverlay').style.display = 'none';
+    renderEditNewPreviews();
 }
 
 async function saveEdit(id) {
     const err = document.getElementById('editError');
-    const el = document.querySelector('.edit-modal');
-    const mediaUrl = el ? el.dataset.media : '';
     try {
+        let finalMediaUrl = editKeptMedia.filter(Boolean).join(',');
+
+        if (editNewFiles.length > 0) {
+            const formData = new FormData();
+            for (const f of editNewFiles) formData.append('files', f);
+            const res = await fetch('/api/posts/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Upload gagal');
+            if (finalMediaUrl) finalMediaUrl += ',';
+            finalMediaUrl += data.urls.join(',');
+        }
+
         await api('/api/posts/' + id, {
             method: 'PUT',
             body: {
                 type: 'text',
                 content: document.getElementById('editContent').value,
-                media_url: mediaUrl || null,
+                media_url: finalMediaUrl || null,
                 segment: document.getElementById('editSegment').value || null,
             },
         });

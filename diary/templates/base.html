@@ -168,9 +168,16 @@
             document.getElementById('imgPopup').style.display = 'flex';
         }
         function closeImgPopup(e) {
-            if (e && e.target !== e.currentTarget && !e.target.closest('.img-popup-close') && !e.target.closest('.img-popup-zoom-tools')) return;
-            document.getElementById('imgPopup').style.display = 'none';
-            document.getElementById('imgPopupSrc').src = '';
+            if (e) {
+                if (e.target.closest('.img-popup-zoom-tools')) return;
+                if (e.target.closest('.img-popup-close') || e.target === e.currentTarget) {
+                    document.getElementById('imgPopup').style.display = 'none';
+                    document.getElementById('imgPopupSrc').src = '';
+                }
+            } else {
+                document.getElementById('imgPopup').style.display = 'none';
+                document.getElementById('imgPopupSrc').src = '';
+            }
         }
         function zoomImg(delta) {
             imgZoom = Math.max(0.25, Math.min(5, imgZoom + delta));

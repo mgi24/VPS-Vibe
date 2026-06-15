@@ -573,20 +573,26 @@ input, textarea, select, button {
 .modal-full {
     max-width: 98vw;
     width: 98vw;
-    max-height: 95vh;
-    padding: 16px;
+    max-height: 98vh;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
 .modal-full .img-editor {
     width: 100%;
+    max-width: none;
 }
 
 .modal-full .img-editor-canvas-wrap {
-    max-height: 80vh;
+    max-height: 82vh;
 }
 
 .modal-full .edit-img {
-    max-height: 80vh;
+    max-height: 82vh;
 }
 
 /* THREE-DOT MENU */
@@ -770,29 +776,6 @@ input, textarea, select, button {
     border-color: #2d88ff;
 }
 
-.edit-media-section {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-    flex-wrap: wrap;
-}
-
-.edit-media-item {
-    position: relative;
-    width: 100px;
-    height: 100px;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #3a3b3c;
-}
-
-.edit-media-preview {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 0;
-}
-
 .edit-modal .post-toolbar {
     border-top: 1px solid #393a3b;
     padding-top: 12px;
@@ -821,6 +804,61 @@ input, textarea, select, button {
 .edit-modal .toolbar-right .btn-cancel:hover {
     background: #4e4f50;
     color: #e4e6eb;
+}
+
+/* EDIT PASTE ZONE */
+.edit-paste-zone {
+    border: 2px dashed #3a3b3c;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    color: #8a8d91;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.edit-paste-zone.dragover {
+    border-color: #2d88ff;
+    background: rgba(45, 136, 255, 0.05);
+}
+
+.edit-new-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+}
+
+.edit-new-previews .file-preview {
+    width: 70px;
+    height: 70px;
+}
+
+/* Existing media in edit modal use .file-preview styling */
+.edit-existing {
+    width: 80px;
+    height: 80px;
+}
+
+.edit-existing img,
+.edit-existing video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.edit-media-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
 }
 
 /* MODAL OVERLAY */
