@@ -57,6 +57,14 @@ nav {
   color: #00d4aa;
   font-weight: 700;
   font-size: 18px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-logo {
+  height: 28px;
+  width: auto;
 }
 .coming-soon {
   font-size: 10px;
@@ -444,7 +452,7 @@ input[type="range"]::-moz-range-thumb {
 <body>
 <nav>
   <div class="nav-left">
-    <span class="nav-brand">MMV Detect</span>
+    <a href="https://misbahwork.my.id" class="nav-brand"><img src="/assets/mmvlogo.png" alt="MMV" class="nav-logo"> MMV Detect</a>
   </div>
   <div class="nav-right">
     <a class="nav-item active" href="/">Object</a>
