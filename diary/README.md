@@ -40,7 +40,7 @@ ADMIN_PASSWORD=securepass
 
 ## Nginx
 
-The app runs on port 8007 behind nginx at `debug.misbahwork.my.id`. Example config in `/etc/nginx/sites-enabled/debug.misbahwork.my.id`.
+The app runs on port 8006 behind nginx at `diary.misbahwork.my.id`. Config in `/etc/nginx/sites-enabled/diary.misbahwork.my.id`.
 
 ## License
 
