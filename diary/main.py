@@ -6,14 +6,15 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent / ".env")
 
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import text as sa_text
+from sqlalchemy import text as sa_text, func, cast, Date
 
-from database import engine, Base
-from models import User
+from database import engine, Base, AsyncSession, get_db
+from models import User, Post
 from auth import hash_password
 from routes.auth_route import router as auth_router
 from routes.posts_route import router as posts_router
@@ -29,6 +30,14 @@ for key in REQUIRED_ENV:
         sys.exit(1)
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.mount("/assets", StaticFiles(directory="/home/mamad/diary/assets"), name="assets")
 app.mount("/static", StaticFiles(directory="/home/mamad/diary/static"), name="static")
@@ -103,3 +112,46 @@ async def roles_page(request: Request):
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_page(request: Request):
     return templates.TemplateResponse("admin.html", {"request": request})
+
+
+@app.get("/api/diary/last")
+async def diary_last_post(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        sa_text("""
+            SELECT p.id, p.content, p.media_url, p.segment, p.created_at,
+                   u.username, u.profile_pic
+            FROM posts p
+            JOIN users u ON u.id = p.user_id
+            ORDER BY p.id DESC LIMIT 1
+        """)
+    )
+    row = result.fetchone()
+    if not row:
+        return JSONResponse({"post": None})
+    return JSONResponse({
+        "post": {
+            "id": row[0],
+            "content": row[1],
+            "media_url": row[2],
+            "segment": row[3],
+            "created_at": row[4].isoformat() if row[4] else None,
+            "username": row[5],
+            "profile_pic": row[6],
+        }
+    })
+
+
+@app.get("/api/diary/stats")
+async def diary_stats(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        sa_text("""
+            SELECT DATE(created_at) as day, COUNT(*) as cnt
+            FROM posts
+            WHERE created_at >= NOW() - INTERVAL '8 days'
+            GROUP BY DATE(created_at)
+            ORDER BY day
+        """)
+    )
+    rows = result.fetchall()
+    stats = {str(r[0]): r[1] for r in rows}
+    return JSONResponse({"stats": stats})

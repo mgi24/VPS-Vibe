@@ -42,5 +42,101 @@
       <a href="/demo" class="btn-demo">{{ content.demo_button }}</a>
     </div>
   </div>
+
+  <div class="card card-diary" id="diaryCard">
+    <div class="card-body diary-grid">
+      <div class="diary-left">
+        <div class="diary-headline">Never miss anything from me!</div>
+        <div class="diary-desc">Checkout my <strong>Diary</strong>. Where i shared <strong>Everything</strong> exclusive. The only platform that i could be myself!</div>
+        <div class="diary-contrib" id="diaryContrib"></div>
+        <a href="http://diary.misbahwork.my.id" target="_blank" class="btn-diary">View Diary</a>
+      </div>
+      <div class="diary-right">
+        <div class="diary-last-label">Last Post</div>
+        <div class="diary-last-post" id="diaryLastPost">
+          <div class="diary-loading">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<script>
+const DIARY_API = 'http://diary.misbahwork.my.id';
+
+async function loadDiary() {
+  try {
+    const [lastRes, statsRes] = await Promise.all([
+      fetch(DIARY_API + '/api/diary/last'),
+      fetch(DIARY_API + '/api/diary/stats')
+    ]);
+    const last = await lastRes.json();
+    const stats = await statsRes.json();
+
+    renderLastPost(last.post);
+    renderContrib(stats.stats || {});
+  } catch (e) {
+    document.getElementById('diaryLastPost').innerHTML =
+      '<div class="diary-loading">Could not load.</div>';
+  }
+}
+
+function renderLastPost(post) {
+  const el = document.getElementById('diaryLastPost');
+  if (!post) {
+    el.innerHTML = '<div class="diary-loading">No posts yet.</div>';
+    return;
+  }
+  const prefix = DIARY_API;
+  const mediaUrl = post.media_url ? prefix + post.media_url.split(',')[0] : null;
+  const mediaHtml = mediaUrl
+    ? (mediaUrl.match(/\.(mp4|webm|ogg|mov|avi)/i)
+        ? `<video src="${mediaUrl}" class="diary-media"></video>`
+        : `<img src="${mediaUrl}" class="diary-media">`)
+    : '';
+  const profilePic = post.profile_pic ? prefix + post.profile_pic : prefix + '/assets/default-profile.png';
+  const snippet = (post.content || '').substring(0, 120);
+  el.innerHTML = `
+    <div class="diary-post-user">
+      <img src="${profilePic}" class="diary-user-pic">
+      <span class="diary-username">${escapeHtml(post.username)}</span>
+    </div>
+    ${mediaHtml}
+    <div class="diary-post-snippet">${escapeHtml(snippet)}${post.content && post.content.length > 120 ? '...' : ''}</div>
+  `;
+}
+
+function renderContrib(stats) {
+  const el = document.getElementById('diaryContrib');
+  const days = [];
+  for (let i = 7; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    const count = stats[key] || 0;
+    days.push({ date: key, count });
+  }
+  const maxCount = Math.max(...days.map(d => d.count), 1);
+  el.innerHTML = '<div class="contrib-label">Activity</div>';
+  const grid = document.createElement('div');
+  grid.className = 'contrib-grid';
+  days.forEach(d => {
+    const intensity = d.count > 0 ? Math.min(Math.round((d.count / maxCount) * 4), 4) : 0;
+    const block = document.createElement('div');
+    block.className = 'contrib-block';
+    block.dataset.level = intensity;
+    block.title = `${d.date}: ${d.count} post${d.count !== 1 ? 's' : ''}`;
+    grid.appendChild(block);
+  });
+  el.appendChild(grid);
+}
+
+function escapeHtml(text) {
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+loadDiary();
+</script>
 {% endblock %}
