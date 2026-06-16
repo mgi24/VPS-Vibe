@@ -1437,3 +1437,44 @@ input, textarea, select, button {
     font-size: 13px;
     color: #8a8d91;
 }
+
+.inline-link {
+    color: #2d88ff;
+    text-decoration: underline;
+    word-break: break-all;
+}
+.inline-link:hover {
+    color: #5aa3ff;
+}
+
+/* ── Emoji Picker ── */
+.emoji-picker {
+    display: none;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 10px;
+    background: #3a3b3c;
+    border-radius: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 8px;
+    border: 1px solid #4e4f50;
+}
+
+.emoji-item {
+    font-size: 22px;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+
+.emoji-item:hover {
+    background: #4e4f50;
+    transform: scale(1.2);
+}
