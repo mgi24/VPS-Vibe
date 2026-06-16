@@ -1,5 +1,6 @@
 import os
 import uuid
+import aiofiles
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Query
 from sqlalchemy import select, desc
@@ -119,9 +120,9 @@ async def upload_files(files: list[UploadFile] = File(...)):
         ext = os.path.splitext(f.filename or "file")[1] or ".bin"
         name = f"{uuid.uuid4().hex}{ext}"
         path = f"/home/mamad/diary/assets/uploads/{name}"
-        content = await f.read()
-        with open(path, "wb") as out:
-            out.write(content)
+        async with aiofiles.open(path, "wb") as out:
+            while chunk := await f.read(65536):
+                await out.write(chunk)
         urls.append(f"/assets/uploads/{name}")
     return {"urls": urls}
 
