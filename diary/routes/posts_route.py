@@ -1,13 +1,13 @@
 import os
 import uuid
-import aiofiles
+import mimetypes
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Query
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
-from models import Post, User, React, Comment, Notification
+from models import Post, User, React, Comment, Notification, Media
 from schemas import PostCreate
 from auth import get_current_user, require_poster
 
@@ -114,16 +114,23 @@ def _detect_type(content: str, media_urls: list) -> str:
 
 
 @router.post("/upload")
-async def upload_files(files: list[UploadFile] = File(...)):
+async def upload_files(files: list[UploadFile] = File(...), db: AsyncSession = Depends(get_db)):
     urls = []
     for f in files:
         ext = os.path.splitext(f.filename or "file")[1] or ".bin"
         name = f"{uuid.uuid4().hex}{ext}"
-        path = f"/home/mamad/diary/assets/uploads/{name}"
-        async with aiofiles.open(path, "wb") as out:
-            while chunk := await f.read(65536):
-                await out.write(chunk)
-        urls.append(f"/assets/uploads/{name}")
+        data = await f.read()
+        mime = f.content_type or mimetypes.guess_type(f.filename or "file")[0] or "application/octet-stream"
+        media = Media(
+            filename=name,
+            original_name=f.filename or "file",
+            mime_type=mime,
+            data=data,
+            size=len(data),
+        )
+        db.add(media)
+        urls.append(f"/api/media/{name}")
+    await db.commit()
     return {"urls": urls}
 
 

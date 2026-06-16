@@ -8,13 +8,14 @@ load_dotenv(Path(__file__).parent / ".env")
 
 from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import text as sa_text, func, cast, Date
+from sqlalchemy import select
 
 from database import engine, Base, AsyncSession, get_db
-from models import User, Post
+from models import User, Post, Media
 from auth import hash_password
 from routes.auth_route import router as auth_router
 from routes.posts_route import router as posts_router
@@ -139,6 +140,15 @@ async def diary_last_post(db: AsyncSession = Depends(get_db)):
             "profile_pic": row[6],
         }
     })
+
+
+@app.get("/api/media/{filename}")
+async def serve_media(filename: str, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Media).where(Media.filename == filename))
+    media = result.scalar_one_or_none()
+    if not media:
+        return JSONResponse({"error": "Not found"}, status_code=404)
+    return Response(content=media.data, media_type=media.mime_type)
 
 
 @app.get("/api/diary/stats")
