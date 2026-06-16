@@ -85,6 +85,20 @@ function pageInit() {
 </div>
 
 <input type="file" id="fileInput" accept="image/*,video/*" multiple style="display:none">
+
+<div class="upload-progress" id="uploadProgress">
+    <div class="upload-progress-box">
+        <h3>Mengupload...</h3>
+        <div class="upload-progress-file" id="uploadFileName"></div>
+        <div class="upload-progress-track">
+            <div class="upload-progress-fill" id="uploadProgressFill"></div>
+        </div>
+        <div class="upload-progress-info">
+            <span id="uploadProgressLabel">Menunggu</span>
+            <span id="uploadProgressPct">0%</span>
+        </div>
+    </div>
+</div>
 {% endblock %}
 {% block scripts %}
 <script>
@@ -172,20 +186,89 @@ document.getElementById('submitPost').addEventListener('click', async function()
         return;
     }
 
+    const progressEl = document.getElementById('uploadProgress');
+    const progressFill = document.getElementById('uploadProgressFill');
+    const progressLabel = document.getElementById('uploadProgressLabel');
+    const progressPct = document.getElementById('uploadProgressPct');
+    const fileNameEl = document.getElementById('uploadFileName');
+
     let mediaUrl = '';
     if (pendingFiles.length > 0) {
-        const formData = new FormData();
-        for (const f of pendingFiles) formData.append('files', f);
-        try {
-            const res = await fetch('/api/posts/upload', { method: 'POST', body: formData });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.detail || 'Upload gagal');
-            mediaUrl = data.urls.join(',');
-        } catch (e) {
-            err.textContent = 'Upload gagal: ' + e.message;
-            return;
+        const total = pendingFiles.length;
+        const urls = [];
+        let completed = 0;
+
+        progressEl.style.display = 'flex';
+
+        for (const file of pendingFiles) {
+            const fileIdx = completed + 1;
+            fileNameEl.textContent = file.name;
+            progressLabel.textContent = `Upload ${fileIdx} dari ${total}`;
+            progressPct.textContent = '0%';
+            progressFill.style.width = '0%';
+
+            const formData = new FormData();
+            formData.append('files', file);
+
+            try {
+                const url = await new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/api/posts/upload');
+                    xhr.upload.onprogress = function(e) {
+                        if (e.lengthComputable) {
+                            const filePct = Math.round((e.loaded / e.total) * 100);
+                            const overall = Math.round(((completed + e.loaded / e.total) / total) * 100);
+                            progressFill.style.width = overall + '%';
+                            progressPct.textContent = filePct + '%';
+                            fileNameEl.textContent = file.name + ` (${filePct}%)`;
+                        }
+                    };
+                    xhr.onload = function() {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                resolve(data.urls[0]);
+                            } catch (e) {
+                                reject(new Error('Gagal parse respons upload'));
+                            }
+                        } else {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                reject(new Error(data.detail || 'Upload gagal'));
+                            } catch {
+                                reject(new Error('Upload gagal (status ' + xhr.status + ')'));
+                            }
+                        }
+                    };
+                    xhr.onerror = function() {
+                        reject(new Error('Upload gagal (jaringan)'));
+                    };
+                    xhr.send(formData);
+                });
+
+                urls.push(url);
+                completed++;
+                fileNameEl.textContent = file.name + ' ✓';
+                const overallPct = Math.round((completed / total) * 100);
+                progressFill.style.width = overallPct + '%';
+                progressPct.textContent = overallPct + '%';
+                progressLabel.textContent = `Upload ${completed} dari ${total}`;
+            } catch (e) {
+                progressEl.style.display = 'none';
+                err.textContent = 'Upload gagal: ' + e.message;
+                return;
+            }
         }
+
+        mediaUrl = urls.join(',');
+        progressLabel.textContent = 'Selesai';
+        fileNameEl.textContent = '';
+        progressFill.style.width = '100%';
+        progressPct.textContent = '100%';
+        await new Promise(r => setTimeout(r, 300));
     }
+
+    progressEl.style.display = 'none';
 
     try {
         await api('/api/posts', {
