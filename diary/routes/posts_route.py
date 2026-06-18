@@ -1,4 +1,6 @@
 import os
+import subprocess
+import tempfile
 import uuid
 import mimetypes
 
@@ -113,6 +115,58 @@ def _detect_type(content: str, media_urls: list) -> str:
     return "text"
 
 
+def _process_video(data: bytes, ext: str) -> tuple[bytes | None, bytes | None]:
+    """Optimize video (faststart) and generate thumbnail.
+    Returns (optimized_bytes, thumbnail_bytes) or (None, None) on failure.
+    """
+    thumb = None
+    try:
+        with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as vf:
+            vf.write(data)
+            vf.flush()
+            in_path = vf.name
+
+        out_path = in_path + "_out" + ext
+        thumb_path = in_path + "_thumb.jpg"
+
+        # faststart: move moov atom to beginning (mp4 only, no re-encode)
+        optimize = ext.lower() == ".mp4"
+        if optimize:
+            subprocess.run(
+                ["ffmpeg", "-y", "-i", in_path, "-c", "copy", "-movflags", "+faststart", out_path],
+                capture_output=True, timeout=120,
+            )
+            if not os.path.exists(out_path):
+                optimize = False
+
+        # generate thumbnail at 1s
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", out_path if optimize else in_path,
+             "-ss", "00:00:01", "-vframes", "1", "-q:v", "3", thumb_path],
+            capture_output=True, timeout=30,
+        )
+
+        os.unlink(in_path)
+
+        if os.path.exists(thumb_path):
+            with open(thumb_path, "rb") as f:
+                thumb = f.read()
+            os.unlink(thumb_path)
+
+        if optimize and os.path.exists(out_path):
+            with open(out_path, "rb") as f:
+                optimized = f.read()
+            os.unlink(out_path)
+            return optimized, thumb
+
+        if os.path.exists(out_path):
+            os.unlink(out_path)
+
+        return None, thumb
+    except Exception:
+        return None, None
+
+
 @router.post("/upload")
 async def upload_files(files: list[UploadFile] = File(...), db: AsyncSession = Depends(get_db)):
     urls = []
@@ -121,11 +175,17 @@ async def upload_files(files: list[UploadFile] = File(...), db: AsyncSession = D
         name = f"{uuid.uuid4().hex}{ext}"
         data = await f.read()
         mime = f.content_type or mimetypes.guess_type(f.filename or "file")[0] or "application/octet-stream"
+        thumb = None
+        if mime.startswith("video/"):
+            optimized, thumb = _process_video(data, ext)
+            if optimized is not None:
+                data = optimized
         media = Media(
             filename=name,
             original_name=f.filename or "file",
             mime_type=mime,
             data=data,
+            thumbnail=thumb,
             size=len(data),
         )
         db.add(media)

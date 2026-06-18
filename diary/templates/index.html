@@ -459,11 +459,25 @@ function renderMediaList(list, full) {
     return '<div class="media-grid">' +
         list.map(url => {
             const isVideo = url.match(/\.(mp4|webm|ogg|mov|avi)(\?|$)/i);
-            return isVideo
-                ? `<video src="${url}" controls ${full ? 'autoplay' : ''} class="post-media"></video>`
-                : `<img src="${url}" alt="" class="post-media" loading="lazy" onclick="openImgPopup(this.src)">`;
+            if (!isVideo) {
+                return `<img src="${url}" alt="" class="post-media" loading="lazy" onclick="openImgPopup(this.src)">`;
+            }
+            const thumbUrl = url + '/thumb';
+            return `<div class="video-thumb" onclick="loadVideo(this, '${escapeHtml(url)}')">
+                <img src="${escapeHtml(thumbUrl)}" alt="" loading="lazy">
+                <div class="play-btn"></div>
+            </div>`;
         }).join('') +
     '</div>';
+}
+
+function loadVideo(el, url) {
+    const video = document.createElement('video');
+    video.src = url;
+    video.controls = true;
+    video.preload = 'auto';
+    video.className = 'post-media';
+    el.replaceWith(video);
 }
 
 function attachPostListeners() {}
@@ -648,8 +662,11 @@ async function editPost(id) {
             <div class="edit-media-section" id="editMediaSection">
                 ${mediaList.map((u, i) => {
                     const isVideo = u.match(/\.(mp4|webm|ogg|mov|avi)/i);
+                    const thumbUrl = isVideo ? u + '/thumb' : u;
                     return `<div class="file-preview edit-existing" data-idx="${i}" data-url="${escapeHtml(u)}">
-                        ${isVideo ? `<video src="${u}" muted></video>` : `<img src="${u}">`}
+                        ${isVideo
+                            ? `<div class="vid-thumb-icon"><img src="${escapeHtml(thumbUrl)}" alt="" loading="lazy"></div>`
+                            : `<img src="${u}">`}
                         ${isVideo ? '' : `<button class="file-edit" onclick="editEditFile(${i})">✏️</button>`}
                         <span class="file-remove" onclick="removeEditMedia(${i})">&times;</span>
                     </div>`;

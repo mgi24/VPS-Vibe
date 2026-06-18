@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -61,6 +62,11 @@ async def startup():
     except Exception as e:
         print(f"ERROR: Gagal koneksi ke database — {e}", file=sys.stderr)
         sys.exit(1)
+
+    async with engine.begin() as conn:
+        await conn.execute(
+            sa_text("ALTER TABLE media ADD COLUMN IF NOT EXISTS thumbnail bytea")
+        )
 
     async with engine.begin() as conn:
         result = await conn.execute(
@@ -143,12 +149,55 @@ async def diary_last_post(db: AsyncSession = Depends(get_db)):
 
 
 @app.get("/api/media/{filename}")
-async def serve_media(filename: str, db: AsyncSession = Depends(get_db)):
+async def serve_media(filename: str, request: Request, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Media).where(Media.filename == filename))
     media = result.scalar_one_or_none()
     if not media:
         return JSONResponse({"error": "Not found"}, status_code=404)
-    return Response(content=media.data, media_type=media.mime_type)
+
+    data = media.data
+    file_size = len(data)
+    range_header = request.headers.get("range")
+
+    if range_header:
+        start = 0
+        end = file_size - 1
+        match = re.match(r"bytes=(\d+)-(\d*)", range_header)
+        if match:
+            start = int(match.group(1))
+            if match.group(2):
+                end = int(match.group(2))
+
+        if start >= file_size:
+            return Response(status_code=416, headers={"Content-Range": f"bytes */{file_size}"})
+
+        end = min(end, file_size - 1)
+        chunk = data[start : end + 1]
+        return Response(
+            content=chunk,
+            status_code=206,
+            media_type=media.mime_type,
+            headers={
+                "Content-Range": f"bytes {start}-{end}/{file_size}",
+                "Accept-Ranges": "bytes",
+                "Content-Length": str(len(chunk)),
+            },
+        )
+
+    return Response(
+        content=data,
+        media_type=media.mime_type,
+        headers={"Accept-Ranges": "bytes"},
+    )
+
+
+@app.get("/api/media/{filename}/thumb")
+async def serve_thumbnail(filename: str, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Media).where(Media.filename == filename))
+    media = result.scalar_one_or_none()
+    if not media or not media.thumbnail:
+        return JSONResponse({"error": "Not found"}, status_code=404)
+    return Response(content=media.thumbnail, media_type="image/jpeg")
 
 
 @app.get("/api/diary/stats")

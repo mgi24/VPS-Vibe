@@ -87,5 +87,6 @@ class Media(Base):
     original_name = Column(String(255))
     mime_type = Column(String(100))
     data = Column(LargeBinary, nullable=False)
+    thumbnail = Column(LargeBinary, nullable=True)
     size = Column(Integer)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
