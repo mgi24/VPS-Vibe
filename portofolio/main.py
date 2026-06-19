@@ -89,6 +89,11 @@ async def contact(request: Request, lang: str = Cookie(default="en")):
     content = load_content(lang)
     return templates.TemplateResponse(request, "contact.html", {"content": content, "lang": lang})
 
+@app.get("/phone")
+async def phone(request: Request, lang: str = Cookie(default="en")):
+    content = load_content(lang)
+    return templates.TemplateResponse(request, "phone.html", {"content": content, "lang": lang})
+
 @app.get("/set-language/{lang}")
 async def set_language(lang: str, request: Request, next: str = "/"):
     if lang not in ("en", "id"):
