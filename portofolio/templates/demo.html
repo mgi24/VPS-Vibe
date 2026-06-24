@@ -49,6 +49,34 @@
           </div>
         </div>
       </div>
+      <div class="st-row">
+        <div class="st-left">
+          <div class="st-heading">Check Your Speed</div>
+          <div class="st-desc">Batam datacenter, 4 Gigabit bandwidth</div>
+        </div>
+        <div class="st-right">
+          <div class="st-cols">
+            <div class="st-col">
+              <div class="st-col-val" id="st-ping-val">—</div>
+              <div class="st-col-unit">ms</div>
+              <div class="st-col-lbl">Ping</div>
+            </div>
+            <div class="st-col-div"></div>
+            <div class="st-col">
+              <div class="st-col-val" id="st-dl-val">—</div>
+              <div class="st-col-unit">Mbps</div>
+              <div class="st-col-lbl">Download</div>
+            </div>
+            <div class="st-col-div"></div>
+            <div class="st-col">
+              <div class="st-col-val" id="st-ul-val">—</div>
+              <div class="st-col-unit">Mbps</div>
+              <div class="st-col-lbl">Upload</div>
+            </div>
+          </div>
+          <button class="speedtest-btn" id="st-btn" onclick="runSpeedtest()">Test Connection</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -93,5 +121,77 @@
   fetchResource();
   setInterval(fetchResource, 1000);
 })();
+
+/* ── Speedtest columns ── */
+let stRunning = false;
+
+function stCol(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+async function measurePing() {
+  const t0 = performance.now();
+  try { await fetch('/speedtest/download?size_mb=1'); } catch(_) {}
+  return performance.now() - t0;
+}
+
+async function measureDownload(sizeMb) {
+  const t0 = performance.now();
+  let received = 0;
+  const resp = await fetch('/speedtest/download?size_mb=' + sizeMb);
+  if (!resp.ok) return 0;
+  const reader = resp.body.getReader();
+  while (true) {
+    const {done, value} = await reader.read();
+    if (done) break;
+    received += value.length;
+  }
+  const elapsed = (performance.now() - t0) / 1000;
+  return (received * 8) / 1_000_000 / elapsed;
+}
+
+async function measureUpload(sizeMb) {
+  const size = sizeMb * 1_000_000;
+  const data = new Uint8Array(size);
+  const t0 = performance.now();
+  try {
+    await fetch('/speedtest/api/upload?size_mb=' + sizeMb, { method: 'POST', body: data });
+  } catch(_) { return 0; }
+  const elapsed = (performance.now() - t0) / 1000;
+  return (size * 8) / 1_000_000 / elapsed;
+}
+
+async function runSpeedtest() {
+  if (stRunning) return;
+  stRunning = true;
+  const btn = document.getElementById('st-btn');
+  btn.disabled = true;
+  btn.textContent = 'Testing\u2026';
+
+  stCol('st-ping-val', '\u2026');
+  stCol('st-dl-val', '\u2014');
+  stCol('st-ul-val', '\u2014');
+  const ping = await measurePing();
+  stCol('st-ping-val', Math.round(ping));
+
+  let dl = 0;
+  for (const s of [2, 5, 10, 20]) {
+    stCol('st-dl-val', '\u2026');
+    dl = await measureDownload(s);
+    stCol('st-dl-val', dl.toFixed(1));
+  }
+
+  let ul = 0;
+  for (const s of [1, 2, 5]) {
+    stCol('st-ul-val', '\u2026');
+    ul = await measureUpload(s);
+    stCol('st-ul-val', ul.toFixed(1));
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Test Again';
+  stRunning = false;
+}
 </script>
 {% endblock %}
