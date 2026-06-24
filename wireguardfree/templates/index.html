@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WireGuard Free VPN</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;margin:0;padding:1rem}
+.card{background:#1e293b;border-radius:16px;padding:2.5rem;max-width:480px;width:100%;box-shadow:0 25px 50px -12px #00000080;text-align:center}
+h1{font-size:1.5rem;margin-bottom:.25rem}
+.sub{color:#94a3b8;font-size:.9rem;margin-bottom:1rem}
+.bar-wrap{background:#1e293b;border-radius:8px;height:28px;overflow:hidden;position:relative;margin-bottom:.5rem;border:1px solid #334155}
+.bar-fill{height:100%;border-radius:6px;transition:width .4s,background .4s;min-width:4px}
+.bar-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;color:#e2e8f0}
+.sub-stats{display:flex;justify-content:space-between;font-size:.8rem;color:#94a3b8;margin-bottom:1.5rem}
+.sub-stats span{color:#e2e8f0;font-weight:600}
+.btn{background:#3b82f6;color:#fff;border:none;padding:.75rem 2rem;border-radius:8px;font-size:1rem;cursor:pointer;transition:background .2s;width:100%;font-weight:600}
+.btn:hover{background:#2563eb}
+.btn:disabled{background:#475569;cursor:not-allowed}
+.error{color:#f87171;background:#450a0a;padding:1rem;border-radius:8px;margin-bottom:1rem;font-size:.9rem}
+.success{color:#4ade80;background:#052e16;padding:1rem;border-radius:8px;margin-bottom:1rem;font-size:.9rem}
+.download{display:inline-block;background:#22c55e;color:#fff;padding:.75rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;margin:.75rem 0;transition:background .2s}
+.download:hover{background:#16a34a}
+pre{background:#0f172a;padding:1rem;border-radius:8px;text-align:left;font-size:.7rem;overflow-x:auto;margin:.75rem 0;max-height:240px}
+.footer{font-size:.7rem;color:#475569;margin-top:1.5rem;word-break:break-all}
+code{font-size:.7rem;color:#64748b}
+form{margin-top:.5rem}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>WireGuard Free</h1>
+<p class="sub">Generate konfigurasi VPN gratis</p>
+{% set pct = (quota_left / max_daily * 100)|round %}
+{% set hue = (quota_left / max_daily * 210)|round %}
+<div class="bar-wrap">
+<div class="bar-fill" style="width:{{ pct }}%;background:hsl({{ hue }},80%,50%)"></div>
+<div class="bar-label">Kuota hari ini: {{ quota_left }} / {{ max_daily }}</div>
+</div>
+<div class="sub-stats">
+<div>Kuota per user: <span>{{ max_session }}</span></div>
+<div>Total dibuat: <span>{{ total_accounts }}</span></div>
+</div>
+
+{% if error %}
+<div class="error">{{ error }}</div>
+{% endif %}
+
+{% if success %}
+<div class="success">Berhasil! Config siap diunduh.</div>
+<a href="/download/{{ conf_file }}" class="download">Download .conf</a>
+<pre>{{ conf_content }}</pre>
+<p style="font-size:.8rem;color:#64748b">Simpan file .conf lalu import ke aplikasi WireGuard</p>
+{% endif %}
+
+<form method="post" action="/generate">
+<button type="submit" class="btn" {% if quota_left == 0 %}disabled{% endif %}>
+{% if quota_left > 0 %}Generate Config{% else %}Kuota Habis{% endif %}
+</button>
+</form>
+<p style="margin-top:.75rem"><a href="/my" style="color:#3b82f6;font-size:.8rem;text-decoration:none">&larr; Lihat config saya</a></p>
+
+</div>
+</body>
+</html>
