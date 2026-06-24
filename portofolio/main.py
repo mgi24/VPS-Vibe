@@ -43,12 +43,25 @@ def _read_ram():
                 mem[key] = int(parts[1])  # kB
     return mem
 
+_prev_net = None
+
+def _read_net(iface):
+    try:
+        with open("/proc/net/dev") as f:
+            for line in f:
+                line_s = line.strip()
+                if line_s.startswith(iface + ":"):
+                    parts = line_s.split()
+                    return int(parts[1]), int(parts[9])
+    except:
+        pass
+    return 0, 0
+
 @app.get("/resource")
 async def get_resource(request: Request):
-    global _prev_cpu
+    global _prev_cpu, _prev_net
 
     total, idle = _read_cpu()
-
     cpu = 0.0
     if _prev_cpu is not None:
         td = total - _prev_cpu[0]
@@ -63,6 +76,18 @@ async def get_resource(request: Request):
     used_kb = total_kb - avail_kb
     ram_pct = round(used_kb / total_kb * 100, 1) if total_kb > 0 else 0
 
+    iface = "eth0"
+    rx, tx = _read_net(iface)
+    now = time.time()
+    rx_mbps = tx_mbps = 0.0
+    if _prev_net is not None:
+        dt = now - _prev_net["time"]
+        if dt > 0:
+            rx_mbps = max(0, (rx - _prev_net["rx"]) * 8 / 1_000_000 / dt)
+            tx_mbps = max(0, (tx - _prev_net["tx"]) * 8 / 1_000_000 / dt)
+    _prev_net = {"rx": rx, "tx": tx, "time": now}
+    max_mbps = 3000
+
     return {
         "cpu": cpu,
         "ram_percent": ram_pct,
@@ -70,6 +95,12 @@ async def get_resource(request: Request):
         "ram_total_gb": round(total_kb / 1_048_576, 1),
         "cores": 4,
         "arch": "arm64",
+        "rx_mbps": round(rx_mbps, 2),
+        "tx_mbps": round(tx_mbps, 2),
+        "rx_pct": min(round(rx_mbps / max_mbps * 100, 2), 100),
+        "tx_pct": min(round(tx_mbps / max_mbps * 100, 2), 100),
+        "usage_pct": min(round((rx_mbps + tx_mbps) / max_mbps * 100, 2), 100),
+        "max_mbps": max_mbps,
     }
 
 # --- Speedtest ---

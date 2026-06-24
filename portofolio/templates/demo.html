@@ -46,36 +46,71 @@
               </div>
               <div class="gauge-name" id="ram-label">RAM <span class="gauge-ram-detail" id="ram-detail">0.0 / 0.0 GB</span></div>
             </div>
+            <div class="gauge-box">
+              <div class="gauge-svg-wrap">
+                <svg class="gauge-svg" viewBox="0 0 140 80">
+                  <path d="M 10 75 A 60 60 0 0 1 130 75"
+                    fill="none" stroke="#222" stroke-width="10" stroke-linecap="round"/>
+                  <path id="net-dl-arc" d="M 10 75 A 60 60 0 0 1 130 75"
+                    fill="none" stroke="#ef4444" stroke-width="10" stroke-linecap="butt"
+                    stroke-dasharray="188.5" stroke-dashoffset="188.5"/>
+                  <path id="net-ul-arc" d="M 10 75 A 60 60 0 0 1 130 75"
+                    fill="none" stroke="#3b82f6" stroke-width="5" stroke-linecap="butt"
+                    stroke-dasharray="188.5" stroke-dashoffset="188.5"/>
+                </svg>
+                <div class="gauge-readout">
+                  <span class="gauge-pct" id="net-pct">0</span><span class="gauge-pct-unit">%</span>
+                </div>
+              </div>
+              <div class="gauge-name" style="font-size:11px">
+                <span id="net-dl-val">↓ 0.00</span> / <span id="net-ul-val">↑ 0.00</span>
+                <span style="color:#555;font-weight:400">Mbps</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="st-row">
-        <div class="st-left">
-          <div class="st-heading">Check Your Speed</div>
-          <div class="st-desc">Batam datacenter, 4 Gigabit bandwidth</div>
-        </div>
-        <div class="st-right">
-          <div class="st-cols">
-            <div class="st-col">
-              <div class="st-col-val" id="st-ping-val">—</div>
-              <div class="st-col-unit">ms</div>
-              <div class="st-col-lbl">Ping</div>
-            </div>
-            <div class="st-col-div"></div>
-            <div class="st-col">
-              <div class="st-col-val" id="st-dl-val">—</div>
-              <div class="st-col-unit">Mbps</div>
-              <div class="st-col-lbl">Download</div>
-            </div>
-            <div class="st-col-div"></div>
-            <div class="st-col">
-              <div class="st-col-val" id="st-ul-val">—</div>
-              <div class="st-col-unit">Mbps</div>
-              <div class="st-col-lbl">Upload</div>
-            </div>
+      <div class="st-section">
+        <div class="st-grid">
+          <div class="st-info">
+            <div class="st-heading">Check Your Speed</div>
+            <div class="st-desc">Batam datacenter, 4 Gigabit bandwidth</div>
           </div>
-          <button class="speedtest-btn" id="st-btn" onclick="runSpeedtest()">Test Connection</button>
+          <div class="st-ctrl">
+            <div class="st-cols">
+              <div class="st-col">
+                <div class="st-col-val" id="st-ping-val">—</div>
+                <div class="st-col-unit">ms</div>
+                <div class="st-col-lbl">Ping</div>
+              </div>
+              <div class="st-col-div"></div>
+              <div class="st-col">
+                <div class="st-col-val" id="st-dl-val">—</div>
+                <div class="st-col-unit">Mbps</div>
+                <div class="st-col-lbl">Download</div>
+              </div>
+              <div class="st-col-div"></div>
+              <div class="st-col">
+                <div class="st-col-val" id="st-ul-val">—</div>
+                <div class="st-col-unit">Mbps</div>
+                <div class="st-col-lbl">Upload</div>
+              </div>
+            </div>
+            <button class="speedtest-btn" id="st-btn" onclick="runSpeedtest()">Test Connection</button>
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-vpn">
+    <div class="card-body">
+      <div class="vpn-grid">
+        <div class="vpn-left">
+          <div class="vpn-heading">{{ content.vpn_title }}</div>
+          <div class="vpn-desc">{{ content.vpn_desc }}</div>
+        </div>
+        <a href="https://vpn.misbahwork.my.id" target="_blank" class="vpn-btn">{{ content.vpn_button }}</a>
       </div>
     </div>
   </div>
@@ -105,6 +140,11 @@
   const cpuPct = document.getElementById('cpu-pct');
   const ramPct = document.getElementById('ram-pct');
   const ramDetail = document.getElementById('ram-detail');
+  const netDlArc = document.getElementById('net-dl-arc');
+  const netUlArc = document.getElementById('net-ul-arc');
+  const netPct = document.getElementById('net-pct');
+  const netDlVal = document.getElementById('net-dl-val');
+  const netUlVal = document.getElementById('net-ul-val');
 
   async function fetchResource() {
     try {
@@ -115,6 +155,11 @@
       cpuPct.textContent = d.cpu;
       ramPct.textContent = d.ram_percent;
       ramDetail.textContent = d.ram_used_gb + ' / ' + d.ram_total_gb + ' GB';
+      netDlArc.setAttribute('stroke-dashoffset', d.rx_pct > 0 ? ARC * (1 - d.rx_pct / 100) : ARC + 1);
+      netUlArc.setAttribute('stroke-dashoffset', d.tx_pct > 0 ? ARC * (1 - d.tx_pct / 100) : ARC + 1);
+      netPct.textContent = d.usage_pct.toFixed(2);
+      netDlVal.textContent = '\u2193 ' + d.rx_mbps.toFixed(2);
+      netUlVal.textContent = '\u2191 ' + d.tx_mbps.toFixed(2);
     } catch (_) {}
   }
 

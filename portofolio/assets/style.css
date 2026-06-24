@@ -296,6 +296,69 @@ nav {
   100% { box-shadow: 0 0 15px rgba(255, 100, 0, 0.3); }
 }
 
+/* ===== VPN Card ===== */
+.card-vpn {
+  background: #181818;
+  border: 1px solid #262626;
+  border-left: 4px solid #00d4aa;
+}
+
+.vpn-grid {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vpn-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.vpn-heading {
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+.vpn-desc {
+  font-size: 16px;
+  color: #999;
+  line-height: 1.6;
+}
+
+.vpn-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border-radius: 14px;
+  background: #0a1628;
+  border: 1px solid #1e3a6f;
+  padding: 18px 52px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #60a5fa;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.4s;
+  animation: vpnGlow 2s ease-in-out infinite alternate;
+  flex-shrink: 0;
+}
+
+.vpn-btn:hover {
+  color: #93bbfd;
+  border-color: #3b82f6;
+  transform: scale(1.04);
+}
+
+@keyframes vpnGlow {
+  0% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 35px rgba(59, 130, 246, 0.5), 0 0 60px rgba(59, 130, 246, 0.2); }
+  100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+}
+
 /* ===== Demo Page ===== */
 .card-demo-page {
   background: #181818;
@@ -682,7 +745,9 @@ nav {
 /* ===== Speed Gauges ===== */
 .speed-gauges {
   display: flex;
-  gap: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
 }
 
 .gauge-box {
@@ -741,46 +806,49 @@ nav {
   margin-top: 1px;
 }
 
-/* ===== Speedtest Row ===== */
-.st-row {
+/* ===== Speedtest Card ===== */
+.st-section {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid #262626;
+}
+
+.st-grid {
   display: flex;
   gap: 40px;
   align-items: center;
-  border-top: 1px solid #262626;
-  margin-top: 24px;
-  padding-top: 24px;
 }
 
-.st-left {
+.st-info {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  min-width: 0;
 }
 
-.st-heading {
-  font-size: 22px;
-  font-weight: 600;
-  color: #fff;
-}
-
-.st-desc {
-  font-size: 13px;
-  color: #94a3b8;
-  margin-top: 4px;
-}
-
-.st-right {
-  flex: 1;
+.st-ctrl {
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
 }
 
+.st-heading {
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  text-align: left;
+}
+
+.st-desc {
+  font-size: 13px;
+  color: #94a3b8;
+  text-align: left;
+}
+
 .st-cols {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0;
 }
 
@@ -849,14 +917,6 @@ nav {
 }
 
 @media (max-width: 768px) {
-  .st-row {
-    flex-direction: column;
-    gap: 20px;
-    text-align: center;
-  }
-  .st-left {
-    align-items: center;
-  }
   .st-col {
     min-width: 80px;
   }
@@ -995,7 +1055,31 @@ nav {
   }
 
   .speed-gauges {
+    flex-direction: column;
     gap: 20px;
+    align-items: center;
+  }
+  .brand-logos {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .st-grid {
+    flex-direction: column;
+    text-align: center;
+  }
+  .st-info .st-heading,
+  .st-info .st-desc {
+    text-align: center;
+  }
+  .st-cols {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .st-col-div {
+    display: none;
+  }
+  .st-col {
+    min-width: 0;
   }
 
   .gauge-svg-wrap {
@@ -1008,6 +1092,22 @@ nav {
   }
 
   /* Demo page responsive */
+  .vpn-grid {
+    flex-direction: column;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .vpn-btn {
+    width: 100%;
+    padding: 18px 0;
+    font-size: 20px;
+  }
+
+  .speedtest-btn {
+    width: 100%;
+  }
+
   .demo-grid {
     flex-direction: column;
     gap: 24px;
