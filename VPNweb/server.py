@@ -4,6 +4,7 @@ from datetime import date
 from pathlib import Path
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from urllib.parse import quote
 from fastapi.templating import Jinja2Templates
 
@@ -30,8 +31,9 @@ DNS = cfg["dns_servers"]
 
 CLIENTS_DIR.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="WireGuard Free")
+app = FastAPI(title="MMV VPN")
 templates = Jinja2Templates(directory=str(BASE / "templates"))
+app.mount("/assets", StaticFiles(directory=str(BASE / "assets")), name="assets")
 
 
 def get_db():
@@ -251,11 +253,22 @@ async def my_configs(request: Request):
         ).fetchall()
     finally:
         db.close()
+    configs = []
+    for r in rows:
+        fname = f"wgfree_{r['address'].replace('.', '_')}.conf"
+        fpath = CLIENTS_DIR / fname
+        content = fpath.read_text() if fpath.exists() else ""
+        configs.append({**dict(r), "config_content": content})
     today_str = date.today().strftime('%d %B %Y')
     return templates.TemplateResponse(request, "my_configs.html", {
-        "configs": rows,
+        "configs": configs,
         "today_str": today_str,
     })
+
+
+@app.get("/ssh", response_class=HTMLResponse)
+async def ssh_page(request: Request):
+    return templates.TemplateResponse(request, "ssh.html", {})
 
 
 @app.get("/admin", response_class=HTMLResponse)

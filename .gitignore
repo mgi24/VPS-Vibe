@@ -14,5 +14,9 @@ diary/.env
 diary/.venv/
 diary/__pycache__/
 diary/*.pyc
+!VPNweb/
+!VPNweb/**
+VPNweb/.venv/
+VPNweb/__pycache__/
 doc.md
 __pycache__/

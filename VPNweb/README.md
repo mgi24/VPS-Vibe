@@ -5,7 +5,7 @@ Jalan di **port 8007**, subnet **`10.0.0.0/16`** (65.534 IP).
 
 ## Stack
 
-- **FastAPI** + **Uvicorn** (systemd: `wireguardfree.service`)
+- **FastAPI** + **Uvicorn** (systemd: `VPNweb.service`)
 - **SQLite** (`/opt/wireguardfree/data.db`)
 - **Jinja2** templates
 
