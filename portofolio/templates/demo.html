@@ -5,10 +5,10 @@
 
   <div class="card card-network">
     <div class="card-body">
-      <div class="network-title">Network Infrastructure</div>
+      <div class="network-title">{{ content.network_title }}</div>
       <div class="network-grid">
         <div class="network-left">
-          <div class="powered-by">Powered by Oracle | Protected by Cloudlflare</div>
+          <div class="powered-by">{{ content.network_powered }}</div>
           <div class="brand-logos">
             <img src="/static/oracle_logo.png" alt="Oracle" class="brand-logo">
             <img src="/static/cloudflare_logo.png" alt="Cloudflare" class="brand-logo">
@@ -29,7 +29,7 @@
                   <span class="gauge-pct" id="cpu-pct">0</span><span class="gauge-pct-unit">%</span>
                 </div>
               </div>
-              <div class="gauge-name">4 Arm 64 CPU</div>
+              <div class="gauge-name">{{ content.network_cpu }}</div>
             </div>
             <div class="gauge-box">
               <div class="gauge-svg-wrap">
@@ -44,7 +44,7 @@
                   <span class="gauge-pct" id="ram-pct">0</span><span class="gauge-pct-unit">%</span>
                 </div>
               </div>
-              <div class="gauge-name" id="ram-label">RAM <span class="gauge-ram-detail" id="ram-detail">0.0 / 0.0 GB</span></div>
+              <div class="gauge-name" id="ram-label">{{ content.network_ram }} <span class="gauge-ram-detail" id="ram-detail">0.0 / 0.0 GB</span></div>
             </div>
             <div class="gauge-box">
               <div class="gauge-svg-wrap">
@@ -73,30 +73,30 @@
       <div class="st-section">
         <div class="st-grid">
           <div class="st-info">
-            <div class="st-heading">Check Your Speed</div>
-            <div class="st-desc">Batam datacenter, 4 Gigabit bandwidth</div>
+            <div class="st-heading">{{ content.st_heading }}</div>
+            <div class="st-desc">{{ content.st_desc }}</div>
           </div>
           <div class="st-ctrl">
             <div class="st-cols">
               <div class="st-col">
                 <div class="st-col-val" id="st-ping-val">—</div>
                 <div class="st-col-unit">ms</div>
-                <div class="st-col-lbl">Ping</div>
+                <div class="st-col-lbl">{{ content.st_ping }}</div>
               </div>
               <div class="st-col-div"></div>
               <div class="st-col">
                 <div class="st-col-val" id="st-dl-val">—</div>
                 <div class="st-col-unit">Mbps</div>
-                <div class="st-col-lbl">Download</div>
+                <div class="st-col-lbl">{{ content.st_download }}</div>
               </div>
               <div class="st-col-div"></div>
               <div class="st-col">
                 <div class="st-col-val" id="st-ul-val">—</div>
                 <div class="st-col-unit">Mbps</div>
-                <div class="st-col-lbl">Upload</div>
+                <div class="st-col-lbl">{{ content.st_upload }}</div>
               </div>
             </div>
-            <button class="speedtest-btn" id="st-btn" onclick="runSpeedtest()">Test Connection</button>
+            <button class="speedtest-btn" id="st-btn" onclick="runSpeedtest()" data-again="{{ content.st_again }}">{{ content.st_button }}</button>
           </div>
         </div>
       </div>
@@ -235,7 +235,7 @@ async function runSpeedtest() {
   }
 
   btn.disabled = false;
-  btn.textContent = 'Test Again';
+  btn.textContent = btn.dataset.again;
   stRunning = false;
 }
 </script>

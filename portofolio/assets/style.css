@@ -817,10 +817,10 @@ nav {
   display: flex;
   gap: 40px;
   align-items: center;
+  justify-content: center;
 }
 
 .st-info {
-  flex: 1;
   min-width: 0;
 }
 

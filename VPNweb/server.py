@@ -137,18 +137,22 @@ def add_peer(pubkey, addr):
         f.write(f"\n[Peer]\nPublicKey = {pubkey}\nAllowedIPs = {addr}/32\n")
 
 
-def gen_conf(client_priv, client_addr):
-    return f"""[Interface]
+def gen_conf(client_priv, client_addr, psk=None):
+    conf = f"""[Interface]
 PrivateKey = {client_priv}
 Address = {client_addr}/32
 DNS = {', '.join(DNS)}
 
 [Peer]
 PublicKey = {SERVER_PUBKEY}
-Endpoint = {SERVER_ENDPOINT}
+"""
+    if psk:
+        conf += f"PresharedKey = {psk}\n"
+    conf += f"""Endpoint = {SERVER_ENDPOINT}
 AllowedIPs = 0.0.0.0/0
 PersistentKeepalive = 25
 """
+    return conf
 
 
 def daily_left(db):
@@ -206,7 +210,10 @@ async def generate(request: Request):
             return RedirectResponse(url=f"/?error={quote('Semua IP habis!')}", status_code=303)
 
         priv, pub = gen_keys()
-        conf = gen_conf(priv, next_ip)
+        form = await request.form()
+        use_psk = form.get("use_psk") == "1"
+        psk = subprocess.check_output(["wg", "genpsk"]).strip().decode() if use_psk else None
+        conf = gen_conf(priv, next_ip, psk=psk)
 
         fname = f"wgfree_{next_ip.replace('.', '_')}.conf"
         fpath = CLIENTS_DIR / fname
