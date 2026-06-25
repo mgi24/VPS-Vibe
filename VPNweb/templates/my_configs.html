@@ -71,11 +71,8 @@ nav{background:#111;padding:10px 30px;display:flex;align-items:center;justify-co
 </div>
 <div class="raw-wrap" id="raw-{{ loop.index0 }}" style="display:none">
 <pre>{{ c.config_content }}</pre>
-<div style="display:flex;gap:12px;margin-top:8px;align-items:center">
-<div class="qr-canvas" style="flex-shrink:0"></div>
-<div style="display:flex;flex-direction:column;gap:6px;margin-left:auto">
+<div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end">
 <button class="btn-sm copy-btn" data-idx="{{ loop.index0 }}">📋 Copy</button>
-</div>
 </div>
 </div>
 {% endfor %}
@@ -89,7 +86,6 @@ nav{background:#111;padding:10px 30px;display:flex;align-items:center;justify-co
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 document.querySelectorAll('.view-btn').forEach(btn => {
 btn.addEventListener('click', () => {
@@ -98,20 +94,6 @@ const wrap = document.getElementById('raw-' + idx);
 const isHidden = wrap.style.display === 'none';
 wrap.style.display = isHidden ? 'block' : 'none';
 btn.textContent = isHidden ? 'Sembunyi' : 'View';
-if (!isHidden) {
-  const canvas = wrap.querySelector('.qr-canvas');
-  if (canvas && !canvas.dataset.rendered) {
-    new QRCode(canvas, {
-      text: wrap.querySelector('pre').textContent,
-      width: 180,
-      height: 180,
-      colorDark: "#00d4aa",
-      colorLight: "#0f172a",
-      correctLevel: QRCode.CorrectLevel.M
-    });
-    canvas.dataset.rendered = '1';
-  }
-}
 });
 });
 

@@ -181,30 +181,63 @@ async function measurePing() {
   return performance.now() - t0;
 }
 
-async function measureDownload(sizeMb) {
+function calcMbps(bytes, ms) {
+  return ms > 0 ? (bytes * 8) / 1_000 / ms : 0;
+}
+
+async function measureDownload(sizeMb, onSpeed) {
   const t0 = performance.now();
-  let received = 0;
+  let received = 0, speeds = [];
   const resp = await fetch('/speedtest/download?size_mb=' + sizeMb);
   if (!resp.ok) return 0;
   const reader = resp.body.getReader();
+  let lastT = t0, lastB = 0;
   while (true) {
     const {done, value} = await reader.read();
     if (done) break;
+    const now = performance.now();
     received += value.length;
+    const dt = now - lastT;
+    if (dt >= 80) {
+      const mbps = calcMbps(received - lastB, dt);
+      speeds.push(mbps);
+      onSpeed(mbps);
+      lastT = now;
+      lastB = received;
+    }
   }
-  const elapsed = (performance.now() - t0) / 1000;
-  return (received * 8) / 1_000_000 / elapsed;
+  const elapsed = performance.now() - t0;
+  const avg = speeds.length ? speeds.reduce((a,b)=>a+b,0) / speeds.length : calcMbps(received, elapsed);
+  return avg;
 }
 
-async function measureUpload(sizeMb) {
-  const size = sizeMb * 1_000_000;
-  const data = new Uint8Array(size);
-  const t0 = performance.now();
-  try {
-    await fetch('/speedtest/api/upload?size_mb=' + sizeMb, { method: 'POST', body: data });
-  } catch(_) { return 0; }
-  const elapsed = (performance.now() - t0) / 1000;
-  return (size * 8) / 1_000_000 / elapsed;
+function measureUpload(sizeMb, onSpeed) {
+  return new Promise(resolve => {
+    const size = sizeMb * 1_000_000;
+    const data = new Uint8Array(size);
+    const t0 = performance.now();
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/speedtest/api/upload?size_mb=' + sizeMb);
+    let lastT = t0, lastB = 0, speeds = [];
+    xhr.upload.onprogress = e => {
+      if (!e.lengthComputable) return;
+      const now = performance.now();
+      const dt = now - lastT;
+      if (dt >= 80) {
+        const mbps = calcMbps(e.loaded - lastB, dt);
+        speeds.push(mbps);
+        onSpeed(mbps);
+        lastT = now;
+        lastB = e.loaded;
+      }
+    };
+    xhr.onload = () => {
+      const elapsed = performance.now() - t0;
+      resolve(speeds.length ? speeds.reduce((a,b)=>a+b,0) / speeds.length : calcMbps(size, elapsed));
+    };
+    xhr.onerror = () => resolve(0);
+    xhr.send(data);
+  });
 }
 
 async function runSpeedtest() {
@@ -220,19 +253,19 @@ async function runSpeedtest() {
   const ping = await measurePing();
   stCol('st-ping-val', Math.round(ping));
 
+  stCol('st-dl-val', '0.0');
   let dl = 0;
   for (const s of [2, 5, 10, 20]) {
-    stCol('st-dl-val', '\u2026');
-    dl = await measureDownload(s);
-    stCol('st-dl-val', dl.toFixed(1));
+    dl = await measureDownload(s, mbps => stCol('st-dl-val', mbps.toFixed(1)));
   }
+  stCol('st-dl-val', dl.toFixed(1));
 
+  stCol('st-ul-val', '0.0');
   let ul = 0;
   for (const s of [1, 2, 5]) {
-    stCol('st-ul-val', '\u2026');
-    ul = await measureUpload(s);
-    stCol('st-ul-val', ul.toFixed(1));
+    ul = await measureUpload(s, mbps => stCol('st-ul-val', mbps.toFixed(1)));
   }
+  stCol('st-ul-val', ul.toFixed(1));
 
   btn.disabled = false;
   btn.textContent = btn.dataset.again;

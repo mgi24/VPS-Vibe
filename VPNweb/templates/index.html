@@ -104,23 +104,6 @@ form{margin-top:.5rem}
 </button>
 </form>
 
-{% if conf_content %}
-<div id="qr-wrap" style="margin-top:1.5rem;text-align:center">
-<div id="qrcode" style="display:inline-block"></div>
-<p style="font-size:.75rem;color:#64748b;margin-top:.5rem">Scan untuk HP</p>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script>
-new QRCode(document.getElementById("qrcode"), {
-text: {{ conf_content|tojson }},
-width: 200,
-height: 200,
-colorDark: "#00d4aa",
-colorLight: "#0f172a",
-correctLevel: QRCode.CorrectLevel.M
-});
-</script>
-{% endif %}
 
 <p style="margin-top:.75rem"><a href="/my" style="color:#00d4aa;font-size:.85rem;text-decoration:none;font-weight:500">&larr; Lihat config saya</a></p>
 </div>
