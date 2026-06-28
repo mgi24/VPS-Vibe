@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import tempfile
 import uuid
@@ -94,7 +95,7 @@ async def create_post(
     post = Post(
         user_id=user.id,
         type=post_type,
-        content=body.content,
+        content=re.sub(r'<[^>]*>', '', body.content) if body.content else body.content,
         media_url=body.media_url,
         segment=body.segment,
     )
@@ -210,7 +211,7 @@ async def update_post(
         raise HTTPException(status_code=403, detail="Not your post")
     media_list = body.media_url.split(",") if body.media_url else []
     post.type = _detect_type(body.content or "", media_list)
-    post.content = body.content
+    post.content = re.sub(r'<[^>]*>', '', body.content) if body.content else body.content
     post.media_url = body.media_url
     post.segment = body.segment
     await db.commit()

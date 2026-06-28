@@ -1,3 +1,5 @@
+import re
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +8,9 @@ from database import get_db
 from models import Post, Comment, User, Notification
 from schemas import CommentCreate
 from auth import get_current_user
+
+def strip_html(text: str | None) -> str | None:
+    return re.sub(r'<[^>]*>', '', text) if text else text
 
 router = APIRouter(prefix="/api/posts", tags=["comments"])
 
@@ -52,8 +57,8 @@ async def create_comment(
     comment = Comment(
         post_id=post_id,
         user_id=user.id if user else None,
-        guest_name=body.guest_name if not user else None,
-        content=body.content,
+        guest_name=strip_html(body.guest_name) if not user else None,
+        content=strip_html(body.content),
     )
 
     if not user and not body.guest_name:
