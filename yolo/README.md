@@ -10,10 +10,11 @@ Demo object detection running on port 8004.
 | `POST /segment` | `yolo11n-seg.pt` | Segmentation |
 | `POST /cs2-segment` | `cs2-s-26best.pt` | CS2 segmentation |
 
-## Idle Offload
+## Model Loading
 
-Models are loaded lazily on first request. After 60 seconds of inactivity,
-the model is unloaded from memory and automatically reloaded on the next
-request. This keeps RAM usage low when the service is idle.
+Models are loaded at startup and always stay in memory (`model_always_on.py`).
 
-Each model segment (detect, segment, cs2) has its own independent idle timer.
+An alternative idle-offload version is available in `model_manager.py` —
+models are lazily loaded on first request and unloaded after 60s of
+inactivity to save RAM. To use it, swap the import in `main.py` from
+`model_always_on` to `model_manager`.

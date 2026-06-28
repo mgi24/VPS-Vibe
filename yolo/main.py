@@ -1,7 +1,6 @@
 import base64
 import logging
 import time
-from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
@@ -14,35 +13,20 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from model_manager import ModelManager
+from model_always_on import (
+    model,
+    seg_model,
+    cs2_model,
+    class_names,
+    seg_class_names,
+    cs2_class_names,
+)
 
 BASE_DIR = Path(__file__).parent
 
 REQUEST_DELAY_LIMIT: float = 0.5
 
-IDLE_TIMEOUT = 60  # detik tanpa request -> model di-unload
-
-model_manager = ModelManager()
-
-detect_model = model_manager.register(
-    "detect", BASE_DIR / "yolov8s.pt", idle_timeout=IDLE_TIMEOUT
-)
-segment_model = model_manager.register(
-    "segment", BASE_DIR / "yolo11n-seg.pt", idle_timeout=IDLE_TIMEOUT
-)
-cs2_segment_model = model_manager.register(
-    "cs2_segment", BASE_DIR / "cs2-s-26best.pt", idle_timeout=IDLE_TIMEOUT
-)
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await model_manager.start_monitor()
-    yield
-    await model_manager.stop_monitor()
-    model_manager.unload_all()
-
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 app.mount("/assets", StaticFiles(directory=str(BASE_DIR / "assets")), name="assets")
@@ -180,12 +164,12 @@ async def segment(req: DetectRequest, request: Request):
     img = decode_image(req)
     kwargs = build_kwargs(req)
 
-    results = await segment_model.predict(img, **kwargs)
-    drawn = draw_segmentations(img.copy(), results, segment_model.class_names)
+    results = seg_model(img, **kwargs)
+    drawn = draw_segmentations(img.copy(), results, seg_class_names)
 
     return JSONResponse({
         "image": encode_result(drawn),
-        "detections": detection_results(results, segment_model.class_names),
+        "detections": detection_results(results, seg_class_names),
     })
 
 
@@ -202,12 +186,12 @@ async def cs2_segment(req: DetectRequest, request: Request):
     img = decode_image(req)
     kwargs = build_kwargs(req)
 
-    results = await cs2_segment_model.predict(img, **kwargs)
-    drawn = draw_segmentations(img.copy(), results, cs2_segment_model.class_names)
+    results = cs2_model(img, **kwargs)
+    drawn = draw_segmentations(img.copy(), results, cs2_class_names)
 
     return JSONResponse({
         "image": encode_result(drawn),
-        "detections": detection_results(results, cs2_segment_model.class_names),
+        "detections": detection_results(results, cs2_class_names),
     })
 
 
@@ -219,12 +203,12 @@ async def detect(req: DetectRequest, request: Request):
     img = decode_image(req)
     kwargs = build_kwargs(req)
 
-    results = await detect_model.predict(img, **kwargs)
-    drawn = draw_detections(img.copy(), results, detect_model.class_names)
+    results = model(img, **kwargs)
+    drawn = draw_detections(img.copy(), results, class_names)
 
     return JSONResponse({
         "image": encode_result(drawn),
-        "detections": detection_results(results, detect_model.class_names),
+        "detections": detection_results(results, class_names),
     })
 
 
