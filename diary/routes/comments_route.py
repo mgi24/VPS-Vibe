@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from models import Post, Comment, User, Notification
 from schemas import CommentCreate
-from auth import get_current_user
+from auth import get_current_user, require_admin
 
 def strip_html(text: str | None) -> str | None:
     return re.sub(r'<[^>]*>', '', text) if text else text
@@ -90,3 +90,32 @@ async def create_comment(
 
     await db.commit()
     return {"message": "Comment added", "id": comment.id}
+
+
+@router.delete("/{post_id}/comments")
+async def purge_comments(
+    post_id: int,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(require_admin),
+):
+    result = await db.execute(select(Comment).where(Comment.post_id == post_id))
+    comments = result.scalars().all()
+    for c in comments:
+        await db.delete(c)
+    await db.commit()
+    return {"message": f"Purged {len(comments)} comments"}
+
+
+@router.delete("/{post_id}/comments/{comment_id}")
+async def delete_comment(
+    post_id: int,
+    comment_id: int,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(require_admin),
+):
+    comment = await db.get(Comment, comment_id)
+    if not comment or comment.post_id != post_id:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    await db.delete(comment)
+    await db.commit()
+    return {"message": "Comment deleted"}

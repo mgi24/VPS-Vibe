@@ -972,6 +972,7 @@ input, textarea, select, button {
     gap: 10px;
     padding: 10px 0;
     border-bottom: 1px solid #393a3b;
+    align-items: flex-start;
 }
 
 .comment-avatar {
@@ -1003,6 +1004,39 @@ input, textarea, select, button {
     text-align: center;
     color: #8a8d91;
     padding: 20px;
+}
+
+.btn-del-comment {
+    background: none;
+    border: none;
+    color: #e44;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    align-self: flex-start;
+    line-height: 1;
+    border-radius: 4px;
+}
+.btn-del-comment:hover {
+    background: rgba(238,68,68,0.15);
+}
+
+.purge-bar {
+    padding: 8px 0;
+    border-bottom: 1px solid #393a3b;
+    margin-bottom: 8px;
+}
+.btn-purge {
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.btn-purge:hover {
+    background: #e74c3c;
 }
 
 .comment-input-area {
