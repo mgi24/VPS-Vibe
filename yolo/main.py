@@ -1,9 +1,7 @@
-import asyncio
 import base64
-import io
 import logging
-import sys
 import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
@@ -14,32 +12,48 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, Field
-from ultralytics import YOLO
+from pydantic import BaseModel
+
+from model_manager import ModelManager
 
 BASE_DIR = Path(__file__).parent
 
 REQUEST_DELAY_LIMIT: float = 0.5
 
-model = YOLO(BASE_DIR / "yolov8s.pt")
-class_names = model.names
+IDLE_TIMEOUT = 60  # detik tanpa request -> model di-unload
 
-seg_model = YOLO(BASE_DIR / "yolo11n-seg.pt")
-seg_class_names = seg_model.names
+model_manager = ModelManager()
 
-cs2_model = YOLO(BASE_DIR / "cs2-s-26best.pt")
-cs2_class_names = cs2_model.names
+detect_model = model_manager.register(
+    "detect", BASE_DIR / "yolov8s.pt", idle_timeout=IDLE_TIMEOUT
+)
+segment_model = model_manager.register(
+    "segment", BASE_DIR / "yolo11n-seg.pt", idle_timeout=IDLE_TIMEOUT
+)
+cs2_segment_model = model_manager.register(
+    "cs2_segment", BASE_DIR / "cs2-s-26best.pt", idle_timeout=IDLE_TIMEOUT
+)
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await model_manager.start_monitor()
+    yield
+    await model_manager.stop_monitor()
+    model_manager.unload_all()
+
+
+app = FastAPI(lifespan=lifespan)
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 app.mount("/assets", StaticFiles(directory=str(BASE_DIR / "assets")), name="assets")
+
 
 class DetectRequest(BaseModel):
     base64: str
     conf: float | None = None
     iou: float | None = None
     imgsz: int | None = None
+
 
 session_last_time: dict[str, float] = {}
 
@@ -54,12 +68,12 @@ COLORS = [
     (128, 0, 255), (0, 128, 255),
 ]
 
+
 def get_color(class_id: int):
     return COLORS[class_id % len(COLORS)]
 
-def draw_detections(img: np.ndarray, results, class_names: dict | None = None) -> np.ndarray:
-    if class_names is None:
-        class_names = globals().get("class_names", {})
+
+def draw_detections(img: np.ndarray, results, class_names: dict) -> np.ndarray:
     for r in results:
         for box in r.boxes:
             x1, y1, x2, y2 = map(int, box.xyxy[0])
@@ -73,9 +87,8 @@ def draw_detections(img: np.ndarray, results, class_names: dict | None = None) -
             cv2.putText(img, label, (x1 + 4, y1 - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
     return img
 
-def draw_segmentations(img: np.ndarray, results, class_names: dict | None = None) -> np.ndarray:
-    if class_names is None:
-        class_names = globals().get("class_names", {})
+
+def draw_segmentations(img: np.ndarray, results, class_names: dict) -> np.ndarray:
     overlay = img.copy()
     for r in results:
         if r.masks is not None:
@@ -97,34 +110,20 @@ def draw_segmentations(img: np.ndarray, results, class_names: dict | None = None
     cv2.addWeighted(overlay, 0.35, img, 0.65, 0, img)
     return img
 
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse(request, "index.html", {})
 
-@app.get("/segment", response_class=HTMLResponse)
-async def segment_page(request: Request):
-    return templates.TemplateResponse(request, "segment.html", {})
-
-@app.post("/segment")
-async def segment(req: DetectRequest, request: Request):
-    client_ip = request.client.host if request.client else "unknown"
-
-    if REQUEST_DELAY_LIMIT > 0:
-        now = time.time()
-        last = session_last_time.get(client_ip, 0)
-        if now - last < REQUEST_DELAY_LIMIT:
-            raise HTTPException(status_code=429, detail="Rate limit: 1 FPS")
-        session_last_time[client_ip] = now
-
+def decode_image(req: DetectRequest):
     try:
         image_data = base64.b64decode(req.base64)
         np_arr = np.frombuffer(image_data, np.uint8)
         img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
         if img is None:
             raise HTTPException(status_code=400, detail="Invalid image data")
+        return img
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid base64 image data")
 
+
+def build_kwargs(req: DetectRequest) -> dict:
     kwargs = {}
     if req.conf is not None:
         kwargs["conf"] = req.conf
@@ -132,120 +131,10 @@ async def segment(req: DetectRequest, request: Request):
         kwargs["iou"] = req.iou
     if req.imgsz is not None:
         kwargs["imgsz"] = req.imgsz
+    return kwargs
 
-    results = seg_model(img, **kwargs)
 
-    drawn = draw_segmentations(img.copy(), results, seg_class_names)
-
-    _, buffer = cv2.imencode(".jpg", drawn, [cv2.IMWRITE_JPEG_QUALITY, 85])
-    result_b64 = base64.b64encode(buffer).decode("utf-8")
-
-    detections = []
-    for r in results:
-        for box in r.boxes:
-            cls_id = int(box.cls[0])
-            detections.append({
-                "class": seg_class_names[cls_id],
-                "class_id": cls_id,
-                "confidence": round(float(box.conf[0]), 4),
-                "bbox": [int(x) for x in box.xyxy[0].tolist()],
-            })
-
-    return JSONResponse({
-        "image": result_b64,
-        "detections": detections,
-    })
-
-@app.get("/cs2-segment", response_class=HTMLResponse)
-async def cs2_segment_page(request: Request):
-    return templates.TemplateResponse(request, "cs2_segment.html", {})
-
-@app.post("/cs2-segment")
-async def cs2_segment(req: DetectRequest, request: Request):
-    client_ip = request.client.host if request.client else "unknown"
-
-    if REQUEST_DELAY_LIMIT > 0:
-        now = time.time()
-        last = session_last_time.get(client_ip, 0)
-        if now - last < REQUEST_DELAY_LIMIT:
-            raise HTTPException(status_code=429, detail="Rate limit: 1 FPS")
-        session_last_time[client_ip] = now
-
-    try:
-        image_data = base64.b64decode(req.base64)
-        np_arr = np.frombuffer(image_data, np.uint8)
-        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        if img is None:
-            raise HTTPException(status_code=400, detail="Invalid image data")
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid base64 image data")
-
-    kwargs = {}
-    if req.conf is not None:
-        kwargs["conf"] = req.conf
-    if req.iou is not None:
-        kwargs["iou"] = req.iou
-    if req.imgsz is not None:
-        kwargs["imgsz"] = req.imgsz
-
-    results = cs2_model(img, **kwargs)
-
-    drawn = draw_segmentations(img.copy(), results, cs2_class_names)
-
-    _, buffer = cv2.imencode(".jpg", drawn, [cv2.IMWRITE_JPEG_QUALITY, 85])
-    result_b64 = base64.b64encode(buffer).decode("utf-8")
-
-    detections = []
-    for r in results:
-        for box in r.boxes:
-            cls_id = int(box.cls[0])
-            detections.append({
-                "class": cs2_class_names[cls_id],
-                "class_id": cls_id,
-                "confidence": round(float(box.conf[0]), 4),
-                "bbox": [int(x) for x in box.xyxy[0].tolist()],
-            })
-
-    return JSONResponse({
-        "image": result_b64,
-        "detections": detections,
-    })
-
-@app.post("/detect")
-async def detect(req: DetectRequest, request: Request):
-    client_ip = request.client.host if request.client else "unknown"
-
-    if REQUEST_DELAY_LIMIT > 0:
-        now = time.time()
-        last = session_last_time.get(client_ip, 0)
-        if now - last < REQUEST_DELAY_LIMIT:
-            raise HTTPException(status_code=429, detail="Rate limit: 1 FPS")
-        session_last_time[client_ip] = now
-
-    try:
-        image_data = base64.b64decode(req.base64)
-        np_arr = np.frombuffer(image_data, np.uint8)
-        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        if img is None:
-            raise HTTPException(status_code=400, detail="Invalid image data")
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid base64 image data")
-
-    kwargs = {}
-    if req.conf is not None:
-        kwargs["conf"] = req.conf
-    if req.iou is not None:
-        kwargs["iou"] = req.iou
-    if req.imgsz is not None:
-        kwargs["imgsz"] = req.imgsz
-
-    results = model(img, **kwargs)
-
-    drawn = draw_detections(img.copy(), results, class_names)
-
-    _, buffer = cv2.imencode(".jpg", drawn, [cv2.IMWRITE_JPEG_QUALITY, 85])
-    result_b64 = base64.b64encode(buffer).decode("utf-8")
-
+def detection_results(results, class_names: dict):
     detections = []
     for r in results:
         for box in r.boxes:
@@ -256,11 +145,88 @@ async def detect(req: DetectRequest, request: Request):
                 "confidence": round(float(box.conf[0]), 4),
                 "bbox": [int(x) for x in box.xyxy[0].tolist()],
             })
+    return detections
+
+
+def encode_result(img: np.ndarray) -> str:
+    _, buffer = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    return base64.b64encode(buffer).decode("utf-8")
+
+
+def check_rate_limit(client_ip: str):
+    if REQUEST_DELAY_LIMIT > 0:
+        now = time.time()
+        last = session_last_time.get(client_ip, 0)
+        if now - last < REQUEST_DELAY_LIMIT:
+            raise HTTPException(status_code=429, detail="Rate limit: 1 FPS")
+        session_last_time[client_ip] = now
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse(request, "index.html", {})
+
+
+@app.get("/segment", response_class=HTMLResponse)
+async def segment_page(request: Request):
+    return templates.TemplateResponse(request, "segment.html", {})
+
+
+@app.post("/segment")
+async def segment(req: DetectRequest, request: Request):
+    client_ip = request.client.host if request.client else "unknown"
+    check_rate_limit(client_ip)
+
+    img = decode_image(req)
+    kwargs = build_kwargs(req)
+
+    results = await segment_model.predict(img, **kwargs)
+    drawn = draw_segmentations(img.copy(), results, segment_model.class_names)
 
     return JSONResponse({
-        "image": result_b64,
-        "detections": detections,
+        "image": encode_result(drawn),
+        "detections": detection_results(results, segment_model.class_names),
     })
+
+
+@app.get("/cs2-segment", response_class=HTMLResponse)
+async def cs2_segment_page(request: Request):
+    return templates.TemplateResponse(request, "cs2_segment.html", {})
+
+
+@app.post("/cs2-segment")
+async def cs2_segment(req: DetectRequest, request: Request):
+    client_ip = request.client.host if request.client else "unknown"
+    check_rate_limit(client_ip)
+
+    img = decode_image(req)
+    kwargs = build_kwargs(req)
+
+    results = await cs2_segment_model.predict(img, **kwargs)
+    drawn = draw_segmentations(img.copy(), results, cs2_segment_model.class_names)
+
+    return JSONResponse({
+        "image": encode_result(drawn),
+        "detections": detection_results(results, cs2_segment_model.class_names),
+    })
+
+
+@app.post("/detect")
+async def detect(req: DetectRequest, request: Request):
+    client_ip = request.client.host if request.client else "unknown"
+    check_rate_limit(client_ip)
+
+    img = decode_image(req)
+    kwargs = build_kwargs(req)
+
+    results = await detect_model.predict(img, **kwargs)
+    drawn = draw_detections(img.copy(), results, detect_model.class_names)
+
+    return JSONResponse({
+        "image": encode_result(drawn),
+        "detections": detection_results(results, detect_model.class_names),
+    })
+
 
 if __name__ == "__main__":
     uvicorn.run(
