@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFTest</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2/dist/chartjs-plugin-zoom.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0a;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', sans-serif;
+  min-height: 100vh;
+}
+nav {
+  background: #111;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 1px solid #222;
+}
+.nav-brand { color: #00d4aa; font-weight: 700; font-size: 18px; }
+.tab {
+  color: #888;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  font-size: 14px;
+}
+.tab:hover, .tab.active { color: #fff; border-color: #00d4aa; }
+.tab.active { background: rgba(0,212,170,0.1); }
+.container { max-width: 960px; margin: 0 auto; padding: 24px; }
+.section { display: none; }
+.section.active { display: block; }
+.card {
+  background: #141414;
+  border-radius: 16px;
+  border: 1px solid #222;
+  border-left: 4px solid #00d4aa;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.card h2 { font-size: 18px; margin-bottom: 16px; color: #fff; }
+.btn-test {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 36px;
+  background: #00d4aa;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-test:hover { transform: scale(1.04); }
+.btn-test:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.btn-stop { background: #ff4444; color: #fff; }
+.status-log {
+  margin-top: 16px;
+  background: #0e0e0e;
+  border-radius: 10px;
+  padding: 16px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.status-log .log-line { padding: 1px 0; }
+.status-log .log-ok { color: #00d4aa; }
+.status-log .log-info { color: #888; }
+.status-log .log-running { color: #ffaa00; }
+.status-log .log-err { color: #ff4444; }
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+.result-item {
+  background: #0e0e0e;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.result-item .ri-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+.result-item .ri-value { font-size: 22px; font-weight: 700; color: #fff; margin-top: 6px; }
+.result-item .ri-value.ok { color: #00d4aa; }
+.result-item .ri-value.running { color: #ffaa00; }
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-bar label { font-size: 13px; color: #888; }
+.filter-bar select, .filter-bar input {
+  background: #0e0e0e;
+  border: 1px solid #333;
+  color: #e0e0e0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.filter-bar input[type="datetime-local"] { color-scheme: dark; }
+.chart-wrapper {
+  background: #0e0e0e;
+  border-radius: 10px;
+  padding: 16px;
+}
+.session-info {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+.session-info strong { color: #00d4aa; }
+.elapsed { color: #ffaa00; font-size: 14px; margin-top: 8px; }
+@media (max-width: 600px) {
+  .result-grid { grid-template-columns: 1fr; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-brand">CFTest</span>
+  <span class="tab active" data-tab="test">Test</span>
+  <span class="tab" data-tab="report">Report</span>
+</nav>
+<div class="container">
+  <div class="section active" id="section-test">
+    <div class="card">
+      <h2>Continuous Speed Test</h2>
+      <p style="color:#888;font-size:14px;margin-bottom:8px;">
+        Downloads and uploads run simultaneously in a continuous loop. Throughput is logged to DB every second.
+      </p>
+      <div class="session-info" id="session-info"></div>
+      <button class="btn-test" id="btn-start">&#9654; Start Test</button>
+      <div class="result-grid" id="results">
+        <div class="result-item">
+          <div class="ri-label">Download</div>
+          <div class="ri-value" id="val-download">—</div>
+        </div>
+        <div class="result-item">
+          <div class="ri-label">Upload</div>
+          <div class="ri-value" id="val-upload">—</div>
+        </div>
+      </div>
+      <div class="elapsed" id="elapsed">Elapsed: 0s</div>
+      <div class="status-log" id="log">
+        <div class="log-line log-info">Idle — press Start Test to begin.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="section-report">
+    <div class="card">
+      <h2>Throughput Report</h2>
+      <div class="filter-bar">
+        <label>From</label>
+        <input type="datetime-local" id="filter-since">
+        <label>To</label>
+        <input type="datetime-local" id="filter-until">
+        <label>Type</label>
+        <select id="filter-type">
+          <option value="">All</option>
+          <option value="download">Download</option>
+          <option value="upload">Upload</option>
+        </select>
+        <button class="btn-test" id="btn-refresh" style="padding:8px 20px;font-size:13px;">Refresh</button>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="chart"></canvas>
+      </div>
+      <div style="display:flex;justify-content:center;gap:12px;margin-top:12px;">
+        <button class="btn-test" id="btn-scroll-left" style="padding:6px 16px;font-size:16px;">&larr;</button>
+        <button class="btn-test" id="btn-scroll-right" style="padding:6px 16px;font-size:16px;">&rarr;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const btnStart = document.getElementById('btn-start');
+const logEl = document.getElementById('log');
+const valDownload = document.getElementById('val-download');
+const valUpload = document.getElementById('val-upload');
+const sessionInfo = document.getElementById('session-info');
+const elapsedEl = document.getElementById('elapsed');
+
+const tabs = document.querySelectorAll('.tab');
+const sections = {
+  test: document.getElementById('section-test'),
+  report: document.getElementById('section-report'),
+};
+
+tabs.forEach(t => t.addEventListener('click', () => {
+  tabs.forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  Object.keys(sections).forEach(k => sections[k].classList.remove('active'));
+  sections[t.dataset.tab].classList.add('active');
+  if (t.dataset.tab === 'report') loadReports();
+}));
+
+const TZ_OFF = 7 * 3600 * 1000;
+let chart = null;
+let running = false;
+let stopFlag = false;
+let dlReader = null;
+let ulAbort = null;
+let sessionId = null;
+let startTime = 0;
+let elapsedTimer = null;
+
+function fmtNow() {
+  return new Date().toLocaleTimeString();
+}
+
+function log(msg, cls = 'log-info') {
+  const line = document.createElement('div');
+  line.className = `log-line log-${cls}`;
+  line.textContent = `[${fmtNow()}] ${msg}`;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+btnStart.addEventListener('click', async () => {
+  if (running) {
+    stopFlag = true;
+    if (dlReader) { dlReader.cancel(); dlReader = null; }
+    if (ulAbort) { ulAbort.abort(); ulAbort = null; }
+    btnStart.disabled = true;
+    btnStart.textContent = 'Stopping...';
+    log('Stopping...', 'running');
+    return;
+  }
+
+  running = true;
+  stopFlag = false;
+  sessionId = 's-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+  startTime = Date.now();
+  sessionInfo.innerHTML = `Session: <strong>${sessionId}</strong>`;
+
+  btnStart.textContent = '\u23F9 Stop Test';
+  btnStart.classList.add('btn-stop');
+  btnStart.disabled = false;
+  logEl.innerHTML = '';
+  valDownload.textContent = '...';
+  valDownload.className = 'running';
+  valUpload.textContent = '...';
+  valUpload.className = 'running';
+
+  elapsedTimer = setInterval(() => {
+    elapsedEl.textContent = `Elapsed: ${Math.floor((Date.now() - startTime) / 1000)}s`;
+  }, 200);
+
+  log('Test started — parallel download & upload streaming continuously.', 'info');
+
+  await Promise.all([
+    runDownload(),
+    runUpload(),
+  ]);
+
+  clearInterval(elapsedTimer);
+  log(`Test stopped after ${Math.floor((Date.now() - startTime) / 1000)}s.`, 'info');
+  running = false;
+  stopFlag = false;
+  btnStart.textContent = '\u25B6 Start Test';
+  btnStart.classList.remove('btn-stop');
+  btnStart.disabled = false;
+});
+
+async function runDownload() {
+  try {
+    let accBytes = 0;
+    let lastLog = performance.now();
+    let logBuf = [];
+
+    while (!stopFlag) {
+      const resp = await fetch('/api/download-stream', { cache: 'no-store' });
+      const reader = resp.body.getReader();
+      dlReader = reader;
+
+      while (!stopFlag) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        accBytes += value.length;
+
+        const now = performance.now();
+        const delta = now - lastLog;
+        if (delta >= 1000) {
+          const mbps = (accBytes * 8) / (delta / 1000) / 1_000_000;
+          valDownload.textContent = `${mbps.toFixed(2)} Mbps`;
+          valDownload.className = 'ok';
+
+          logBuf.push(mbps);
+          if (logBuf.length === 5) {
+            const avg = logBuf.reduce((a, b) => a + b, 0) / 5;
+            logToServer('download', avg);
+            log(`dl: ${avg.toFixed(2)} Mbps (avg 5s)`, 'ok');
+            logBuf = [];
+          }
+
+          accBytes = 0;
+          lastLog = now;
+        }
+      }
+      dlReader = null;
+    }
+  } catch (_) {}
+  dlReader = null;
+}
+
+async function runUpload() {
+  try {
+    const CHUNK_SIZE = 5 * 1024 * 1024;
+    const buf = new Uint8Array(CHUNK_SIZE);
+    for (let i = 0; i < CHUNK_SIZE; i++) buf[i] = i & 0xFF;
+    const uploadBlob = new Blob([buf]);
+
+    let accBytes = 0;
+    let lastLog = performance.now();
+    let logBuf = [];
+
+    while (!stopFlag) {
+      ulAbort = new AbortController();
+      const form = new FormData();
+      form.append('file', uploadBlob, 'chunk.bin');
+      await fetch('/api/upload', { method: 'POST', body: form, signal: ulAbort.signal });
+      ulAbort = null;
+      accBytes += CHUNK_SIZE;
+
+      const now = performance.now();
+      const delta = now - lastLog;
+      if (delta >= 1000) {
+        const mbps = (accBytes * 8) / (delta / 1000) / 1_000_000;
+        valUpload.textContent = `${mbps.toFixed(2)} Mbps`;
+        valUpload.className = 'ok';
+
+        logBuf.push(mbps);
+        if (logBuf.length === 5) {
+          const avg = logBuf.reduce((a, b) => a + b, 0) / 5;
+          logToServer('upload', avg);
+          log(`ul: ${avg.toFixed(2)} Mbps (avg 5s)`, 'ok');
+          logBuf = [];
+        }
+
+        accBytes = 0;
+        lastLog = now;
+      }
+    }
+  } catch (_) {}
+  ulAbort = null;
+}
+
+async function logToServer(testType, mbps) {
+  try {
+    await fetch('/api/log-throughput', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        session_id: sessionId,
+        entries: [{
+          test_type: testType,
+          throughput_mbps: mbps,
+          data_size_bytes: 0,
+          duration_ms: 1000,
+        }],
+      }),
+    });
+  } catch (_) {}
+}
+
+async function loadReports() {
+  const since = document.getElementById('filter-since').value;
+  const until = document.getElementById('filter-until').value;
+  const type = document.getElementById('filter-type').value;
+  const params = new URLSearchParams();
+  if (since) params.set('since', wibFromUtc(since).toISOString());
+  if (until) params.set('until', wibFromUtc(until).toISOString());
+  if (type) params.set('test_type', type);
+  const qs = params.toString();
+  const url = '/api/reports' + (qs ? '?' + qs : '');
+
+  try {
+    const resp = await fetch(url);
+    const data = await resp.json();
+    renderChart(data);
+  } catch (e) {
+    console.error('Failed to load reports:', e);
+  }
+}
+
+function updateFilterFromTo() {
+  if (!chart || !chart.scales || !chart.scales.x) return;
+  const min = chart.scales.x.min;
+  const max = chart.scales.x.max;
+  if (min == null || max == null) return;
+  document.getElementById('filter-since').value = toWib(new Date(min - TZ_OFF));
+  document.getElementById('filter-until').value = toWib(new Date(max - TZ_OFF));
+}
+
+function scrollChart(direction) {
+  if (!chart || !chart.scales || !chart.scales.x) return;
+  const xScale = chart.scales.x;
+  const range = xScale.max - xScale.min;
+  const step = range * 0.2;
+  const newSince = new Date(xScale.min - TZ_OFF + step * direction);
+  const newUntil = new Date(xScale.max - TZ_OFF + step * direction);
+  document.getElementById('filter-since').value = toWib(newSince);
+  document.getElementById('filter-until').value = toWib(newUntil);
+  loadReports();
+}
+
+function renderChart(data) {
+  const ctx = document.getElementById('chart').getContext('2d');
+  if (chart) chart.destroy();
+
+  if (!data.length) {
+    chart = new Chart(ctx, {
+      type: 'scatter',
+      data: { datasets: [] },
+      options: {
+        plugins: { title: { display: true, text: 'No data yet', color: '#888' } },
+      },
+    });
+    return;
+  }
+
+  const dlData = data.filter(d => d.test_type === 'download').map(d => ({ x: new Date(d.created_at).getTime() + TZ_OFF, y: d.throughput_mbps }));
+  const ulData = data.filter(d => d.test_type === 'upload').map(d => ({ x: new Date(d.created_at).getTime() + TZ_OFF, y: d.throughput_mbps }));
+
+  chart = new Chart(ctx, {
+    type: 'scatter',
+    data: {
+      datasets: [
+        dlData.length ? {
+          label: 'Download (Mbps)',
+          data: dlData,
+          backgroundColor: '#00d4aa',
+          borderColor: '#00d4aa',
+          showLine: true,
+          tension: 0.2,
+          pointRadius: 3,
+          yAxisID: 'y',
+        } : null,
+        ulData.length ? {
+          label: 'Upload (Mbps)',
+          data: ulData,
+          backgroundColor: '#4488ff',
+          borderColor: '#4488ff',
+          showLine: true,
+          tension: 0.2,
+          pointRadius: 3,
+          yAxisID: 'y',
+        } : null,
+      ].filter(Boolean),
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            title: function(items) {
+              const d = new Date(items[0].parsed.x);
+              return d.toLocaleString('en', { timeZone: 'UTC', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            },
+          },
+        },
+        legend: { labels: { color: '#aaa' } },
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'x',
+            onPanComplete: function() { updateFilterFromTo(); },
+          },
+          zoom: {
+            wheel: { enabled: true },
+            pinch: { enabled: true },
+            mode: 'x',
+            onZoomComplete: function() { updateFilterFromTo(); },
+          },
+        },
+      },
+      scales: {
+        x: {
+          type: 'time',
+          time: { displayFormats: { hour: 'MMM d HH:mm', minute: 'HH:mm' } },
+          ticks: {
+            color: '#888', maxTicksLimit: 12,
+            callback: function(val) {
+              return new Date(val).toLocaleString('en', { timeZone: 'UTC', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            },
+          },
+          grid: { color: '#222' },
+        },
+        y: {
+          title: { display: true, text: 'Mbps', color: '#888' },
+          ticks: { color: '#888' },
+          grid: { color: '#222' },
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+  updateFilterFromTo();
+}
+
+document.getElementById('btn-refresh').addEventListener('click', function() {
+  const now = new Date();
+  const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+  document.getElementById('filter-since').value = toWib(hourAgo);
+  document.getElementById('filter-until').value = toWib(now);
+  document.getElementById('filter-type').value = '';
+  loadReports();
+});
+
+document.getElementById('btn-scroll-left').addEventListener('click', function() {
+  scrollChart(-1);
+});
+document.getElementById('btn-scroll-right').addEventListener('click', function() {
+  scrollChart(1);
+});
+
+function wibFromUtc(str) {
+  const [d, t] = str.split('T');
+  const [y, M, d_] = d.split('-').map(Number);
+  const [h, m] = t.split(':').map(Number);
+  return new Date(Date.UTC(y, M - 1, d_, h - 7, m));
+}
+
+function toWib(d) {
+  const off = d.getTime() + 7 * 3600 * 1000;
+  return new Date(off).toISOString().replace('Z', '').slice(0, 16);
+}
+
+(function initFilters() {
+  const now = new Date();
+  const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+  document.getElementById('filter-since').value = toWib(hourAgo);
+  document.getElementById('filter-until').value = toWib(now);
+})();
+</script>
+</body>
+</html>
