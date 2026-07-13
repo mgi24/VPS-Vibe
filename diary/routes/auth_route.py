@@ -1,4 +1,5 @@
 import os
+import re
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import select
@@ -11,6 +12,9 @@ from auth import hash_password, verify_password, create_token, get_current_user
 
 router = APIRouter(prefix="/api", tags=["auth"])
 
+def strip_html(text: str | None) -> str | None:
+    return re.sub(r'<[^>]*>', '', text) if text else text
+
 
 @router.post("/register")
 async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
@@ -19,7 +23,7 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Username already taken")
 
     user = User(
-        username=body.username,
+        username=strip_html(body.username),
         password_hash=hash_password(body.password),
         role="general",
         approved=False,

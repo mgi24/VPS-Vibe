@@ -8,7 +8,7 @@ Demo object detection running on port 8004.
 |---|---|---|
 | `POST /detect` | `yolov8s.pt` | Object detection |
 | `POST /segment` | `yolo11n-seg.pt` | Segmentation |
-| `POST /cs2-segment` | `cs2-s-26best.pt` | CS2 segmentation |
+| `POST /cs2-segment` | `cs2-s-26last.pt` | CS2 segmentation |
 
 ## Model Loading
 
