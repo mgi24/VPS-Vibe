@@ -390,6 +390,37 @@ def get_service_status(name: str) -> dict:
     }
 
 
+def get_service_memory(name: str) -> dict:
+    try:
+        _, cg_path, _ = run_systemctl(["show", name, "--property=ControlGroup", "--value"])
+        cgroup_procs = f"/sys/fs/cgroup{cg_path}/cgroup.procs"
+        try:
+            with open(cgroup_procs) as f:
+                pids = {int(line.strip()) for line in f if line.strip().isdigit()}
+        except FileNotFoundError:
+            pids = set()
+        if not pids:
+            _, main_pid_str, _ = run_systemctl(["show", name, "--property=MainPID", "--value"])
+            main_pid = int(main_pid_str)
+            if main_pid > 0:
+                pids = {main_pid}
+        if not pids:
+            return {"rss_mb": 0, "pids": 0}
+        total_rss = 0
+        for pid in pids:
+            try:
+                with open(f"/proc/{pid}/status") as f:
+                    for line in f:
+                        if line.startswith("VmRSS:"):
+                            total_rss += int(line.split()[1])
+                            break
+            except (FileNotFoundError, PermissionError, IndexError):
+                pass
+        return {"rss_mb": round(total_rss / 1024, 1), "pids": len(pids)}
+    except Exception:
+        return {"rss_mb": 0, "pids": 0}
+
+
 @app.get("/api/services/available")
 async def get_available_services(token: str = Query(...)):
     session = sessions.get(token)
@@ -404,7 +435,12 @@ async def get_monitored(token: str = Query(...)):
     if not session or datetime.utcnow() > session["expires"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
     names = load_monitored_services()
-    statuses = [get_service_status(n) for n in names]
+    statuses = []
+    for n in names:
+        svc = get_service_status(n)
+        mem = get_service_memory(n)
+        svc.update(mem)
+        statuses.append(svc)
     return {"services": statuses}
 
 

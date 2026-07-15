@@ -102,35 +102,31 @@ input,button,select,textarea{font-family:inherit}
 .svc-controls button{padding:8px 14px;background:var(--accent2);border:1px solid var(--border);color:#fff;border-radius:6px;font-size:13px;font-weight:600;outline:none;cursor:pointer;transition:opacity 0.15s}
 .svc-controls button:hover{opacity:0.85}
 .svc-controls button.svc-add-btn{background:var(--green);color:#000}
-.svc-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:16px;transition:border-color 0.15s}
-.svc-card:hover{border-color:var(--accent2)}
-.svc-card .svc-info{flex:1;min-width:0}
-.svc-card .svc-name{font-size:14px;font-weight:600;color:#fff;margin-bottom:2px;font-family:'Consolas','Courier New',monospace}
-.svc-card .svc-desc{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.svc-badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px}
-.svc-badge.active{background:rgba(12,237,160,0.15);color:var(--green)}
-.svc-badge.inactive{background:rgba(106,106,138,0.2);color:var(--text2)}
-.svc-badge.failed{background:rgba(233,69,96,0.15);color:var(--accent)}
-.svc-badge.enabled{background:rgba(91,141,239,0.15);color:var(--accent2)}
-.svc-badge.disabled{background:rgba(106,106,138,0.2);color:var(--text2)}
-.svc-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.svc-actions button{padding:5px 12px;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;transition:opacity 0.15s}
-.svc-actions button:hover{opacity:0.8}
-.svc-actions .svc-btn-restart{background:var(--accent2);color:#fff}
-.svc-actions .svc-btn-start{background:var(--green);color:#000}
-.svc-actions .svc-btn-stop{background:var(--accent);color:#fff}
-.svc-actions .svc-btn-enable{background:var(--accent2);color:#fff}
-.svc-actions .svc-btn-disable{background:var(--text2);color:#fff}
-.svc-actions .svc-btn-remove{background:transparent;border:1px solid var(--text2);color:var(--text2)}
-.svc-actions .svc-btn-remove:hover{border-color:var(--accent);color:var(--accent)}
-.svc-actions .svc-btn-show{background:transparent;border:1px solid var(--accent2);color:var(--accent2)}
-.svc-actions .svc-btn-show:hover{background:rgba(91,141,239,0.1)}
-.svc-actions .svc-btn-show.active{background:var(--accent2);color:#fff}
-.svc-config{display:none;margin-top:10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.svc-table{width:100%;border-collapse:collapse;font-size:13px}
+.svc-table th{padding:10px 12px;text-align:left;background:var(--surface);color:var(--text2);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.3px;border-bottom:1px solid var(--border)}
+.svc-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text)}
+.svc-table tr:hover td{background:rgba(255,255,255,0.03)}
+.svc-table .svc-td-name{font-family:'Consolas','Courier New',monospace;font-weight:600;color:#fff}
+.svc-table .svc-td-desc{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
+.svc-check{font-size:16px;line-height:1}
+.svc-check.yes{color:var(--green)}
+.svc-check.no{color:var(--accent)}
+.svc-drop-wrap{position:relative;display:inline-block}
+.svc-drop-btn{padding:5px 12px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:4px}
+.svc-drop-btn:hover{border-color:var(--accent2);color:#fff}
+.svc-drop-btn .arrow{font-size:8px}
+.svc-drop-menu{display:none;position:absolute;right:0;top:100%;margin-top:4px;background:var(--surface);border:1px solid var(--border);border-radius:6px;min-width:150px;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,0.4);overflow:hidden}
+.svc-drop-menu.show{display:block}
+.svc-drop-item{padding:8px 14px;font-size:12px;color:var(--text);cursor:pointer;transition:background 0.1s;white-space:nowrap}
+.svc-drop-item:hover{background:rgba(255,255,255,0.05);color:#fff}
+.svc-drop-item.danger{color:var(--accent)}
+.svc-drop-item.danger:hover{background:rgba(233,69,96,0.1)}
+.svc-drop-sep{height:1px;background:var(--border);margin:2px 0}
+.svc-config{display:none;margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;overflow:hidden}
 .svc-config.show{display:block}
 .svc-config pre{padding:12px 14px;font-size:11px;color:var(--text);white-space:pre-wrap;word-break:break-all;font-family:'Consolas','Courier New',monospace;line-height:1.5;margin:0;max-height:400px;overflow-y:auto}
 .svc-config .svc-config-src{padding:6px 14px;font-size:10px;color:var(--text2);border-bottom:1px solid var(--border);background:var(--surface)}
-.svc-sep{width:1px;height:20px;background:var(--border);margin:0 2px}
+.svc-empty{padding:32px;text-align:center;color:var(--text2);font-size:13px}
 /* Service Add Modal */
 .svc-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:999}
 .svc-modal-overlay.show{display:flex}
@@ -148,7 +144,6 @@ input,button,select,textarea{font-family:inherit}
 .svc-modal-item.svc-already .svc-modal-add{background:var(--text2);color:#fff;cursor:default;opacity:0.5}
 .svc-modal-close{margin-top:12px;padding:8px 20px;background:var(--text2);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;align-self:flex-end}
 .svc-modal-close:hover{opacity:0.85}
-.svc-empty{padding:32px;text-align:center;color:var(--text2);font-size:13px}
 </style>
 </head>
 <body>
@@ -630,6 +625,7 @@ function escapeHtml(str) {
 
 // ── Service Management ────────────────────────────────────────
 let svcAvailable = [];
+let openDropdown = null;
 
 async function loadService() {
   const el = document.getElementById('tab-services');
@@ -638,7 +634,8 @@ async function loadService() {
       <button class="svc-add-btn" id="svc-add-btn">+ Add Service</button>
       <button id="svc-refresh">&#8635; Refresh</button>
     </div>
-    <div id="svc-list"><div class="svc-empty"><span class="spinner"></span> Loading...</div></div>
+    <div id="svc-table-wrap"></div>
+    <div id="svc-config-area"></div>
   `;
   document.getElementById('svc-add-btn').addEventListener('click', openAddServiceModal);
   document.getElementById('svc-refresh').addEventListener('click', refreshServices);
@@ -646,7 +643,7 @@ async function loadService() {
 }
 
 async function refreshServices() {
-  const el = document.getElementById('svc-list');
+  const el = document.getElementById('svc-table-wrap');
   el.innerHTML = '<div class="svc-empty"><span class="spinner"></span> Loading...</div>';
   try {
     const res = await fetch('/api/services/monitored?token=' + encodeURIComponent(authToken));
@@ -656,48 +653,59 @@ async function refreshServices() {
       el.innerHTML = '<div class="svc-empty">No services monitored. Click "+ Add Service" to begin.</div>';
       return;
     }
-    let html = '';
+    let html = '<table class="svc-table"><thead><tr>';
+    html += '<th>Service</th><th>Status</th><th>Enabled</th><th>Memory</th><th></th>';
+    html += '</tr></thead><tbody>';
     for (const svc of data.services) {
       const isActive = svc.active_state === 'active';
       const isFailed = svc.active_state === 'failed';
       const isEnabled = svc.enabled_state === 'enabled';
-      const stateCls = isFailed ? 'failed' : (isActive ? 'active' : 'inactive');
-      const enCls = isEnabled ? 'enabled' : 'disabled';
       const safeId = svc.name.replace(/[^a-zA-Z0-9]/g, '_');
-      html += '<div class="svc-card-wrap">';
-      html += '<div class="svc-card">';
-      html += '<div class="svc-info">';
-      html += '<div class="svc-name">' + escapeHtml(svc.name) + '</div>';
-      html += '<div class="svc-desc">' + escapeHtml(svc.description) + '</div>';
-      html += '</div>';
-      html += '<span class="svc-badge ' + stateCls + '">' + svc.active_state + '</span>';
-      html += '<span class="svc-badge ' + enCls + '">' + svc.enabled_state + '</span>';
-      html += '<div class="svc-actions">';
-      html += '<button class="svc-btn-restart" onclick="svcAction(\'' + svc.name + '\',\'restart\')">Restart</button>';
+      const memStr = svc.pids > 0 ? svc.rss_mb + ' MB \u00b7 ' + svc.pids + ' PID' + (svc.pids > 1 ? 's' : '') : '\u2014';
+      html += '<tr>';
+      html += '<td><div class="svc-td-name">' + escapeHtml(svc.name) + '</div><div class="svc-td-desc">' + escapeHtml(svc.description) + '</div></td>';
+      html += '<td><span class="svc-check ' + (isActive || isFailed ? (isFailed ? 'no' : 'yes') : 'no') + '">' + (isActive ? '\u2713' : '\u2717') + '</span></td>';
+      html += '<td><span class="svc-check ' + (isEnabled ? 'yes' : 'no') + '">' + (isEnabled ? '\u2713' : '\u2717') + '</span></td>';
+      html += '<td style="color:var(--text2);font-size:12px">' + memStr + '</td>';
+      html += '<td style="text-align:right"><div class="svc-drop-wrap">';
+      html += '<button class="svc-drop-btn" onclick="toggleDropdown(event,\'' + safeId + '\')">Actions <span class="arrow">\u25be</span></button>';
+      html += '<div class="svc-drop-menu" id="svc-drop-' + safeId + '">';
+      html += '<div class="svc-drop-item" onclick="svcAction(\'' + svc.name + '\',\'restart\')">Restart</div>';
       if (isActive) {
-        html += '<button class="svc-btn-stop" onclick="svcAction(\'' + svc.name + '\',\'stop\')">Stop</button>';
+        html += '<div class="svc-drop-item" onclick="svcAction(\'' + svc.name + '\',\'stop\')">Stop</div>';
       } else {
-        html += '<button class="svc-btn-start" onclick="svcAction(\'' + svc.name + '\',\'start\')">Start</button>';
+        html += '<div class="svc-drop-item" onclick="svcAction(\'' + svc.name + '\',\'start\')">Start</div>';
       }
-      html += '<div class="svc-sep"></div>';
+      html += '<div class="svc-drop-sep"></div>';
       if (isEnabled) {
-        html += '<button class="svc-btn-disable" onclick="svcAction(\'' + svc.name + '\',\'disable\')">Disable</button>';
+        html += '<div class="svc-drop-item" onclick="svcAction(\'' + svc.name + '\',\'disable\')">Disable</div>';
       } else {
-        html += '<button class="svc-btn-enable" onclick="svcAction(\'' + svc.name + '\',\'enable\')">Enable</button>';
+        html += '<div class="svc-drop-item" onclick="svcAction(\'' + svc.name + '\',\'enable\')">Enable</div>';
       }
-      html += '<div class="svc-sep"></div>';
-      html += '<button class="svc-btn-show" id="svc-show-' + safeId + '" onclick="toggleServiceConfig(\'' + svc.name + '\',\'' + safeId + '\')">Show</button>';
-      html += '<button class="svc-btn-remove" onclick="removeService(\'' + svc.name + '\')">Remove</button>';
-      html += '</div>';
-      html += '</div>';
-      html += '<div class="svc-config" id="svc-config-' + safeId + '"></div>';
-      html += '</div>';
+      html += '<div class="svc-drop-sep"></div>';
+      html += '<div class="svc-drop-item" onclick="toggleServiceConfig(\'' + svc.name + '\')">Show Config</div>';
+      html += '<div class="svc-drop-item danger" onclick="removeService(\'' + svc.name + '\')">Remove</div>';
+      html += '</div></div></td>';
+      html += '</tr>';
     }
+    html += '</tbody></table>';
     el.innerHTML = html;
   } catch(e) {
     el.innerHTML = '<div class="svc-empty" style="color:var(--accent)">Error: ' + escapeHtml(e.message) + '</div>';
   }
 }
+
+function toggleDropdown(e, safeId) {
+  e.stopPropagation();
+  const menu = document.getElementById('svc-drop-' + safeId);
+  if (openDropdown && openDropdown !== menu) openDropdown.classList.remove('show');
+  menu.classList.toggle('show');
+  openDropdown = menu.classList.contains('show') ? menu : null;
+}
+
+document.addEventListener('click', () => {
+  if (openDropdown) { openDropdown.classList.remove('show'); openDropdown = null; }
+});
 
 async function svcAction(name, action) {
   try {
@@ -720,40 +728,27 @@ async function removeService(name) {
   }
 }
 
-async function toggleServiceConfig(name, safeId) {
-  const configEl = document.getElementById('svc-config-' + safeId);
-  const btnEl = document.getElementById('svc-show-' + safeId);
-
-  if (configEl.classList.contains('show')) {
-    configEl.classList.remove('show');
-    btnEl.classList.remove('active');
-    btnEl.textContent = 'Show';
+async function toggleServiceConfig(name) {
+  const el = document.getElementById('svc-config-area');
+  if (el.dataset.current === name) {
+    el.innerHTML = '';
+    el.dataset.current = '';
     return;
   }
-
-  document.querySelectorAll('.svc-config.show').forEach(el => el.classList.remove('show'));
-  document.querySelectorAll('.svc-btn-show.active').forEach(el => {
-    el.classList.remove('active');
-    el.textContent = 'Show';
-  });
-
-  configEl.innerHTML = '<div class="svc-config-src"><span class="spinner"></span> Loading config...</div>';
-  configEl.classList.add('show');
-  btnEl.classList.add('active');
-  btnEl.textContent = 'Hide';
-
+  el.dataset.current = name;
+  el.innerHTML = '<div class="svc-config show"><div class="svc-config-src"><span class="spinner"></span> Loading config for ' + escapeHtml(name) + '...</div></div>';
   try {
     const res = await fetch('/api/services/' + encodeURIComponent(name) + '/config?token=' + encodeURIComponent(authToken));
     if (!res.ok) throw new Error('Failed to load config');
     const data = await res.json();
     if (data.error) {
-      configEl.innerHTML = '<div class="svc-config-src">' + escapeHtml(data.source || '') + '</div><pre style="color:var(--accent)">' + escapeHtml(data.error) + '</pre>';
+      el.innerHTML = '<div class="svc-config show"><div class="svc-config-src">' + escapeHtml(data.source || '') + '</div><pre style="color:var(--accent)">' + escapeHtml(data.error) + '</pre></div>';
     } else {
       const srcLabel = data.source ? '<div class="svc-config-src">' + escapeHtml(data.source) + '</div>' : '';
-      configEl.innerHTML = srcLabel + '<pre>' + escapeHtml(data.config) + '</pre>';
+      el.innerHTML = '<div class="svc-config show">' + srcLabel + '<pre>' + escapeHtml(data.config) + '</pre></div>';
     }
   } catch(e) {
-    configEl.innerHTML = '<pre style="color:var(--accent)">Error: ' + escapeHtml(e.message) + '</pre>';
+    el.innerHTML = '<div class="svc-config show"><pre style="color:var(--accent)">Error: ' + escapeHtml(e.message) + '</pre></div>';
   }
 }
 
