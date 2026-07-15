@@ -18,11 +18,6 @@ diary/*.pyc
 !VPNweb/**
 VPNweb/.venv/
 VPNweb/__pycache__/
-!cftest/
-!cftest/**
-cftest/.venv/
-cftest/__pycache__/
-cftest/static/dl-chunk.bin
-cftest/__pycache__/
+
 doc.md
 __pycache__/

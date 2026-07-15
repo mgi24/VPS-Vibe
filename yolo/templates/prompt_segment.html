@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MMV Prompt</title>
+  <link rel="icon" type="image/png" href="/assets/mmvlogo.png">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background-color: #0a0a0a;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+}
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #111;
+  padding: 12px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #222;
+}
+.nav-left { display: flex; gap: 8px; align-items: center; }
+.nav-right { display: flex; gap: 4px; align-items: center; }
+.nav-item {
+  color: #aaa;
+  text-decoration: none;
+  padding: 8px 16px;
+  font-size: 15px;
+  transition: all 0.25s;
+  border: 1px solid transparent;
+  border-radius: 6px;
+}
+.nav-item:hover { color: #fff; border-color: #00d4aa; background: rgba(0, 212, 170, 0.08); }
+.nav-item.active { color: #fff; border-color: #00d4aa; background: rgba(0, 212, 170, 0.12); }
+.nav-brand {
+  color: #00d4aa;
+  font-weight: 700;
+  font-size: 18px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-logo { height: 28px; width: auto; }
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.card {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #141414;
+  border: 1px solid #222;
+  border-left: 4px solid #00d4aa;
+}
+.card-body { padding: 24px; }
+
+.sample-section { margin-bottom: 20px; }
+.sample-section .sample-title {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.sample-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.sample-item {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid #333;
+  cursor: pointer;
+  transition: all 0.25s;
+  aspect-ratio: 16/9;
+}
+.sample-item:hover { border-color: #00d4aa; transform: scale(1.04); box-shadow: 0 0 16px rgba(0, 212, 170, 0.3); }
+.sample-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sample-item .sample-label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 4px 8px;
+  background: rgba(0,0,0,0.75);
+  font-size: 10px;
+  color: #aaa;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upload-header { margin-bottom: 16px; }
+.upload-header strong { font-size: 16px; color: #fff; }
+.upload-header p { font-size: 13px; color: #888; margin-top: 4px; }
+
+.drop-zone {
+  border: 2px dashed #444;
+  border-radius: 12px;
+  padding: 30px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  background: #0e0e0e;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.drop-zone:hover, .drop-zone.drag-over { border-color: #00d4aa; background: rgba(0, 212, 170, 0.06); }
+.drop-zone .dz-icon { font-size: 36px; opacity: 0.4; margin-bottom: 4px; }
+.drop-zone .dz-text { font-size: 15px; color: #aaa; }
+.drop-zone .dz-hint { font-size: 12px; color: #555; }
+.drop-zone .dz-error { font-size: 13px; color: #ff4444; margin-top: 4px; }
+
+.preview-area {
+  position: relative;
+  width: 100%;
+  background: #0a0a0a;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+.preview-area .img-container {
+  position: relative;
+  width: 100%;
+}
+.preview-area .img-container img {
+  width: 100%;
+  display: block;
+}
+.preview-area .img-container canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.point-toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px 0;
+}
+.point-toolbar .point-count {
+  font-size: 13px;
+  color: #aaa;
+  flex: 1;
+}
+.point-toolbar .point-mode {
+  display: flex;
+  gap: 4px;
+}
+.point-mode-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: transparent;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+.point-mode-btn.active-fg { border-color: #00d4aa; color: #00d4aa; background: rgba(0, 212, 170, 0.1); }
+.point-mode-btn.active-bg { border-color: #ff4444; color: #ff4444; background: rgba(255, 68, 68, 0.1); }
+.btn-clear-points {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #ff4444;
+  background: transparent;
+  color: #ff4444;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+.btn-clear-points:hover { background: rgba(255, 68, 68, 0.15); }
+.btn-back {
+  background: transparent;
+  border: 1px solid #888;
+  color: #ccc;
+  padding: 6px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.btn-back:hover { border-color: #00d4aa; color: #00d4aa; background: rgba(0, 212, 170, 0.08); }
+
+.settings-section {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.setting-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 160px;
+}
+.setting-row label {
+  font-size: 13px;
+  color: #aaa;
+  display: flex;
+  justify-content: space-between;
+}
+.setting-row label span { color: #00d4aa; font-weight: 600; }
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #333;
+  outline: none;
+  pointer-events: none;
+  opacity: 0.6;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #00d4aa;
+  cursor: default;
+  border: none;
+}
+
+.warning-box {
+  background: #1a1000;
+  border: 1px solid #664400;
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+}
+.warning-box .warn-icon { font-size: 22px; flex-shrink: 0; }
+.warning-box .warn-text { font-size: 13px; color: #ccaa66; line-height: 1.5; }
+.warning-box .warn-text strong { color: #ffcc44; }
+
+.btn-start {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #00d4aa, #00a88a);
+  color: #000;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 16px;
+}
+.btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0, 212, 170, 0.35); }
+.btn-start:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-start.loading { background: #333; color: #888; pointer-events: none; }
+
+.result-area { margin-top: 20px; display: none; }
+.result-area .result-label { font-size: 12px; font-weight: 700; color: #888; letter-spacing: 0.5px; margin-bottom: 6px; }
+.result-area .result-wrapper {
+  position: relative;
+  width: 100%;
+  background: #0a0a0a;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+.result-area .result-wrapper img { width: 100%; display: block; }
+
+.result-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(10,10,10,0.9);
+  color: #888;
+  font-size: 14px;
+}
+.result-loading .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #333;
+  border-top-color: #00d4aa;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.result-loading .spinner-sub {
+  font-size: 12px;
+  color: #666;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.result-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(10,10,10,0.9);
+  color: #ff6b6b;
+  font-size: 13px;
+  padding: 20px;
+  text-align: center;
+}
+
+.promo-section { margin-top: 0; }
+.promo-box {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.promo-text { font-size: 14px; color: #ccc; line-height: 1.5; flex: 1; min-width: 200px; }
+.promo-text strong { color: #00d4aa; }
+.btn-contact {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  padding: 18px 32px;
+  border-radius: 16px;
+  background: #1a0f08;
+  border: 1px solid #663300;
+  color: #fff;
+  font-weight: 700;
+  font-size: 17px;
+  white-space: nowrap;
+  transition: transform 0.3s;
+  animation: contactFireGlow 2s ease-in-out infinite alternate;
+}
+.btn-contact:hover { transform: scale(1.04); }
+.btn-contact small { font-weight: 400; font-size: 11px; opacity: 0.7; margin-top: 2px; color: #ccc; }
+@keyframes contactFireGlow {
+  0% { box-shadow: 0 0 12px rgba(255, 100, 0, 0.25); }
+  50% { box-shadow: 0 0 30px rgba(255, 80, 0, 0.4), 0 0 50px rgba(255, 50, 0, 0.15); }
+  100% { box-shadow: 0 0 12px rgba(255, 100, 0, 0.25); }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 10px 16px; }
+  .container { padding: 12px; }
+  .card-body { padding: 16px; }
+  .promo-box { flex-direction: column; text-align: center; }
+  .btn-contact { width: 100%; }
+  .settings-section { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-left">
+    <a href="https://misbahwork.my.id" class="nav-brand"><img src="/assets/mmvlogo.png" alt="MMV" class="nav-logo"> MMV Prompt</a>
+  </div>
+  <div class="nav-right">
+    <a class="nav-item" href="/">Object</a>
+    <a class="nav-item" href="/segment">Segment</a>
+    <a class="nav-item active" href="/prompt-segment">Prompt</a>
+    <a class="nav-item" href="/cs2-segment">CS2</a>
+    <a class="nav-item" href="#"><span>License Plate</span><span class="coming-soon" style="font-size:10px;color:#ffaa00;margin-left:4px;font-weight:600;vertical-align:super;">Coming Soon!</span></a>
+  </div>
+</nav>
+  <div class="container">
+  <div class="card">
+    <div class="card-body">
+      <div class="sample-section">
+        <div class="sample-title">SAMPLE IMAGES — click to load</div>
+        <div class="sample-grid" id="sample-grid"></div>
+      </div>
+
+      <div class="upload-header">
+        <strong>Upload Image</strong>
+        <p>Click a sample above or drag &amp; drop an image below. Then click points on the image and press Start Inference.</p>
+      </div>
+
+      <div class="drop-zone" id="drop-zone">
+        <div class="dz-icon">&#128247;</div>
+        <div class="dz-text">Drop your image here</div>
+        <div class="dz-hint">or click to browse</div>
+        <div class="dz-error" id="dz-error"></div>
+      </div>
+
+      <div id="upload-content" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:13px;color:#fff;font-weight:600">Loaded Image</span>
+          <button class="btn-back" id="btn-back">&#8592; Back</button>
+        </div>
+        <div class="preview-area">
+          <div class="img-container">
+            <img id="main-image" alt="preview">
+            <canvas id="point-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="point-toolbar">
+          <div class="point-count" id="point-count">0 points</div>
+          <div class="point-mode">
+            <button class="point-mode-btn active-fg" id="mode-fg" data-mode="fg">Foreground</button>
+            <button class="point-mode-btn" id="mode-bg" data-mode="bg">Background</button>
+          </div>
+          <button class="btn-clear-points" id="clear-points">Clear Points</button>
+        </div>
+
+        <div class="settings-section">
+          <div class="setting-row">
+            <label>Confidence <span id="conf-val">0.25</span></label>
+            <input type="range" id="conf-slider" min="0" max="1" step="0.01" value="0.25">
+          </div>
+          <div class="setting-row">
+            <label>Image Size <span id="imgsz-val">640</span></label>
+            <input type="range" id="imgsz-slider" min="320" max="1280" step="32" value="640">
+          </div>
+          <div class="setting-row">
+            <label>IoU <span id="iou-val">0.45</span></label>
+            <input type="range" id="iou-slider" min="0" max="1" step="0.01" value="0.45">
+          </div>
+        </div>
+
+        <div class="warning-box">
+          <span class="warn-icon">&#9888;&#65039;</span>
+          <div class="warn-text">
+            <strong>Demo Notice:</strong> This demo runs on CPU and may take <strong>up to 500 seconds</strong> per inference depending on image size and point complexity. <strong>Real deployment: ~500ms on GPU.</strong>
+          </div>
+        </div>
+
+        <button class="btn-start" id="start-inference">Start Inference</button>
+
+        <div class="result-area" id="result-area">
+          <div class="result-label">RESULT</div>
+          <div class="result-wrapper">
+            <img id="result-image" alt="result">
+            <div class="result-loading" id="result-loading" style="display:none">
+              <div class="spinner"></div>
+              <span>Processing with SAM ...</span>
+              <span class="spinner-sub">This may take a while on CPU</span>
+            </div>
+            <div class="result-error" id="result-error" style="display:none">
+              <span style="font-size:28px;">&#9888;</span>
+              <span id="result-error-text"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="promo-section">
+    <div class="promo-box">
+      <div class="promo-text">
+        <strong>Prompt-Based Any Segmentation</strong><br>
+        Click points on the image to segment objects using SAM (Segment Anything Model).
+      </div>
+      <a class="btn-contact" href="https://misbahwork.my.id/contact" target="_blank">
+        Contact me!
+        <small>real person, get in touch in seconds!</small>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+const SAMPLE_IMAGES = [
+  "beach.JPG",
+  "cctv_jalan_50.jpg",
+  "park.jpeg",
+  "road.jpg",
+  "road2.jpg",
+];
+
+const sampleGrid = document.getElementById('sample-grid');
+SAMPLE_IMAGES.forEach(filename => {
+  const div = document.createElement('div');
+  div.className = 'sample-item';
+  div.innerHTML = `<img src="/assets/any/${filename}" alt="${filename}" loading="lazy"><div class="sample-label">${filename}</div>`;
+  div.addEventListener('click', () => loadSampleImage(`/assets/any/${filename}`));
+  sampleGrid.appendChild(div);
+});
+
+const dropZone = document.getElementById('drop-zone');
+const dzError = document.getElementById('dz-error');
+const uploadContent = document.getElementById('upload-content');
+const mainImage = document.getElementById('main-image');
+const pointCanvas = document.getElementById('point-canvas');
+const pointCount = document.getElementById('point-count');
+const clearPointsBtn = document.getElementById('clear-points');
+const modeFg = document.getElementById('mode-fg');
+const modeBg = document.getElementById('mode-bg');
+const startBtn = document.getElementById('start-inference');
+const resultArea = document.getElementById('result-area');
+const resultImage = document.getElementById('result-image');
+const resultLoading = document.getElementById('result-loading');
+const resultError = document.getElementById('result-error');
+const resultErrorText = document.getElementById('result-error-text');
+
+const confSlider = document.getElementById('conf-slider');
+const imgszSlider = document.getElementById('imgsz-slider');
+const iouSlider = document.getElementById('iou-slider');
+const confVal = document.getElementById('conf-val');
+const imgszVal = document.getElementById('imgsz-val');
+const iouVal = document.getElementById('iou-val');
+const btnBack = document.getElementById('btn-back');
+
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp'];
+
+let currentBase64 = null;
+let currentDataUrl = null;
+let points = [];
+let pointLabels = [];
+let pointMode = 'fg';
+let imageNaturalW = 0;
+let imageNaturalH = 0;
+let canvasScale = 1;
+
+confSlider.oninput = () => { confVal.textContent = parseFloat(confSlider.value).toFixed(2); };
+imgszSlider.oninput = () => { imgszVal.textContent = imgszSlider.value; };
+iouSlider.oninput = () => { iouVal.textContent = parseFloat(iouSlider.value).toFixed(2); };
+
+modeFg.addEventListener('click', () => {
+  pointMode = 'fg';
+  modeFg.className = 'point-mode-btn active-fg';
+  modeBg.className = 'point-mode-btn';
+  pointCanvas.style.cursor = 'crosshair';
+});
+modeBg.addEventListener('click', () => {
+  pointMode = 'bg';
+  modeBg.className = 'point-mode-btn active-bg';
+  modeFg.className = 'point-mode-btn';
+  pointCanvas.style.cursor = 'crosshair';
+});
+
+clearPointsBtn.addEventListener('click', () => {
+  points = [];
+  pointLabels = [];
+  updatePointDisplay();
+  setupCanvas();
+});
+
+btnBack.addEventListener('click', resetToUpload);
+
+dropZone.addEventListener('click', () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = () => { if (input.files.length) handleFile(input.files[0]); };
+  input.click();
+});
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('drag-over'); });
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+
+startBtn.addEventListener('click', startInference);
+
+function resetToUpload() {
+  currentBase64 = null;
+  currentDataUrl = null;
+  points = [];
+  pointLabels = [];
+  uploadContent.style.display = 'none';
+  dropZone.style.display = 'flex';
+  dzError.textContent = '';
+  mainImage.src = '';
+  resultArea.style.display = 'none';
+  resultImage.src = '';
+  updatePointDisplay();
+}
+
+async function loadSampleImage(url) {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('Failed to fetch');
+    const blob = await resp.blob();
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const dataUrl = e.target.result;
+      currentBase64 = dataUrl.split(',')[1];
+      currentDataUrl = dataUrl;
+      dropZone.style.display = 'none';
+      uploadContent.style.display = 'block';
+      showImage(dataUrl);
+    };
+    reader.readAsDataURL(blob);
+  } catch (e) {
+    dzError.textContent = 'Failed to load sample image.';
+  }
+}
+
+function handleFile(file) {
+  dzError.textContent = '';
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    dzError.textContent = 'Invalid file type. Please drop an image file (JPEG, PNG, WebP, etc).';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const dataUrl = e.target.result;
+    const img = new Image();
+    img.onload = function () {
+      currentBase64 = dataUrl.split(',')[1];
+      currentDataUrl = dataUrl;
+      dropZone.style.display = 'none';
+      uploadContent.style.display = 'block';
+      showImage(dataUrl);
+    };
+    img.onerror = function () { dzError.textContent = 'Corrupted image file.'; };
+    img.src = dataUrl;
+  };
+  reader.onerror = function () { dzError.textContent = 'Failed to read file.'; };
+  reader.readAsDataURL(file);
+}
+
+function showImage(dataUrl) {
+  points = [];
+  pointLabels = [];
+  resultArea.style.display = 'none';
+  resultImage.src = '';
+  updatePointDisplay();
+
+  mainImage.onload = function () {
+    imageNaturalW = mainImage.naturalWidth;
+    imageNaturalH = mainImage.naturalHeight;
+    setupCanvas();
+  };
+  mainImage.src = dataUrl;
+}
+
+function setupCanvas() {
+  const displayRect = mainImage.getBoundingClientRect();
+  pointCanvas.width = displayRect.width;
+  pointCanvas.height = displayRect.height;
+  canvasScale = displayRect.width / imageNaturalW;
+
+  const ctx = pointCanvas.getContext('2d');
+  ctx.clearRect(0, 0, pointCanvas.width, pointCanvas.height);
+
+  drawPointsWithCtx(ctx);
+
+  pointCanvas.onclick = function (e) {
+    const rect = pointCanvas.getBoundingClientRect();
+    const displayX = e.clientX - rect.left;
+    const displayY = e.clientY - rect.top;
+    const naturalX = Math.round(displayX / canvasScale);
+    const naturalY = Math.round(displayY / canvasScale);
+
+    points.push([naturalX, naturalY]);
+    pointLabels.push(pointMode === 'fg' ? 1 : 0);
+    updatePointDisplay();
+    const ctx2 = pointCanvas.getContext('2d');
+    drawPointsWithCtx(ctx2);
+  };
+}
+
+function drawPointsWithCtx(ctx) {
+  ctx.clearRect(0, 0, pointCanvas.width, pointCanvas.height);
+  for (let i = 0; i < points.length; i++) {
+    const [nx, ny] = points[i];
+    const dx = nx * canvasScale;
+    const dy = ny * canvasScale;
+    const isFg = pointLabels[i] === 1;
+
+    ctx.beginPath();
+    ctx.arc(dx, dy, 6, 0, 2 * Math.PI);
+    ctx.fillStyle = isFg ? '#00d4aa' : '#ff4444';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.font = '11px sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.fillText(i + 1, dx, dy - 12);
+  }
+}
+
+function updatePointDisplay() {
+  const fgCount = pointLabels.filter(l => l === 1).length;
+  const bgCount = pointLabels.filter(l => l === 0).length;
+  pointCount.textContent = `${points.length} points (FG: ${fgCount}, BG: ${bgCount})`;
+}
+
+async function startInference() {
+  if (!currentBase64) return;
+  if (points.length === 0) {
+    alert('Please click at least one point on the image before starting inference.');
+    return;
+  }
+
+  startBtn.disabled = true;
+  startBtn.textContent = 'Processing ...';
+  startBtn.classList.add('loading');
+
+  resultArea.style.display = 'block';
+  resultLoading.style.display = 'flex';
+  resultError.style.display = 'none';
+  resultImage.style.display = 'none';
+
+  try {
+    const res = await fetch('/prompt-segment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        base64: currentBase64,
+        points: points,
+        point_labels: pointLabels,
+      })
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    const data = await res.json();
+    resultLoading.style.display = 'none';
+    resultImage.src = 'data:image/jpeg;base64,' + data.image;
+    resultImage.style.display = 'block';
+  } catch (e) {
+    console.error('Inference error:', e);
+    resultLoading.style.display = 'none';
+    resultErrorText.textContent = e.message || 'Connection failed. Backend may be down.';
+    resultError.style.display = 'flex';
+  } finally {
+    startBtn.disabled = false;
+    startBtn.textContent = 'Start Inference';
+    startBtn.classList.remove('loading');
+  }
+}
+</script>
+</body>
+</html>

@@ -16,3 +16,17 @@ logging.info("Model 'segment' loaded from yolo11n-seg.pt")
 cs2_model = YOLO(BASE_DIR / "cs2-s-26last.pt")
 cs2_class_names = cs2_model.names
 logging.info("Model 'cs2_segment' loaded from cs2-s-26last.pt")
+
+_sam_base_model = None
+_sam_base_processor = None
+
+def get_sam_base():
+    global _sam_base_model, _sam_base_processor
+    if _sam_base_model is None:
+        from transformers import SamModel, SamProcessor
+        import torch
+        _sam_base_processor = SamProcessor.from_pretrained("facebook/sam-vit-base")
+        _sam_base_model = SamModel.from_pretrained("facebook/sam-vit-base")
+        _sam_base_model.eval()
+        logging.info("SAM-vit-base model loaded")
+    return _sam_base_model, _sam_base_processor

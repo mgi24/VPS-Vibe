@@ -439,6 +439,7 @@ input[type="range"]::-moz-range-thumb {
   <div class="nav-right">
     <a class="nav-item" href="/">Object</a>
     <a class="nav-item" href="/segment">Segment</a>
+    <a class="nav-item" href="/prompt-segment">Prompt</a>
     <a class="nav-item active" href="/cs2-segment">CS2</a>
     <a class="nav-item" href="#"><span>License Plate</span><span class="coming-soon" style="font-size:10px;color:#ffaa00;margin-left:4px;font-weight:600;vertical-align:super;">Coming Soon!</span></a>
   </div>
@@ -548,6 +549,8 @@ const SAMPLE_IMAGES = [
 
 const sampleGrid = document.getElementById('sample-grid');
 
+let currentBase64 = null;
+
 SAMPLE_IMAGES.forEach(filename => {
   const div = document.createElement('div');
   div.className = 'sample-item';
@@ -564,6 +567,7 @@ async function handleSampleImage(url) {
     const reader = new FileReader();
     reader.onload = function (e) {
       const base64 = e.target.result.split(',')[1];
+      currentBase64 = base64;
       dropZone.style.display = 'none';
       uploadContent.style.display = 'block';
       uploadOriginalImg.src = url;
@@ -599,9 +603,18 @@ const uploadErrorText = document.getElementById('upload-error-text');
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp'];
 
-confSlider.oninput = () => confVal.textContent = parseFloat(confSlider.value).toFixed(2);
-imgszSlider.oninput = () => imgszVal.textContent = imgszSlider.value;
-iouSlider.oninput = () => iouVal.textContent = parseFloat(iouSlider.value).toFixed(2);
+confSlider.oninput = () => {
+  confVal.textContent = parseFloat(confSlider.value).toFixed(2);
+  if (currentBase64) sendUploadImage(currentBase64);
+};
+imgszSlider.oninput = () => {
+  imgszVal.textContent = imgszSlider.value;
+  if (currentBase64) sendUploadImage(currentBase64);
+};
+iouSlider.oninput = () => {
+  iouVal.textContent = parseFloat(iouSlider.value).toFixed(2);
+  if (currentBase64) sendUploadImage(currentBase64);
+};
 
 dropZone.addEventListener('click', () => {
   const input = document.createElement('input');
@@ -627,6 +640,7 @@ dropZone.addEventListener('drop', (e) => {
 });
 
 btnResetUpload.addEventListener('click', () => {
+  currentBase64 = null;
   uploadContent.style.display = 'none';
   dropZone.style.display = 'flex';
   dzError.textContent = '';
@@ -651,6 +665,7 @@ function handleFile(file) {
     const dataUrl = e.target.result;
     const img = new Image();
     img.onload = function () {
+      currentBase64 = dataUrl.split(',')[1];
       dropZone.style.display = 'none';
       uploadContent.style.display = 'block';
       uploadOriginalImg.src = dataUrl;
@@ -658,7 +673,7 @@ function handleFile(file) {
       uploadResultImg.style.display = 'none';
       uploadLoading.style.display = 'none';
       uploadError.style.display = 'none';
-      sendUploadImage(dataUrl.split(',')[1]);
+      sendUploadImage(currentBase64);
     };
     img.onerror = function () {
       dzError.textContent = 'Corrupted image file. Please try another image.';
