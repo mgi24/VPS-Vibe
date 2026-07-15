@@ -6,8 +6,11 @@ import pwd
 import spwd
 import crypt
 import grp
+import json
+from pathlib import Path
+import sqlite3
 from datetime import datetime, timedelta
-from fastapi import FastAPI, Form, Query, HTTPException
+from fastapi import FastAPI, Form, Query, HTTPException, Body
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -15,6 +18,7 @@ sessions = {}
 SESSION_EXPIRE_HOURS = 24
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "manage.db")
 
 app = FastAPI(title="VPS Manager")
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
@@ -314,3 +318,180 @@ async def get_overview(token: str = Query(...)):
     except Exception:
         info["top_processes"] = "N/A"
     return info
+
+
+# ── Service Management ──────────────────────────────────────────────
+
+def _init_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("CREATE TABLE IF NOT EXISTS monitored (name TEXT PRIMARY KEY)")
+    conn.commit()
+    conn.close()
+
+_init_db()
+
+
+def load_monitored_services() -> list[str]:
+    conn = sqlite3.connect(DB_PATH)
+    rows = conn.execute("SELECT name FROM monitored ORDER BY name").fetchall()
+    conn.close()
+    return [r[0] for r in rows]
+
+
+def save_monitored_services(services: list[str]):
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("DELETE FROM monitored")
+    conn.executemany("INSERT INTO monitored (name) VALUES (?)", [(s,) for s in sorted(services)])
+    conn.commit()
+    conn.close()
+
+
+def run_systemctl(args: list[str]) -> tuple[int, str, str]:
+    result = subprocess.run(
+        ["systemctl"] + args,
+        capture_output=True, text=True, timeout=10
+    )
+    return result.returncode, result.stdout.strip(), result.stderr.strip()
+
+
+def list_available_services() -> list[dict]:
+    try:
+        result = subprocess.run(
+            ["systemctl", "list-unit-files", "--type=service", "--no-pager", "--no-legend", "--plain"],
+            capture_output=True, text=True, timeout=10
+        )
+        services = []
+        for line in result.stdout.strip().split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split()
+            if len(parts) >= 2 and parts[0].endswith(".service"):
+                services.append({
+                    "name": parts[0],
+                    "unit_file_state": parts[1],
+                })
+        return services
+    except Exception:
+        return []
+
+
+def get_service_status(name: str) -> dict:
+    _, active_state, _ = run_systemctl(["is-active", name])
+    _, enabled_state, _ = run_systemctl(["is-enabled", name])
+    _, sub_state, _ = run_systemctl(["show", name, "--property=SubState", "--value"])
+    _, description, _ = run_systemctl(["show", name, "--property=Description", "--value"])
+    return {
+        "name": name,
+        "active_state": active_state,
+        "enabled_state": enabled_state,
+        "sub_state": sub_state,
+        "description": description,
+    }
+
+
+@app.get("/api/services/available")
+async def get_available_services(token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return {"services": list_available_services()}
+
+
+@app.get("/api/services/monitored")
+async def get_monitored(token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    names = load_monitored_services()
+    statuses = [get_service_status(n) for n in names]
+    return {"services": statuses}
+
+
+@app.post("/api/services/monitored")
+async def add_monitored(token: str = Body(..., embed=True), name: str = Body(..., embed=True)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    services = load_monitored_services()
+    if name in services:
+        return {"success": True, "message": "Already monitored"}
+    services.append(name)
+    save_monitored_services(services)
+    return {"success": True}
+
+
+@app.delete("/api/services/monitored")
+async def remove_monitored(token: str = Query(...), name: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    services = load_monitored_services()
+    if name not in services:
+        return {"success": True, "message": "Not monitored"}
+    services.remove(name)
+    save_monitored_services(services)
+    return {"success": True}
+
+
+@app.post("/api/services/{name}/start")
+async def start_service(name: str, token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    code, out, err = run_systemctl(["start", name])
+    return {"success": code == 0, "error": err if code != 0 else None}
+
+
+@app.post("/api/services/{name}/stop")
+async def stop_service(name: str, token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    code, out, err = run_systemctl(["stop", name])
+    return {"success": code == 0, "error": err if code != 0 else None}
+
+
+@app.post("/api/services/{name}/restart")
+async def restart_service(name: str, token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    code, out, err = run_systemctl(["restart", name])
+    return {"success": code == 0, "error": err if code != 0 else None}
+
+
+@app.post("/api/services/{name}/enable")
+async def enable_service(name: str, token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    code, out, err = run_systemctl(["enable", name])
+    return {"success": code == 0, "error": err if code != 0 else None}
+
+
+@app.get("/api/services/{name}/config")
+async def get_service_config(name: str, token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    code, out, err = run_systemctl(["cat", name])
+    if code != 0:
+        code2, out2, _ = run_systemctl(["show", name, "--property=FragmentPath", "--value"])
+        if code2 == 0 and out2:
+            try:
+                with open(out2, "r") as f:
+                    return {"name": name, "config": f.read(), "source": out2}
+            except Exception as e:
+                return {"name": name, "config": "", "error": str(e)}
+        return {"name": name, "config": "", "error": err or "Cannot read service config"}
+    return {"name": name, "config": out, "source": "systemctl cat"}
+
+
+@app.post("/api/services/{name}/disable")
+async def disable_service(name: str, token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    code, out, err = run_systemctl(["disable", name])
+    return {"success": code == 0, "error": err if code != 0 else None}

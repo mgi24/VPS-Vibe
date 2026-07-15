@@ -97,6 +97,58 @@ input,button,select,textarea{font-family:inherit}
 /* Loading */
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--text2);border-top-color:var(--accent2);border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* Service Tab */
+.svc-controls{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.svc-controls button{padding:8px 14px;background:var(--accent2);border:1px solid var(--border);color:#fff;border-radius:6px;font-size:13px;font-weight:600;outline:none;cursor:pointer;transition:opacity 0.15s}
+.svc-controls button:hover{opacity:0.85}
+.svc-controls button.svc-add-btn{background:var(--green);color:#000}
+.svc-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:16px;transition:border-color 0.15s}
+.svc-card:hover{border-color:var(--accent2)}
+.svc-card .svc-info{flex:1;min-width:0}
+.svc-card .svc-name{font-size:14px;font-weight:600;color:#fff;margin-bottom:2px;font-family:'Consolas','Courier New',monospace}
+.svc-card .svc-desc{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.svc-badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px}
+.svc-badge.active{background:rgba(12,237,160,0.15);color:var(--green)}
+.svc-badge.inactive{background:rgba(106,106,138,0.2);color:var(--text2)}
+.svc-badge.failed{background:rgba(233,69,96,0.15);color:var(--accent)}
+.svc-badge.enabled{background:rgba(91,141,239,0.15);color:var(--accent2)}
+.svc-badge.disabled{background:rgba(106,106,138,0.2);color:var(--text2)}
+.svc-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.svc-actions button{padding:5px 12px;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;transition:opacity 0.15s}
+.svc-actions button:hover{opacity:0.8}
+.svc-actions .svc-btn-restart{background:var(--accent2);color:#fff}
+.svc-actions .svc-btn-start{background:var(--green);color:#000}
+.svc-actions .svc-btn-stop{background:var(--accent);color:#fff}
+.svc-actions .svc-btn-enable{background:var(--accent2);color:#fff}
+.svc-actions .svc-btn-disable{background:var(--text2);color:#fff}
+.svc-actions .svc-btn-remove{background:transparent;border:1px solid var(--text2);color:var(--text2)}
+.svc-actions .svc-btn-remove:hover{border-color:var(--accent);color:var(--accent)}
+.svc-actions .svc-btn-show{background:transparent;border:1px solid var(--accent2);color:var(--accent2)}
+.svc-actions .svc-btn-show:hover{background:rgba(91,141,239,0.1)}
+.svc-actions .svc-btn-show.active{background:var(--accent2);color:#fff}
+.svc-config{display:none;margin-top:10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.svc-config.show{display:block}
+.svc-config pre{padding:12px 14px;font-size:11px;color:var(--text);white-space:pre-wrap;word-break:break-all;font-family:'Consolas','Courier New',monospace;line-height:1.5;margin:0;max-height:400px;overflow-y:auto}
+.svc-config .svc-config-src{padding:6px 14px;font-size:10px;color:var(--text2);border-bottom:1px solid var(--border);background:var(--surface)}
+.svc-sep{width:1px;height:20px;background:var(--border);margin:0 2px}
+/* Service Add Modal */
+.svc-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:999}
+.svc-modal-overlay.show{display:flex}
+.svc-modal{background:var(--surface);border-radius:12px;padding:24px;width:560px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+.svc-modal h4{font-size:14px;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px}
+.svc-modal-search{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);color:#fff;border-radius:6px;font-size:13px;outline:none;margin-bottom:12px}
+.svc-modal-search:focus{border-color:var(--accent2)}
+.svc-modal-list{flex:1;overflow-y:auto;max-height:50vh}
+.svc-modal-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:6px;cursor:pointer;transition:background 0.1s;font-size:13px}
+.svc-modal-item:hover{background:rgba(255,255,255,0.05)}
+.svc-modal-item .svc-modal-name{font-family:'Consolas','Courier New',monospace;color:var(--text);font-size:12px}
+.svc-modal-item .svc-modal-state{font-size:10px;color:var(--text2)}
+.svc-modal-item .svc-modal-add{padding:4px 10px;background:var(--green);color:#000;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;transition:opacity 0.15s}
+.svc-modal-item .svc-modal-add:hover{opacity:0.8}
+.svc-modal-item.svc-already .svc-modal-add{background:var(--text2);color:#fff;cursor:default;opacity:0.5}
+.svc-modal-close{margin-top:12px;padding:8px 20px;background:var(--text2);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;align-self:flex-end}
+.svc-modal-close:hover{opacity:0.85}
+.svc-empty{padding:32px;text-align:center;color:var(--text2);font-size:13px}
 </style>
 </head>
 <body>
@@ -118,9 +170,8 @@ input,button,select,textarea{font-family:inherit}
     <div id="sidebar-user"></div>
     <div id="sidebar-nav">
       <div class="nav-item active" data-tab="overview"><span class="icon">&#9679;</span> Overview</div>
-      <div class="nav-item" data-tab="wireguard"><span class="icon">&#9881;</span> WireGuard</div>
       <div class="nav-item" data-tab="iptables"><span class="icon">&#9632;</span> iptables</div>
-      <div class="nav-item" data-tab="service"><span class="icon">&#9776;</span> Service</div>
+      <div class="nav-item" data-tab="services"><span class="icon">&#9776;</span> Services</div>
     </div>
     <div id="sidebar-logout">&#8592; Logout</div>
   </div>
@@ -128,14 +179,18 @@ input,button,select,textarea{font-family:inherit}
     <div id="main-header"></div>
     <div id="main-content">
       <div id="tab-overview"></div>
-      <div id="tab-wireguard" style="display:none">
-        <div class="overview-card"><h3>WireGuard</h3><pre style="color:var(--text2)">WireGuard management coming soon.</pre></div>
-      </div>
       <div id="tab-iptables" style="display:none"></div>
-      <div id="tab-service" style="display:none">
-        <div class="overview-card"><h3>Service Status</h3><pre style="color:var(--text2)">Service management coming soon.</pre></div>
-      </div>
+      <div id="tab-services" style="display:none"></div>
     </div>
+  </div>
+</div>
+
+<div class="svc-modal-overlay" id="svc-modal-overlay">
+  <div class="svc-modal">
+    <h4>Add Service to Monitor</h4>
+    <input type="text" class="svc-modal-search" id="svc-modal-search" placeholder="Search services...">
+    <div class="svc-modal-list" id="svc-modal-list"></div>
+    <button class="svc-modal-close" id="svc-modal-close">Close</button>
   </div>
 </div>
 
@@ -204,12 +259,13 @@ function switchTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
   document.querySelectorAll('#main-content > div[id^="tab-"]').forEach(el => el.style.display = 'none');
-  const tabNames = {overview:'Overview', wireguard:'WireGuard', iptables:'iptables', service:'Service'};
+  const tabNames = {overview:'Overview', iptables:'iptables', services:'Services'};
   document.getElementById('main-header').textContent = tabNames[tab] || tab;
   const tabEl = document.getElementById('tab-' + tab);
   if (tabEl) tabEl.style.display = 'block';
   if (tab === 'overview') loadOverview();
   if (tab === 'iptables') loadIptables();
+  if (tab === 'services') loadService();
 }
 
 // Overview
@@ -571,6 +627,206 @@ function escapeHtml(str) {
   div.textContent = str;
   return div.innerHTML;
 }
+
+// ── Service Management ────────────────────────────────────────
+let svcAvailable = [];
+
+async function loadService() {
+  const el = document.getElementById('tab-services');
+  el.innerHTML = `
+    <div class="svc-controls">
+      <button class="svc-add-btn" id="svc-add-btn">+ Add Service</button>
+      <button id="svc-refresh">&#8635; Refresh</button>
+    </div>
+    <div id="svc-list"><div class="svc-empty"><span class="spinner"></span> Loading...</div></div>
+  `;
+  document.getElementById('svc-add-btn').addEventListener('click', openAddServiceModal);
+  document.getElementById('svc-refresh').addEventListener('click', refreshServices);
+  refreshServices();
+}
+
+async function refreshServices() {
+  const el = document.getElementById('svc-list');
+  el.innerHTML = '<div class="svc-empty"><span class="spinner"></span> Loading...</div>';
+  try {
+    const res = await fetch('/api/services/monitored?token=' + encodeURIComponent(authToken));
+    if (!res.ok) throw new Error('Failed to load');
+    const data = await res.json();
+    if (!data.services.length) {
+      el.innerHTML = '<div class="svc-empty">No services monitored. Click "+ Add Service" to begin.</div>';
+      return;
+    }
+    let html = '';
+    for (const svc of data.services) {
+      const isActive = svc.active_state === 'active';
+      const isFailed = svc.active_state === 'failed';
+      const isEnabled = svc.enabled_state === 'enabled';
+      const stateCls = isFailed ? 'failed' : (isActive ? 'active' : 'inactive');
+      const enCls = isEnabled ? 'enabled' : 'disabled';
+      const safeId = svc.name.replace(/[^a-zA-Z0-9]/g, '_');
+      html += '<div class="svc-card-wrap">';
+      html += '<div class="svc-card">';
+      html += '<div class="svc-info">';
+      html += '<div class="svc-name">' + escapeHtml(svc.name) + '</div>';
+      html += '<div class="svc-desc">' + escapeHtml(svc.description) + '</div>';
+      html += '</div>';
+      html += '<span class="svc-badge ' + stateCls + '">' + svc.active_state + '</span>';
+      html += '<span class="svc-badge ' + enCls + '">' + svc.enabled_state + '</span>';
+      html += '<div class="svc-actions">';
+      html += '<button class="svc-btn-restart" onclick="svcAction(\'' + svc.name + '\',\'restart\')">Restart</button>';
+      if (isActive) {
+        html += '<button class="svc-btn-stop" onclick="svcAction(\'' + svc.name + '\',\'stop\')">Stop</button>';
+      } else {
+        html += '<button class="svc-btn-start" onclick="svcAction(\'' + svc.name + '\',\'start\')">Start</button>';
+      }
+      html += '<div class="svc-sep"></div>';
+      if (isEnabled) {
+        html += '<button class="svc-btn-disable" onclick="svcAction(\'' + svc.name + '\',\'disable\')">Disable</button>';
+      } else {
+        html += '<button class="svc-btn-enable" onclick="svcAction(\'' + svc.name + '\',\'enable\')">Enable</button>';
+      }
+      html += '<div class="svc-sep"></div>';
+      html += '<button class="svc-btn-show" id="svc-show-' + safeId + '" onclick="toggleServiceConfig(\'' + svc.name + '\',\'' + safeId + '\')">Show</button>';
+      html += '<button class="svc-btn-remove" onclick="removeService(\'' + svc.name + '\')">Remove</button>';
+      html += '</div>';
+      html += '</div>';
+      html += '<div class="svc-config" id="svc-config-' + safeId + '"></div>';
+      html += '</div>';
+    }
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div class="svc-empty" style="color:var(--accent)">Error: ' + escapeHtml(e.message) + '</div>';
+  }
+}
+
+async function svcAction(name, action) {
+  try {
+    const res = await fetch('/api/services/' + name + '/' + action + '?token=' + encodeURIComponent(authToken), { method: 'POST' });
+    const d = await res.json();
+    if (!d.success && d.error) alert('Error: ' + d.error);
+    refreshServices();
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+async function removeService(name) {
+  if (!confirm('Remove "' + name + '" from monitored services?')) return;
+  try {
+    await fetch('/api/services/monitored?token=' + encodeURIComponent(authToken) + '&name=' + encodeURIComponent(name), { method: 'DELETE' });
+    refreshServices();
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+async function toggleServiceConfig(name, safeId) {
+  const configEl = document.getElementById('svc-config-' + safeId);
+  const btnEl = document.getElementById('svc-show-' + safeId);
+
+  if (configEl.classList.contains('show')) {
+    configEl.classList.remove('show');
+    btnEl.classList.remove('active');
+    btnEl.textContent = 'Show';
+    return;
+  }
+
+  document.querySelectorAll('.svc-config.show').forEach(el => el.classList.remove('show'));
+  document.querySelectorAll('.svc-btn-show.active').forEach(el => {
+    el.classList.remove('active');
+    el.textContent = 'Show';
+  });
+
+  configEl.innerHTML = '<div class="svc-config-src"><span class="spinner"></span> Loading config...</div>';
+  configEl.classList.add('show');
+  btnEl.classList.add('active');
+  btnEl.textContent = 'Hide';
+
+  try {
+    const res = await fetch('/api/services/' + encodeURIComponent(name) + '/config?token=' + encodeURIComponent(authToken));
+    if (!res.ok) throw new Error('Failed to load config');
+    const data = await res.json();
+    if (data.error) {
+      configEl.innerHTML = '<div class="svc-config-src">' + escapeHtml(data.source || '') + '</div><pre style="color:var(--accent)">' + escapeHtml(data.error) + '</pre>';
+    } else {
+      const srcLabel = data.source ? '<div class="svc-config-src">' + escapeHtml(data.source) + '</div>' : '';
+      configEl.innerHTML = srcLabel + '<pre>' + escapeHtml(data.config) + '</pre>';
+    }
+  } catch(e) {
+    configEl.innerHTML = '<pre style="color:var(--accent)">Error: ' + escapeHtml(e.message) + '</pre>';
+  }
+}
+
+async function openAddServiceModal() {
+  const overlay = document.getElementById('svc-modal-overlay');
+  const listEl = document.getElementById('svc-modal-list');
+  const searchEl = document.getElementById('svc-modal-search');
+  overlay.classList.add('show');
+  searchEl.value = '';
+  listEl.innerHTML = '<div class="svc-empty"><span class="spinner"></span> Loading services...</div>';
+
+  try {
+    const [availRes, monRes] = await Promise.all([
+      fetch('/api/services/available?token=' + encodeURIComponent(authToken)),
+      fetch('/api/services/monitored?token=' + encodeURIComponent(authToken))
+    ]);
+    if (!availRes.ok || !monRes.ok) throw new Error('Failed to load');
+    const availData = await availRes.json();
+    const monData = await monRes.json();
+    const monitoredNames = new Set(monData.services.map(s => s.name));
+    svcAvailable = availData.services.map(s => ({ ...s, monitored: monitoredNames.has(s.name) }));
+    renderServiceModalList('');
+  } catch(e) {
+    listEl.innerHTML = '<div class="svc-empty" style="color:var(--accent)">Error: ' + escapeHtml(e.message) + '</div>';
+  }
+}
+
+function renderServiceModalList(filter) {
+  const listEl = document.getElementById('svc-modal-list');
+  const filtered = svcAvailable.filter(s => s.name.toLowerCase().includes(filter.toLowerCase()));
+  if (!filtered.length) {
+    listEl.innerHTML = '<div class="svc-empty">No services found.</div>';
+    return;
+  }
+  let html = '';
+  for (const s of filtered) {
+    html += '<div class="svc-modal-item' + (s.monitored ? ' svc-already' : '') + '">';
+    html += '<div><span class="svc-modal-name">' + escapeHtml(s.name) + '</span> <span class="svc-modal-state">' + s.unit_file_state + '</span></div>';
+    if (s.monitored) {
+      html += '<button class="svc-modal-add" disabled>Added</button>';
+    } else {
+      html += '<button class="svc-modal-add" onclick="addServiceFromModal(\'' + escapeAttr(s.name) + '\', this)">Add</button>';
+    }
+    html += '</div>';
+  }
+  listEl.innerHTML = html;
+}
+
+async function addServiceFromModal(name, btn) {
+  try {
+    await fetch('/api/services/monitored', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authToken, name: name })
+    });
+    btn.textContent = 'Added';
+    btn.disabled = true;
+    btn.parentElement.classList.add('svc-already');
+    refreshServices();
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+document.getElementById('svc-modal-close').addEventListener('click', () => {
+  document.getElementById('svc-modal-overlay').classList.remove('show');
+});
+document.getElementById('svc-modal-search').addEventListener('input', (e) => {
+  renderServiceModalList(e.target.value);
+});
+document.addEventListener('click', e => {
+  if (e.target.id === 'svc-modal-overlay') document.getElementById('svc-modal-overlay').classList.remove('show');
+});
 
 // Event listeners
 document.getElementById('login-btn').addEventListener('click', () => {
