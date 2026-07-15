@@ -190,7 +190,7 @@ nav {
 .btn-start:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
 .btn-start.loading { background: #333; color: #888; pointer-events: none; }
 
-.result-area { margin-top: 20px; display: none; }
+.result-area { margin-top: 20px; }
 .result-area .result-label { font-size: 12px; font-weight: 700; color: #888; letter-spacing: 0.5px; margin-bottom: 6px; }
 .result-area .result-wrapper {
   position: relative;
@@ -353,14 +353,14 @@ nav {
 
         <button class="btn-start" id="start-inference">Start Inference</button>
 
-        <div class="result-area" id="result-area">
-          <div class="result-label">RESULT</div>
+        <div class="result-area" id="result-area" style="display:none">
+          <div class="result-label" id="result-label">RESULT</div>
           <div class="result-wrapper">
             <img id="result-image" alt="result">
             <div class="result-loading" id="result-loading" style="display:none">
               <div class="spinner"></div>
-              <span>Processing with SAM 3.1 ...</span>
-              <span class="spinner-sub">This may take a while on CPU</span>
+              <span id="loading-text">Processing with SAM 3.1 ...</span>
+              <span class="spinner-sub" id="loading-sub">This may take a while on CPU</span>
             </div>
             <div class="result-error" id="result-error" style="display:none">
               <span style="font-size:28px;">&#9888;</span>
@@ -409,8 +409,11 @@ const uploadContent = document.getElementById('upload-content');
 const mainImage = document.getElementById('main-image');
 const startBtn = document.getElementById('start-inference');
 const resultArea = document.getElementById('result-area');
+const resultLabel = document.getElementById('result-label');
 const resultImage = document.getElementById('result-image');
 const resultLoading = document.getElementById('result-loading');
+const loadingText = document.getElementById('loading-text');
+const loadingSub = document.getElementById('loading-sub');
 const resultError = document.getElementById('result-error');
 const resultErrorText = document.getElementById('result-error-text');
 const btnBack = document.getElementById('btn-back');
@@ -471,6 +474,7 @@ function resetToUpload() {
   mainImage.src = '';
   resultArea.style.display = 'none';
   resultImage.src = '';
+  resultLabel.textContent = 'RESULT';
 }
 
 async function loadSampleImage(url) {
@@ -536,12 +540,15 @@ async function startInference() {
   startBtn.classList.add('loading');
 
   resultArea.style.display = 'block';
+  resultImage.src = currentDataUrl;
+  resultImage.style.display = 'block';
   resultLoading.style.display = 'flex';
   resultError.style.display = 'none';
-  resultImage.style.display = 'none';
+  resultLabel.textContent = 'PROCESSING ...';
+  resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   try {
-    const res = await fetch('/prompt-segment', {
+    const submitRes = await fetch('/prompt-segment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -550,19 +557,40 @@ async function startInference() {
       })
     });
 
-    if (!res.ok) throw new Error(await res.text());
+    if (!submitRes.ok) throw new Error(await submitRes.text());
+    const submitData = await submitRes.json();
+    const taskId = submitData.task_id;
 
-    const data = await res.json();
-    const elapsed = ((performance.now() - t0) / 1000).toFixed(1);
-    resultLoading.style.display = 'none';
-    resultImage.src = 'data:image/jpeg;base64,' + data.image;
-    resultImage.style.display = 'block';
-    document.querySelector('.result-label').textContent = 'RESULT (' + elapsed + 's)';
+    let pollCount = 0;
+    while (true) {
+      await new Promise(r => setTimeout(r, 3000));
+      pollCount++;
+
+      const elapsed = ((performance.now() - t0) / 1000).toFixed(1);
+      loadingText.textContent = 'Processing with SAM 3.1 ...';
+      loadingSub.textContent = elapsed + 's elapsed (poll #' + pollCount + ')';
+
+      const statusRes = await fetch('/prompt-segment/status/' + taskId);
+      if (!statusRes.ok) throw new Error(await statusRes.text());
+      const statusData = await statusRes.json();
+
+      if (statusData.status === 'done') {
+        resultLoading.style.display = 'none';
+        resultImage.src = 'data:image/jpeg;base64,' + statusData.image;
+        resultLabel.textContent = 'RESULT — ' + (statusData.elapsed || '?') + 's server — ' + elapsed + 's total';
+        break;
+      }
+
+      if (statusData.status === 'error') {
+        throw new Error(statusData.error || 'Server error');
+      }
+    }
   } catch (e) {
     console.error('Inference error:', e);
     resultLoading.style.display = 'none';
     resultErrorText.textContent = e.message || 'Connection failed. Backend may be down.';
     resultError.style.display = 'flex';
+    resultLabel.textContent = 'ERROR';
   } finally {
     startBtn.disabled = false;
     startBtn.textContent = 'Start Inference';

@@ -1,6 +1,9 @@
 import base64
 import logging
+import threading
 import time
+import uuid
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import uvicorn
@@ -45,6 +48,11 @@ class PromptSegmentRequest(BaseModel):
 
 
 session_last_time: dict[str, float] = {}
+
+task_store: dict[str, dict] = {}
+task_lock = threading.Lock()
+sam_lock = threading.Lock()
+executor = ThreadPoolExecutor(max_workers=4)
 
 COLORS = [
     (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0),
@@ -185,9 +193,6 @@ async def prompt_segment_page(request: Request):
 
 @app.post("/prompt-segment")
 async def prompt_segment(req: PromptSegmentRequest, request: Request):
-    from model_always_on import get_sam3_predictor
-
-    t0 = time.time()
     img = decode_image(req)
 
     if not req.prompts:
@@ -196,51 +201,106 @@ async def prompt_segment(req: PromptSegmentRequest, request: Request):
             "elapsed": 0,
         })
 
-    predictor = get_sam3_predictor()
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    task_id = str(uuid.uuid4())[:12]
+    with task_lock:
+        task_store[task_id] = {
+            "status": "processing",
+            "image": None,
+            "elapsed": None,
+            "error": None,
+        }
 
-    import tempfile, os
-    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
-        cv2.imwrite(tmp.name, img_rgb)
-        tmp_path = tmp.name
+    logging.info(f"Task {task_id} created | prompts={req.prompts}")
+    executor.submit(_run_sam3_task, task_id, img, req.prompts)
 
+    return JSONResponse({"task_id": task_id})
+
+
+def _run_sam3_task(task_id: str, img: np.ndarray, prompts: list[str]):
+    from model_always_on import get_sam3_predictor
+
+    t0 = time.time()
     try:
-        predictor.set_image(tmp_path)
-        results = predictor(text=req.prompts)
-    finally:
-        os.unlink(tmp_path)
+        with sam_lock:
+            logging.info(f"Task {task_id} started (acquired sam_lock)")
+            predictor = get_sam3_predictor()
+            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-    drawn = img.copy()
-    colors = [
-        (0, 212, 170), (233, 69, 96), (91, 141, 239),
-        (255, 170, 0), (167, 139, 250), (244, 114, 182),
-    ]
+            import tempfile, os
+            with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+                cv2.imwrite(tmp.name, img_rgb)
+                tmp_path = tmp.name
 
-    if results and len(results) > 0:
-        r = results[0]
-        if r.masks is not None:
-            masks_data = r.masks.data.cpu().numpy()
-            orig_h, orig_w = drawn.shape[:2]
-            for i, mask in enumerate(masks_data):
-                mask_f = mask.astype(np.float32) if mask.dtype == bool else mask
-                mask_resized = cv2.resize(mask_f, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST)
-                color = colors[i % len(colors)]
-                overlay = drawn.copy()
-                overlay[mask_resized > 0.5] = color
-                cv2.addWeighted(overlay, 0.4, drawn, 0.6, 0, drawn)
-                contours, _ = cv2.findContours(
-                    (mask_resized > 0.5).astype(np.uint8),
-                    cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-                )
-                cv2.drawContours(drawn, contours, -1, color, 2)
+            try:
+                predictor.set_image(tmp_path)
+                results = predictor(text=prompts)
+            finally:
+                os.unlink(tmp_path)
 
-    elapsed = round(time.time() - t0, 2)
-    logging.info(f"SAM3 inference: {elapsed}s | prompts={req.prompts}")
+        drawn = img.copy()
+        colors = [
+            (0, 212, 170), (233, 69, 96), (91, 141, 239),
+            (255, 170, 0), (167, 139, 250), (244, 114, 182),
+        ]
 
-    return JSONResponse({
-        "image": encode_result(drawn),
-        "elapsed": elapsed,
-    })
+        if results and len(results) > 0:
+            r = results[0]
+            if r.masks is not None:
+                masks_data = r.masks.data.cpu().numpy()
+                orig_h, orig_w = drawn.shape[:2]
+                for i, mask in enumerate(masks_data):
+                    mask_f = mask.astype(np.float32) if mask.dtype == bool else mask
+                    mask_resized = cv2.resize(mask_f, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST)
+                    color = colors[i % len(colors)]
+                    mask_bool = mask_resized > 0.5
+                    overlay = drawn.copy()
+                    overlay[mask_bool] = color
+                    cv2.addWeighted(overlay, 0.5, drawn, 0.5, 0, drawn)
+                    contours, _ = cv2.findContours(
+                        mask_bool.astype(np.uint8),
+                        cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+                    )
+                    cv2.drawContours(drawn, contours, -1, color, 3)
+
+        elapsed = round(time.time() - t0, 2)
+        logging.info(f"Task {task_id} done in {elapsed}s | prompts={prompts}")
+
+        with task_lock:
+            task_store[task_id]["status"] = "done"
+            task_store[task_id]["image"] = encode_result(drawn)
+            task_store[task_id]["elapsed"] = elapsed
+
+    except Exception as e:
+        logging.error(f"Task {task_id} failed: {e}")
+        with task_lock:
+            task_store[task_id]["status"] = "error"
+            task_store[task_id]["error"] = str(e)
+
+
+@app.get("/prompt-segment/status/{task_id}")
+async def prompt_segment_status(task_id: str):
+    with task_lock:
+        task = task_store.get(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    if task["status"] == "done":
+        with task_lock:
+            result = {
+                "status": "done",
+                "image": task["image"],
+                "elapsed": task["elapsed"],
+            }
+            del task_store[task_id]
+        return JSONResponse(result)
+
+    if task["status"] == "error":
+        with task_lock:
+            error_msg = task["error"]
+            del task_store[task_id]
+        return JSONResponse({"status": "error", "error": error_msg}, status_code=500)
+
+    return JSONResponse({"status": "processing"})
 
 
 @app.get("/cs2-segment", response_class=HTMLResponse)
