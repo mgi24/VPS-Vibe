@@ -531,3 +531,101 @@ async def disable_service(name: str, token: str = Query(...)):
         raise HTTPException(status_code=401, detail="Unauthorized")
     code, out, err = run_systemctl(["disable", name])
     return {"success": code == 0, "error": err if code != 0 else None}
+
+
+# ── Docker Management ──────────────────────────────────────────────
+
+def run_docker(args: list[str], timeout: int = 15) -> tuple[int, str, str]:
+    try:
+        result = subprocess.run(
+            ["docker"] + args,
+            capture_output=True, text=True, timeout=timeout
+        )
+        return result.returncode, result.stdout.strip(), result.stderr.strip()
+    except subprocess.TimeoutExpired:
+        return 1, "", "Command timed out"
+    except FileNotFoundError:
+        return 1, "", "docker not found"
+    except Exception as e:
+        return 1, "", str(e)
+
+
+def get_docker_stats() -> dict:
+    code, out, _ = run_docker(["stats", "--no-stream", "--format", "{{.Name}}\t{{.MemUsage}}\t{{.MemPerc}}\t{{.CPUPerc}}"])
+    stats = {}
+    if code == 0 and out:
+        for line in out.split("\n"):
+            parts = line.split("\t")
+            if len(parts) >= 4:
+                name = parts[0].strip()
+                stats[name] = {
+                    "mem_usage": parts[1].strip(),
+                    "mem_perc": parts[2].strip(),
+                    "cpu_perc": parts[3].strip(),
+                }
+    return stats
+
+
+@app.get("/api/docker/containers")
+async def list_docker_containers(token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    code, out, err = run_docker(["ps", "-a", "--format", "{{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}\t{{.State}}\t{{.Ports}}"])
+    if code != 0:
+        raise HTTPException(status_code=500, detail=err or "Failed to list containers")
+    containers = []
+    for line in out.split("\n"):
+        parts = line.split("\t")
+        if len(parts) < 5:
+            continue
+        containers.append({
+            "id": parts[0].strip(),
+            "name": parts[1].strip(),
+            "image": parts[2].strip(),
+            "status": parts[3].strip(),
+            "state": parts[4].strip(),
+            "ports": parts[5].strip() if len(parts) > 5 else "",
+        })
+    stats = get_docker_stats()
+    for c in containers:
+        s = stats.get(c["name"], {})
+        c["mem_usage"] = s.get("mem_usage", "")
+        c["mem_perc"] = s.get("mem_perc", "")
+        c["cpu_perc"] = s.get("cpu_perc", "")
+    return {"containers": containers}
+
+
+@app.get("/api/docker/containers/{name}/inspect")
+async def inspect_docker_container(name: str, token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    code, out, err = run_docker(["inspect", name])
+    if code != 0:
+        raise HTTPException(status_code=500, detail=err or "Failed to inspect container")
+    try:
+        data = json.loads(out)
+        if isinstance(data, list) and len(data) > 0:
+            data = data[0]
+        return {"name": name, "config": json.dumps(data, indent=2)}
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Failed to parse inspect output")
+
+
+@app.post("/api/docker/containers/{name}/start")
+async def start_docker_container(name: str, token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    code, out, err = run_docker(["start", name])
+    return {"success": code == 0, "error": err if code != 0 else None}
+
+
+@app.post("/api/docker/containers/{name}/stop")
+async def stop_docker_container(name: str, token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    code, out, err = run_docker(["stop", name])
+    return {"success": code == 0, "error": err if code != 0 else None}
