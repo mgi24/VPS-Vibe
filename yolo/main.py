@@ -41,8 +41,7 @@ class DetectRequest(BaseModel):
 
 class PromptSegmentRequest(BaseModel):
     base64: str
-    points: list[list[int]] | None = None
-    point_labels: list[int] | None = None
+    prompts: list[str]
 
 
 session_last_time: dict[str, float] = {}
@@ -99,23 +98,6 @@ def draw_segmentations(img: np.ndarray, results, class_names: dict) -> np.ndarra
             cv2.putText(img, label, (x1 + 4, y1 - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
     cv2.addWeighted(overlay, 0.35, img, 0.65, 0, img)
     return img
-
-
-def draw_sam_masks(img: np.ndarray, mask: np.ndarray, points: list[list[int]] | None = None) -> np.ndarray:
-    overlay = img.copy()
-    mask_bool = mask.astype(bool)
-    color = (0, 200, 150)
-    colored_mask = np.zeros_like(img)
-    colored_mask[mask_bool] = color
-    cv2.addWeighted(colored_mask, 0.5, overlay, 0.5, 0, overlay)
-    mask_uint8 = (mask_bool * 255).astype(np.uint8)
-    contours, _ = cv2.findContours(mask_uint8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(overlay, contours, -1, (0, 255, 200), 2)
-    if points:
-        for pt in points:
-            cv2.circle(overlay, tuple(pt), 6, (0, 255, 0), -1)
-            cv2.circle(overlay, tuple(pt), 6, (255, 255, 255), 2)
-    return overlay
 
 
 def decode_image(req: DetectRequest):
@@ -203,45 +185,62 @@ async def prompt_segment_page(request: Request):
 
 @app.post("/prompt-segment")
 async def prompt_segment(req: PromptSegmentRequest, request: Request):
-    from model_always_on import get_sam_base
-    import torch
+    from model_always_on import get_sam3_predictor
 
+    t0 = time.time()
     img = decode_image(req)
 
-    if req.points and len(req.points) > 0:
-        sam_model, sam_processor = get_sam_base()
-
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        point_labels = req.point_labels if req.point_labels else [1] * len(req.points)
-
-        inputs = sam_processor(
-            img_rgb,
-            input_points=[[req.points]],
-            input_labels=[point_labels],
-            return_tensors="pt",
-        )
-
-        with torch.no_grad():
-            outputs = sam_model(**inputs)
-
-        masks = sam_processor.image_processor.post_process_masks(
-            outputs.pred_masks,
-            inputs["original_sizes"],
-            inputs["reshaped_input_sizes"],
-        )
-
-        best_mask = masks[0][0, 0].cpu().numpy()
-        drawn = draw_sam_masks(img.copy(), best_mask, req.points)
-
-        return JSONResponse({
-            "image": encode_result(drawn),
-            "points": req.points,
-        })
-    else:
+    if not req.prompts:
         return JSONResponse({
             "image": encode_result(img),
-            "points": [],
+            "elapsed": 0,
         })
+
+    predictor = get_sam3_predictor()
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    import tempfile, os
+    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+        cv2.imwrite(tmp.name, img_rgb)
+        tmp_path = tmp.name
+
+    try:
+        predictor.set_image(tmp_path)
+        results = predictor(text=req.prompts)
+    finally:
+        os.unlink(tmp_path)
+
+    drawn = img.copy()
+    colors = [
+        (0, 212, 170), (233, 69, 96), (91, 141, 239),
+        (255, 170, 0), (167, 139, 250), (244, 114, 182),
+    ]
+
+    if results and len(results) > 0:
+        r = results[0]
+        if r.masks is not None:
+            masks_data = r.masks.data.cpu().numpy()
+            orig_h, orig_w = drawn.shape[:2]
+            for i, mask in enumerate(masks_data):
+                mask_f = mask.astype(np.float32) if mask.dtype == bool else mask
+                mask_resized = cv2.resize(mask_f, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST)
+                color = colors[i % len(colors)]
+                overlay = drawn.copy()
+                overlay[mask_resized > 0.5] = color
+                cv2.addWeighted(overlay, 0.4, drawn, 0.6, 0, drawn)
+                contours, _ = cv2.findContours(
+                    (mask_resized > 0.5).astype(np.uint8),
+                    cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+                )
+                cv2.drawContours(drawn, contours, -1, color, 2)
+
+    elapsed = round(time.time() - t0, 2)
+    logging.info(f"SAM3 inference: {elapsed}s | prompts={req.prompts}")
+
+    return JSONResponse({
+        "image": encode_result(drawn),
+        "elapsed": elapsed,
+    })
 
 
 @app.get("/cs2-segment", response_class=HTMLResponse)

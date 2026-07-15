@@ -17,16 +17,18 @@ cs2_model = YOLO(BASE_DIR / "cs2-s-26last.pt")
 cs2_class_names = cs2_model.names
 logging.info("Model 'cs2_segment' loaded from cs2-s-26last.pt")
 
-_sam_base_model = None
-_sam_base_processor = None
+_sam3_predictor = None
 
-def get_sam_base():
-    global _sam_base_model, _sam_base_processor
-    if _sam_base_model is None:
-        from transformers import SamModel, SamProcessor
-        import torch
-        _sam_base_processor = SamProcessor.from_pretrained("facebook/sam-vit-base")
-        _sam_base_model = SamModel.from_pretrained("facebook/sam-vit-base")
-        _sam_base_model.eval()
-        logging.info("SAM-vit-base model loaded")
-    return _sam_base_model, _sam_base_processor
+def get_sam3_predictor():
+    global _sam3_predictor
+    if _sam3_predictor is None:
+        from ultralytics.models.sam import SAM3SemanticPredictor
+        overrides = dict(
+            conf=0.25,
+            task="segment",
+            mode="predict",
+            model=str(BASE_DIR / "sam3.1.pt"),
+        )
+        _sam3_predictor = SAM3SemanticPredictor(overrides=overrides)
+        logging.info("SAM3.1 semantic predictor loaded")
+    return _sam3_predictor

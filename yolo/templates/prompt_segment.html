@@ -144,52 +144,9 @@ nav {
   display: block;
 }
 .preview-area .img-container canvas {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  cursor: crosshair;
+  display: none;
 }
 
-.point-toolbar {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 10px 0;
-}
-.point-toolbar .point-count {
-  font-size: 13px;
-  color: #aaa;
-  flex: 1;
-}
-.point-toolbar .point-mode {
-  display: flex;
-  gap: 4px;
-}
-.point-mode-btn {
-  padding: 6px 14px;
-  border-radius: 6px;
-  border: 1px solid #444;
-  background: transparent;
-  color: #aaa;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
-}
-.point-mode-btn.active-fg { border-color: #00d4aa; color: #00d4aa; background: rgba(0, 212, 170, 0.1); }
-.point-mode-btn.active-bg { border-color: #ff4444; color: #ff4444; background: rgba(255, 68, 68, 0.1); }
-.btn-clear-points {
-  padding: 6px 14px;
-  border-radius: 6px;
-  border: 1px solid #ff4444;
-  background: transparent;
-  color: #ff4444;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
-}
-.btn-clear-points:hover { background: rgba(255, 68, 68, 0.15); }
 .btn-back {
   background: transparent;
   border: 1px solid #888;
@@ -201,48 +158,6 @@ nav {
   transition: all 0.2s;
 }
 .btn-back:hover { border-color: #00d4aa; color: #00d4aa; background: rgba(0, 212, 170, 0.08); }
-
-.settings-section {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-top: 16px;
-}
-.setting-row {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  min-width: 160px;
-}
-.setting-row label {
-  font-size: 13px;
-  color: #aaa;
-  display: flex;
-  justify-content: space-between;
-}
-.setting-row label span { color: #00d4aa; font-weight: 600; }
-input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: #333;
-  outline: none;
-  pointer-events: none;
-  opacity: 0.6;
-}
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #00d4aa;
-  cursor: default;
-  border: none;
-}
 
 .warning-box {
   background: #1a1000;
@@ -399,7 +314,7 @@ input[type="range"]::-webkit-slider-thumb {
 
       <div class="upload-header">
         <strong>Upload Image</strong>
-        <p>Click a sample above or drag &amp; drop an image below. Then click points on the image and press Start Inference.</p>
+        <p>Click a sample above or drag &amp; drop an image below. Type a text prompt and press Start Inference.</p>
       </div>
 
       <div class="drop-zone" id="drop-zone">
@@ -417,38 +332,22 @@ input[type="range"]::-webkit-slider-thumb {
         <div class="preview-area">
           <div class="img-container">
             <img id="main-image" alt="preview">
-            <canvas id="point-canvas"></canvas>
           </div>
         </div>
 
-        <div class="point-toolbar">
-          <div class="point-count" id="point-count">0 points</div>
-          <div class="point-mode">
-            <button class="point-mode-btn active-fg" id="mode-fg" data-mode="fg">Foreground</button>
-            <button class="point-mode-btn" id="mode-bg" data-mode="bg">Background</button>
+        <div style="margin:16px 0 12px">
+          <label style="font-size:13px;color:#aaa;display:block;margin-bottom:6px">Text Prompt</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <input type="text" id="prompt-input" placeholder="e.g. car, person, road..." style="flex:1;min-width:180px;padding:10px 14px;background:#1a1a1a;border:1px solid #444;color:#fff;border-radius:6px;font-size:14px;outline:none" onkeydown="if(event.key==='Enter'){event.preventDefault();addPrompt()}">
+            <button onclick="addPrompt()" style="padding:10px 18px;background:#00d4aa;color:#000;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:14px">Add</button>
           </div>
-          <button class="btn-clear-points" id="clear-points">Clear Points</button>
-        </div>
-
-        <div class="settings-section">
-          <div class="setting-row">
-            <label>Confidence <span id="conf-val">0.25</span></label>
-            <input type="range" id="conf-slider" min="0" max="1" step="0.01" value="0.25">
-          </div>
-          <div class="setting-row">
-            <label>Image Size <span id="imgsz-val">640</span></label>
-            <input type="range" id="imgsz-slider" min="320" max="1280" step="32" value="640">
-          </div>
-          <div class="setting-row">
-            <label>IoU <span id="iou-val">0.45</span></label>
-            <input type="range" id="iou-slider" min="0" max="1" step="0.01" value="0.45">
-          </div>
+          <div id="prompt-tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div>
         </div>
 
         <div class="warning-box">
           <span class="warn-icon">&#9888;&#65039;</span>
           <div class="warn-text">
-            <strong>Demo Notice:</strong> This demo runs on CPU and may take <strong>up to 500 seconds</strong> per inference depending on image size and point complexity. <strong>Real deployment: ~500ms on GPU.</strong>
+            <strong>Demo Notice:</strong> SAM 3.1 runs on CPU and may take <strong>up to 500 seconds</strong> per inference. <strong>Real deployment: ~500ms on GPU.</strong>
           </div>
         </div>
 
@@ -460,7 +359,7 @@ input[type="range"]::-webkit-slider-thumb {
             <img id="result-image" alt="result">
             <div class="result-loading" id="result-loading" style="display:none">
               <div class="spinner"></div>
-              <span>Processing with SAM ...</span>
+              <span>Processing with SAM 3.1 ...</span>
               <span class="spinner-sub">This may take a while on CPU</span>
             </div>
             <div class="result-error" id="result-error" style="display:none">
@@ -476,7 +375,7 @@ input[type="range"]::-webkit-slider-thumb {
     <div class="promo-box">
       <div class="promo-text">
         <strong>Prompt-Based Any Segmentation</strong><br>
-        Click points on the image to segment objects using SAM (Segment Anything Model).
+        Type a text prompt and segment any object using SAM 3.1.
       </div>
       <a class="btn-contact" href="https://misbahwork.my.id/contact" target="_blank">
         Contact me!
@@ -508,60 +407,41 @@ const dropZone = document.getElementById('drop-zone');
 const dzError = document.getElementById('dz-error');
 const uploadContent = document.getElementById('upload-content');
 const mainImage = document.getElementById('main-image');
-const pointCanvas = document.getElementById('point-canvas');
-const pointCount = document.getElementById('point-count');
-const clearPointsBtn = document.getElementById('clear-points');
-const modeFg = document.getElementById('mode-fg');
-const modeBg = document.getElementById('mode-bg');
 const startBtn = document.getElementById('start-inference');
 const resultArea = document.getElementById('result-area');
 const resultImage = document.getElementById('result-image');
 const resultLoading = document.getElementById('result-loading');
 const resultError = document.getElementById('result-error');
 const resultErrorText = document.getElementById('result-error-text');
-
-const confSlider = document.getElementById('conf-slider');
-const imgszSlider = document.getElementById('imgsz-slider');
-const iouSlider = document.getElementById('iou-slider');
-const confVal = document.getElementById('conf-val');
-const imgszVal = document.getElementById('imgsz-val');
-const iouVal = document.getElementById('iou-val');
 const btnBack = document.getElementById('btn-back');
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp'];
 
 let currentBase64 = null;
 let currentDataUrl = null;
-let points = [];
-let pointLabels = [];
-let pointMode = 'fg';
-let imageNaturalW = 0;
-let imageNaturalH = 0;
-let canvasScale = 1;
+let promptTexts = [];
 
-confSlider.oninput = () => { confVal.textContent = parseFloat(confSlider.value).toFixed(2); };
-imgszSlider.oninput = () => { imgszVal.textContent = imgszSlider.value; };
-iouSlider.oninput = () => { iouVal.textContent = parseFloat(iouSlider.value).toFixed(2); };
+function addPrompt() {
+  const input = document.getElementById('prompt-input');
+  const val = input.value.trim();
+  if (!val || promptTexts.includes(val)) { input.value = ''; return; }
+  promptTexts.push(val);
+  input.value = '';
+  renderPromptTags();
+}
 
-modeFg.addEventListener('click', () => {
-  pointMode = 'fg';
-  modeFg.className = 'point-mode-btn active-fg';
-  modeBg.className = 'point-mode-btn';
-  pointCanvas.style.cursor = 'crosshair';
-});
-modeBg.addEventListener('click', () => {
-  pointMode = 'bg';
-  modeBg.className = 'point-mode-btn active-bg';
-  modeFg.className = 'point-mode-btn';
-  pointCanvas.style.cursor = 'crosshair';
-});
+function removePrompt(idx) {
+  promptTexts.splice(idx, 1);
+  renderPromptTags();
+}
 
-clearPointsBtn.addEventListener('click', () => {
-  points = [];
-  pointLabels = [];
-  updatePointDisplay();
-  setupCanvas();
-});
+function renderPromptTags() {
+  const container = document.getElementById('prompt-tags');
+  container.innerHTML = promptTexts.map((t, i) =>
+    '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#1a1a1a;border:1px solid #00d4aa;border-radius:14px;font-size:12px;color:#00d4aa">' +
+    t + ' <button onclick="removePrompt(' + i + ')" style="background:none;border:none;color:#ff4444;cursor:pointer;font-size:14px;line-height:1">&times;</button></span>'
+  ).join('');
+}
 
 btnBack.addEventListener('click', resetToUpload);
 
@@ -585,15 +465,12 @@ startBtn.addEventListener('click', startInference);
 function resetToUpload() {
   currentBase64 = null;
   currentDataUrl = null;
-  points = [];
-  pointLabels = [];
   uploadContent.style.display = 'none';
   dropZone.style.display = 'flex';
   dzError.textContent = '';
   mainImage.src = '';
   resultArea.style.display = 'none';
   resultImage.src = '';
-  updatePointDisplay();
 }
 
 async function loadSampleImage(url) {
@@ -641,82 +518,19 @@ function handleFile(file) {
 }
 
 function showImage(dataUrl) {
-  points = [];
-  pointLabels = [];
   resultArea.style.display = 'none';
   resultImage.src = '';
-  updatePointDisplay();
-
-  mainImage.onload = function () {
-    imageNaturalW = mainImage.naturalWidth;
-    imageNaturalH = mainImage.naturalHeight;
-    setupCanvas();
-  };
   mainImage.src = dataUrl;
-}
-
-function setupCanvas() {
-  const displayRect = mainImage.getBoundingClientRect();
-  pointCanvas.width = displayRect.width;
-  pointCanvas.height = displayRect.height;
-  canvasScale = displayRect.width / imageNaturalW;
-
-  const ctx = pointCanvas.getContext('2d');
-  ctx.clearRect(0, 0, pointCanvas.width, pointCanvas.height);
-
-  drawPointsWithCtx(ctx);
-
-  pointCanvas.onclick = function (e) {
-    const rect = pointCanvas.getBoundingClientRect();
-    const displayX = e.clientX - rect.left;
-    const displayY = e.clientY - rect.top;
-    const naturalX = Math.round(displayX / canvasScale);
-    const naturalY = Math.round(displayY / canvasScale);
-
-    points.push([naturalX, naturalY]);
-    pointLabels.push(pointMode === 'fg' ? 1 : 0);
-    updatePointDisplay();
-    const ctx2 = pointCanvas.getContext('2d');
-    drawPointsWithCtx(ctx2);
-  };
-}
-
-function drawPointsWithCtx(ctx) {
-  ctx.clearRect(0, 0, pointCanvas.width, pointCanvas.height);
-  for (let i = 0; i < points.length; i++) {
-    const [nx, ny] = points[i];
-    const dx = nx * canvasScale;
-    const dy = ny * canvasScale;
-    const isFg = pointLabels[i] === 1;
-
-    ctx.beginPath();
-    ctx.arc(dx, dy, 6, 0, 2 * Math.PI);
-    ctx.fillStyle = isFg ? '#00d4aa' : '#ff4444';
-    ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.font = '11px sans-serif';
-    ctx.fillStyle = '#fff';
-    ctx.textAlign = 'center';
-    ctx.fillText(i + 1, dx, dy - 12);
-  }
-}
-
-function updatePointDisplay() {
-  const fgCount = pointLabels.filter(l => l === 1).length;
-  const bgCount = pointLabels.filter(l => l === 0).length;
-  pointCount.textContent = `${points.length} points (FG: ${fgCount}, BG: ${bgCount})`;
 }
 
 async function startInference() {
   if (!currentBase64) return;
-  if (points.length === 0) {
-    alert('Please click at least one point on the image before starting inference.');
+  if (promptTexts.length === 0) {
+    alert('Please add at least one text prompt before starting inference.');
     return;
   }
 
+  const t0 = performance.now();
   startBtn.disabled = true;
   startBtn.textContent = 'Processing ...';
   startBtn.classList.add('loading');
@@ -732,17 +546,18 @@ async function startInference() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         base64: currentBase64,
-        points: points,
-        point_labels: pointLabels,
+        prompts: promptTexts,
       })
     });
 
     if (!res.ok) throw new Error(await res.text());
 
     const data = await res.json();
+    const elapsed = ((performance.now() - t0) / 1000).toFixed(1);
     resultLoading.style.display = 'none';
     resultImage.src = 'data:image/jpeg;base64,' + data.image;
     resultImage.style.display = 'block';
+    document.querySelector('.result-label').textContent = 'RESULT (' + elapsed + 's)';
   } catch (e) {
     console.error('Inference error:', e);
     resultLoading.style.display = 'none';
