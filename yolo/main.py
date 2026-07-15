@@ -262,6 +262,15 @@ def _run_sam3_task(task_id: str, img: np.ndarray, prompts: list[str]):
                     )
                     cv2.drawContours(drawn, contours, -1, color, 3)
 
+                    if r.boxes is not None and i < len(r.boxes):
+                        cls_id = int(r.boxes.cls[i])
+                        conf = float(r.boxes.conf[i])
+                        label = f"{prompts[cls_id] if cls_id < len(prompts) else prompts[0]} {conf:.2f}"
+                        x1, y1, x2, y2 = map(int, r.boxes.xyxy[i])
+                        (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+                        cv2.rectangle(drawn, (x1, y1 - th - 8), (x1 + tw + 8, y1), color, -1)
+                        cv2.putText(drawn, label, (x1 + 4, y1 - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+
         elapsed = round(time.time() - t0, 2)
         logging.info(f"Task {task_id} done in {elapsed}s | prompts={prompts}")
 
