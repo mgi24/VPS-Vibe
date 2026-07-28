@@ -18,6 +18,11 @@ diary/*.pyc
 !VPNweb/**
 VPNweb/.venv/
 VPNweb/__pycache__/
+!discord/
+!discord/**
+discord/.env
+discord/.env.*
+discord/node_modules/
 
 doc.md
 __pycache__/
