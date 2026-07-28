@@ -46,5 +46,14 @@
   "vpn_title": "Butuh VPN?",
   "vpn_desc": "Dapatkan WireGuard VPN gratis tanpa batasan kuota harian. Cepat, aman, dan mudah digunakan.",
   "vpn_button": "VPN Gratis",
+  "llm_title": "Local LLM",
+  "llm_desc": "100% AI lokal selfhosted. Apakah kamu siap untuk AI-Pocalypse? saya siap!",
+  "llm_button": "Chat Sekarang",
+  "diary_headline": "Jangan lewatkan apa pun dari saya!",
+  "diary_desc": "Lihat <strong>Diary</strong> saya. Tempat saya berbagi <strong>Semua</strong> hal eksklusif. Satu-satunya platform di mana saya bisa menjadi diri sendiri!",
+  "diary_button": "Lihat Diary",
+  "diary_last_label": "Postingan Terakhir",
+  "diary_loading": "Memuat...",
+  "diary_activity": "Aktivitas",
   "toast_copied": "Tersalin!"
 }

@@ -46,5 +46,14 @@
   "vpn_title": "Need a VPN?",
   "vpn_desc": "Get a free VPN. Available as long as bandwidth available!",
   "vpn_button": "Get Free VPN",
+  "llm_title": "Local LLM",
+  "llm_desc": "100% Fully selfhosted local AI. Are you ready for AI-Pocalypse? because i do!",
+  "llm_button": "Chat Now",
+  "diary_headline": "Never miss anything from me!",
+  "diary_desc": "Checkout my <strong>Diary</strong>. Where i shared <strong>Everything</strong> exclusive. The only platform that i could be myself!",
+  "diary_button": "View Diary",
+  "diary_last_label": "Last Post",
+  "diary_loading": "Loading...",
+  "diary_activity": "Activity",
   "toast_copied": "Copied!"
 }

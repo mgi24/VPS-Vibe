@@ -46,15 +46,16 @@
   <div class="card card-diary" id="diaryCard">
     <div class="card-body diary-grid">
       <div class="diary-left">
-        <div class="diary-headline">Never miss anything from me!</div>
-        <div class="diary-desc">Checkout my <strong>Diary</strong>. Where i shared <strong>Everything</strong> exclusive. The only platform that i could be myself!</div>
+        <div class="diary-headline">{{ content.diary_headline }}</div>
+        <div class="diary-desc">{{ content.diary_desc | safe }}</div>
+        <div class="domain-label domain-diary">diary.misbahwork.my.id</div>
         <div class="diary-contrib" id="diaryContrib"></div>
-        <a href="http://diary.misbahwork.my.id" target="_blank" class="btn-diary">View Diary</a>
+        <a href="http://diary.misbahwork.my.id" target="_blank" class="btn-diary">{{ content.diary_button }}</a>
       </div>
       <div class="diary-right">
-        <div class="diary-last-label">Last Post</div>
+        <div class="diary-last-label">{{ content.diary_last_label }}</div>
         <div class="diary-last-post" id="diaryLastPost">
-          <div class="diary-loading">Loading...</div>
+          <div class="diary-loading">{{ content.diary_loading }}</div>
         </div>
       </div>
     </div>
@@ -117,7 +118,7 @@ function renderContrib(stats) {
     days.push({ date: key, count });
   }
   const maxCount = Math.max(...days.map(d => d.count), 1);
-  el.innerHTML = '<div class="contrib-label">Activity</div>';
+  el.innerHTML = '<div class="contrib-label">{{ content.diary_activity }}</div>';
   const grid = document.createElement('div');
   grid.className = 'contrib-grid';
   days.forEach(d => {

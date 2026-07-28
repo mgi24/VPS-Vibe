@@ -121,7 +121,7 @@ nav {
 .card-profile {
   background: #141414;
   border: 1px solid #222;
-  border-left: 4px solid #00d4aa;
+  border-left: 4px solid #ef4444;
 }
 
 .card-video {
@@ -189,7 +189,7 @@ nav {
   line-height: 60px;
   font-size: 42px;
   font-weight: 800;
-  color: #00d4aa;
+  color: #ef4444;
 }
 
 @keyframes slotRoll {
@@ -212,7 +212,7 @@ nav {
   width: 220px;
   height: 220px;
   border-radius: 50%;
-  border: 3px solid #00d4aa;
+  border: 3px solid #ef4444;
   object-fit: cover;
   max-width: 100%;
 }
@@ -328,6 +328,18 @@ nav {
   line-height: 1.6;
 }
 
+.domain-label {
+  font-size: 13px;
+  color: #60a5fa;
+  margin-top: 6px;
+  font-family: monospace;
+  opacity: 0.8;
+}
+
+.domain-diary {
+  color: #00d4aa;
+}
+
 .vpn-btn {
   display: inline-flex;
   align-items: center;
@@ -410,6 +422,71 @@ nav {
 .demo-btn:hover {
   color: #ffcc66;
   transform: scale(1.06);
+}
+
+/* ===== Local LLM Card ===== */
+.card-llm {
+  background: #181818;
+  border: 1px solid #262626;
+  border-left: 4px solid #facc15;
+}
+
+.llm-grid {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+
+.llm-left {
+  flex: 1;
+}
+
+.llm-heading {
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.llm-desc {
+  font-size: 16px;
+  color: #999;
+  line-height: 1.6;
+}
+
+.domain-llm {
+  color: #facc15;
+}
+
+.llm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border-radius: 14px;
+  background: #1c1a00;
+  border: 1px solid #504a00;
+  padding: 18px 52px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #facc15;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.4s;
+  animation: llmGlow 2s ease-in-out infinite alternate;
+  flex-shrink: 0;
+}
+
+.llm-btn:hover {
+  color: #fde047;
+  border-color: #facc15;
+  transform: scale(1.04);
+}
+
+@keyframes llmGlow {
+  0% { box-shadow: 0 0 15px rgba(250, 204, 21, 0.3); }
+  50% { box-shadow: 0 0 35px rgba(250, 204, 21, 0.5), 0 0 60px rgba(250, 204, 21, 0.2); }
+  100% { box-shadow: 0 0 15px rgba(250, 204, 21, 0.3); }
 }
 
 /* ===== Contact Page ===== */

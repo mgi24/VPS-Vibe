@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import logging
 import threading
@@ -16,16 +17,33 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from model_always_on import (
-    model,
-    seg_model,
-    cs2_model,
-    class_names,
-    seg_class_names,
-    cs2_class_names,
-)
+from model_manager import ModelManager
 
 BASE_DIR = Path(__file__).parent
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
+model_manager = ModelManager(check_interval=5.0)
+seg_mm = model_manager.register(
+    "segment",
+    BASE_DIR / "yolo11n-seg.pt",
+    idle_timeout=60.0,
+)
+cs2_mm = model_manager.register(
+    "cs2_segment",
+    BASE_DIR / "cs2-s-26last.pt",
+    idle_timeout=60.0,
+)
+det_mm = model_manager.register(
+    "detect",
+    BASE_DIR / "yolov8s.pt",
+    idle_timeout=60.0,
+)
+sam_mm = model_manager.register_sam(
+    "sam3",
+    BASE_DIR / "sam3.1.pt",
+    idle_timeout=60.0,
+)
 
 REQUEST_DELAY_LIMIT: float = 0.5
 
@@ -52,6 +70,7 @@ session_last_time: dict[str, float] = {}
 task_store: dict[str, dict] = {}
 task_lock = threading.Lock()
 sam_lock = threading.Lock()
+model_manager.set_sam_lock(sam_lock)
 executor = ThreadPoolExecutor(max_workers=4)
 
 COLORS = [
@@ -177,12 +196,13 @@ async def segment(req: DetectRequest, request: Request):
     img = decode_image(req)
     kwargs = build_kwargs(req)
 
-    results = seg_model(img, **kwargs)
-    drawn = draw_segmentations(img.copy(), results, seg_class_names)
+    await seg_mm.ensure_loaded()
+    results = await seg_mm.predict(img, **kwargs)
+    drawn = draw_segmentations(img.copy(), results, seg_mm.class_names)
 
     return JSONResponse({
         "image": encode_result(drawn),
-        "detections": detection_results(results, seg_class_names),
+        "detections": detection_results(results, seg_mm.class_names),
     })
 
 
@@ -217,13 +237,13 @@ async def prompt_segment(req: PromptSegmentRequest, request: Request):
 
 
 def _run_sam3_task(task_id: str, img: np.ndarray, prompts: list[str]):
-    from model_always_on import get_sam3_predictor
-
     t0 = time.time()
+    sam_mm.mark_busy(True)
     try:
         with sam_lock:
             logging.info(f"Task {task_id} started (acquired sam_lock)")
-            predictor = get_sam3_predictor()
+            sam_mm.ensure_loaded()
+            predictor = sam_mm.predictor
             img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
             import tempfile, os
@@ -272,6 +292,7 @@ def _run_sam3_task(task_id: str, img: np.ndarray, prompts: list[str]):
                         cv2.putText(drawn, label, (x1 + 4, y1 - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
         elapsed = round(time.time() - t0, 2)
+        sam_mm.mark_used()
         logging.info(f"Task {task_id} done in {elapsed}s | prompts={prompts}")
 
         with task_lock:
@@ -284,6 +305,8 @@ def _run_sam3_task(task_id: str, img: np.ndarray, prompts: list[str]):
         with task_lock:
             task_store[task_id]["status"] = "error"
             task_store[task_id]["error"] = str(e)
+    finally:
+        sam_mm.mark_busy(False)
 
 
 @app.get("/prompt-segment/status/{task_id}")
@@ -325,12 +348,13 @@ async def cs2_segment(req: DetectRequest, request: Request):
     img = decode_image(req)
     kwargs = build_kwargs(req)
 
-    results = cs2_model(img, **kwargs)
-    drawn = draw_segmentations(img.copy(), results, cs2_class_names)
+    await cs2_mm.ensure_loaded()
+    results = await cs2_mm.predict(img, **kwargs)
+    drawn = draw_segmentations(img.copy(), results, cs2_mm.class_names)
 
     return JSONResponse({
         "image": encode_result(drawn),
-        "detections": detection_results(results, cs2_class_names),
+        "detections": detection_results(results, cs2_mm.class_names),
     })
 
 
@@ -342,14 +366,24 @@ async def detect(req: DetectRequest, request: Request):
     img = decode_image(req)
     kwargs = build_kwargs(req)
 
-    results = model(img, **kwargs)
-    drawn = draw_detections(img.copy(), results, class_names)
+    await det_mm.ensure_loaded()
+    results = await det_mm.predict(img, **kwargs)
+    drawn = draw_detections(img.copy(), results, det_mm.class_names)
 
     return JSONResponse({
         "image": encode_result(drawn),
-        "detections": detection_results(results, class_names),
+        "detections": detection_results(results, det_mm.class_names),
     })
 
+
+@app.on_event("startup")
+async def startup_event():
+    await model_manager.start_monitor()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await model_manager.stop_monitor()
+    model_manager.unload_all()
 
 if __name__ == "__main__":
     uvicorn.run(
