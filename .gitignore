@@ -23,6 +23,8 @@ VPNweb/__pycache__/
 discord/.env
 discord/.env.*
 discord/node_modules/
+!videoweb/
+!videoweb/**
 
 doc.md
 __pycache__/

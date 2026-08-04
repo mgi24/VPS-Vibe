@@ -1,0 +1,35 @@
+{
+  "name": "videoweb",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ffmpeg/core": "^0.12.10",
+    "@ffmpeg/core-mt": "^0.12.10",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
+    "@sveltejs/adapter-static": "^3.0.10",
+    "gsap": "^3.15.0",
+    "howler": "^2.2.4",
+    "html2canvas": "^1.4.1",
+    "jszip": "^3.10.1",
+    "three": "^0.185.1",
+    "three-stdlib": "^2.36.1"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
+    "svelte": "^5.56.8",
+    "vite": "^8.2.0"
+  }
+}
