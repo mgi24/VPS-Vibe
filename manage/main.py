@@ -10,12 +10,12 @@ import json
 from pathlib import Path
 import sqlite3
 from datetime import datetime, timedelta
-from fastapi import FastAPI, Form, Query, HTTPException, Body
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi import FastAPI, Form, Query, HTTPException, Body, UploadFile, File, Request
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 sessions = {}
-SESSION_EXPIRE_HOURS = 24
+SESSION_EXPIRE_HOURS = 8760  # 1 year, effectively persistent
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "manage.db")
@@ -63,6 +63,14 @@ def check_sudo_access(username: str) -> bool:
     return False
 
 
+def refresh_session(token):
+    session = sessions.get(token)
+    if session and datetime.utcnow() <= session["expires"]:
+        session["expires"] = datetime.utcnow() + timedelta(hours=SESSION_EXPIRE_HOURS)
+        return True
+    return False
+
+
 @app.post("/api/login")
 async def login(username: str = Form(...), password: str = Form(...)):
     try:
@@ -87,6 +95,15 @@ async def login(username: str = Form(...), password: str = Form(...)):
         "expires": datetime.utcnow() + timedelta(hours=SESSION_EXPIRE_HOURS),
     }
     return {"token": token}
+
+
+@app.get("/api/refresh")
+async def api_refresh(token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    refresh_session(token)
+    return {"ok": True}
 
 
 def run_iptables(args: list[str]) -> str:
@@ -533,6 +550,24 @@ async def disable_service(name: str, token: str = Query(...)):
     return {"success": code == 0, "error": err if code != 0 else None}
 
 
+@app.get("/api/services/{name}/logs")
+async def get_service_logs(name: str, token: str = Query(...)):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    try:
+        result = subprocess.run(
+            ["journalctl", "-u", name, "-n", "20", "--no-pager", "-o", "short"],
+            capture_output=True, text=True, timeout=10
+        )
+        if result.returncode != 0:
+            return {"success": False, "error": result.stderr.strip(), "logs": []}
+        logs = [l for l in result.stdout.strip().split("\n") if l]
+        return {"success": True, "logs": logs[-20:]}
+    except Exception as e:
+        return {"success": False, "error": str(e), "logs": []}
+
+
 # ── Docker Management ──────────────────────────────────────────────
 
 def run_docker(args: list[str], timeout: int = 15) -> tuple[int, str, str]:
@@ -629,3 +664,215 @@ async def stop_docker_container(name: str, token: str = Query(...)):
         raise HTTPException(status_code=401, detail="Unauthorized")
     code, out, err = run_docker(["stop", name])
     return {"success": code == 0, "error": err if code != 0 else None}
+
+
+# ── File Explorer ────────────────────────────────────────────────
+
+def _is_binary(data: bytes) -> bool:
+    return b'\x00' in data[:8192]
+
+
+@app.get("/api/explorer")
+async def explorer(
+    token: str = Query(...),
+    path: str = Query("/"),
+):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    # Restrict to safe paths
+    real_path = os.path.realpath(path)
+    allowed = [os.path.realpath(p) for p in ["/", "/home", "/etc", "/var/log", "/tmp", "/root"]]
+    if not any(real_path.startswith(a + "/") or real_path == a for a in allowed):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    try:
+        entries = []
+        for name in sorted(os.listdir(real_path)):
+            full = os.path.join(real_path, name)
+            try:
+                st = os.lstat(full)
+            except OSError:
+                continue
+            import stat as sm
+            is_dir = sm.S_ISDIR(st.st_mode)
+            entries.append({
+                "name": name,
+                "path": full.replace(os.sep, "/"),
+                "is_dir": is_dir,
+                "size": st.st_size if not is_dir else None,
+                "mtime": st.st_mtime,
+            })
+
+        # Sort: directories first, then files
+        entries.sort(key=lambda e: (not e["is_dir"], e["name"].lower()))
+
+        return {"path": real_path.replace(os.sep, "/"), "entries": entries}
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="Permission denied")
+    except OSError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/api/explorer/read")
+async def explorer_read(
+    token: str = Query(...),
+    path: str = Query(...),
+):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    real_path = os.path.realpath(path)
+    allowed = [os.path.realpath(p) for p in ["/", "/home", "/etc", "/var/log", "/tmp", "/root"]]
+    if not any(real_path.startswith(a + "/") or real_path == a for a in allowed):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    try:
+        with open(real_path, "rb") as f:
+            data = f.read(1 * 1024 * 1024)  # max 1MB
+    except OSError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    if _is_binary(data):
+        return {"path": real_path.replace(os.sep, "/"), "type": "binary", "size": len(data)}
+
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError:
+        try:
+            text = data.decode("latin-1")
+        except Exception:
+            return {"path": real_path.replace(os.sep, "/"), "type": "binary", "size": len(data)}
+
+    return {"path": real_path.replace(os.sep, "/"), "type": "text", "content": text}
+
+
+@app.get("/api/explorer/image")
+async def explorer_image(
+    token: str = Query(...),
+    path: str = Query(...),
+):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    real_path = os.path.realpath(path)
+    allowed = [os.path.realpath(p) for p in ["/", "/home", "/etc", "/var/log", "/tmp", "/root"]]
+    if not any(real_path.startswith(a + "/") or real_path == a for a in allowed):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    try:
+        with open(real_path, "rb") as f:
+            data = f.read()
+    except OSError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    import mimetypes
+    mime, _ = mimetypes.guess_type(path)
+    if not mime or not mime.startswith("image/"):
+        return {"path": real_path.replace(os.sep, "/"), "type": "binary", "size": len(data)}
+
+    import base64
+    b64 = base64.b64encode(data).decode()
+    ext = mime.split("/")[1]
+    return {
+        "path": real_path.replace(os.sep, "/"),
+        "type": "image",
+        "mime": mime,
+        "data_url": f"data:{mime};base64,{b64}",
+    }
+
+
+@app.post("/api/explorer/write")
+async def explorer_write(
+    token: str = Query(...),
+    path: str = Body(...),
+    content: str = Body(...),
+):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    real_path = os.path.realpath(path)
+    allowed = [os.path.realpath(p) for p in ["/", "/home", "/etc", "/var/log", "/tmp", "/root"]]
+    if not any(real_path.startswith(a + "/") or real_path == a for a in allowed):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    try:
+        with open(real_path, "w") as f:
+            f.write(content)
+        return {"success": True}
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="Permission denied")
+    except OSError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.delete("/api/explorer/delete")
+async def explorer_delete(
+    token: str = Query(...),
+    path: str = Query(...),
+):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    real_path = os.path.realpath(path)
+    allowed = [os.path.realpath(p) for p in ["/", "/home", "/etc", "/var/log", "/tmp", "/root"]]
+    if not any(real_path.startswith(a + "/") or real_path == a for a in allowed):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    import shutil
+    try:
+        if os.path.isdir(real_path):
+            shutil.rmtree(real_path)
+        else:
+            os.remove(real_path)
+        return {"success": True}
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="Permission denied")
+    except OSError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/explorer/upload")
+async def explorer_upload(
+    token: str = Query(...),
+    path: str = Body(..., embed=True),
+    file: UploadFile = File(...),
+    new_name: str = Body(None, embed=True),
+):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    real_path = os.path.realpath(path)
+    allowed = [os.path.realpath(p) for p in ["/", "/home", "/etc", "/var/log", "/tmp", "/root"]]
+    if not any(real_path.startswith(a + "/") or real_path == a for a in allowed):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    filename = new_name or file.filename
+    dest = os.path.join(real_path, filename)
+    real_dest = os.path.realpath(dest)
+    if not any(real_dest.startswith(a + "/") or real_dest == a for a in allowed):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    try:
+        with open(dest, "wb") as f:
+            content = await file.read()
+            f.write(content)
+        return {"success": True, "path": real_dest.replace(os.sep, "/"), "size": len(content)}
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="Permission denied")
+    except OSError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.api_route("/", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+@app.api_route("/explorer{rest:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def catch_all(request: Request, rest: str = "/"):
+    if rest and rest != "/":
+        return RedirectResponse(url="/#/explorer/" + rest.lstrip("/"), status_code=307)
+    return FileResponse("static/index.html")

@@ -1,10 +1,14 @@
 import asyncio
 import base64
+import json
 import logging
+import os
+import subprocess
+import sys
+import tempfile
 import threading
 import time
 import uuid
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import uvicorn
@@ -39,11 +43,6 @@ det_mm = model_manager.register(
     BASE_DIR / "yolov8s.pt",
     idle_timeout=60.0,
 )
-sam_mm = model_manager.register_sam(
-    "sam3",
-    BASE_DIR / "sam3.1.pt",
-    idle_timeout=60.0,
-)
 
 REQUEST_DELAY_LIMIT: float = 0.5
 
@@ -66,12 +65,79 @@ class PromptSegmentRequest(BaseModel):
 
 
 session_last_time: dict[str, float] = {}
-
 task_store: dict[str, dict] = {}
 task_lock = threading.Lock()
-sam_lock = threading.Lock()
-model_manager.set_sam_lock(sam_lock)
-executor = ThreadPoolExecutor(max_workers=4)
+executor = threading.Semaphore(1)
+
+
+class _SamWorker:
+    def __init__(self, model_path: str, idle_timeout: float = 60.0):
+        self.model_path = model_path
+        self.idle_timeout = int(idle_timeout)
+        self._process: subprocess.Popen | None = None
+        self._lock = threading.Lock()
+
+    def _ensure_running(self):
+        if self._process is not None and self._process.poll() is None:
+            return
+        self._process = subprocess.Popen(
+            [sys.executable, str(BASE_DIR / "sam_worker.py"),
+             str(self.idle_timeout), self.model_path],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+        logging.info("SAM worker started (PID %d)", self._process.pid)
+
+    def send_request(self, task_id: str, img_path: str, prompts: list[str]) -> dict:
+        with self._lock:
+            self._ensure_running()
+            req = json.dumps({
+                "task_id": task_id,
+                "image_path": img_path,
+                "prompts": prompts,
+            })
+            self._process.stdin.write((req + "\n").encode())
+            self._process.stdin.flush()
+
+            while True:
+                line = self._process.stdout.readline()
+                if not line:
+                    rc = self._process.poll()
+                    self._process = None
+                    raise RuntimeError(f"SAM worker died (rc={rc})")
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    result = json.loads(line)
+                    break
+                except json.JSONDecodeError:
+                    logging.debug("Worker non-JSON output: %s", line)
+                    continue
+
+            if self._process.poll() is not None:
+                self._process = None
+
+            return result
+
+    def kill(self):
+        with self._lock:
+            if self._process is not None and self._process.poll() is None:
+                self._process.terminate()
+                try:
+                    self._process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    self._process.kill()
+                logging.info("SAM worker killed (PID %d)", self._process.pid)
+            self._process = None
+
+    @property
+    def is_alive(self) -> bool:
+        return self._process is not None and self._process.poll() is None
+
+
+sam_worker = _SamWorker(str(BASE_DIR / "sam3.1.pt"), idle_timeout=60.0)
 
 COLORS = [
     (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0),
@@ -231,82 +297,42 @@ async def prompt_segment(req: PromptSegmentRequest, request: Request):
         }
 
     logging.info(f"Task {task_id} created | prompts={req.prompts}")
-    executor.submit(_run_sam3_task, task_id, img, req.prompts)
+    threading.Thread(target=_run_sam3_task, args=(task_id, img, req.prompts), daemon=True).start()
 
     return JSONResponse({"task_id": task_id})
 
 
 def _run_sam3_task(task_id: str, img: np.ndarray, prompts: list[str]):
     t0 = time.time()
-    sam_mm.mark_busy(True)
     try:
-        with sam_lock:
-            logging.info(f"Task {task_id} started (acquired sam_lock)")
-            sam_mm.ensure_loaded()
-            predictor = sam_mm.predictor
-            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False, dir="/tmp") as tmp:
+            cv2.imwrite(tmp.name, img_rgb)
+            tmp_path = tmp.name
 
-            import tempfile, os
-            with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
-                cv2.imwrite(tmp.name, img_rgb)
-                tmp_path = tmp.name
-
+        try:
+            result = sam_worker.send_request(task_id, tmp_path, prompts)
+        finally:
             try:
-                predictor.set_image(tmp_path)
-                results = predictor(text=prompts)
-            finally:
                 os.unlink(tmp_path)
-
-        drawn = img.copy()
-        colors = [
-            (0, 212, 170), (233, 69, 96), (91, 141, 239),
-            (255, 170, 0), (167, 139, 250), (244, 114, 182),
-        ]
-
-        if results and len(results) > 0:
-            r = results[0]
-            if r.masks is not None:
-                masks_data = r.masks.data.cpu().numpy()
-                orig_h, orig_w = drawn.shape[:2]
-                for i, mask in enumerate(masks_data):
-                    mask_f = mask.astype(np.float32) if mask.dtype == bool else mask
-                    mask_resized = cv2.resize(mask_f, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST)
-                    color = colors[i % len(colors)]
-                    mask_bool = mask_resized > 0.5
-                    overlay = drawn.copy()
-                    overlay[mask_bool] = color
-                    cv2.addWeighted(overlay, 0.5, drawn, 0.5, 0, drawn)
-                    contours, _ = cv2.findContours(
-                        mask_bool.astype(np.uint8),
-                        cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-                    )
-                    cv2.drawContours(drawn, contours, -1, color, 3)
-
-                    if r.boxes is not None and i < len(r.boxes):
-                        cls_id = int(r.boxes.cls[i])
-                        conf = float(r.boxes.conf[i])
-                        label = f"{prompts[cls_id] if cls_id < len(prompts) else prompts[0]} {conf:.2f}"
-                        x1, y1, x2, y2 = map(int, r.boxes.xyxy[i])
-                        (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
-                        cv2.rectangle(drawn, (x1, y1 - th - 8), (x1 + tw + 8, y1), color, -1)
-                        cv2.putText(drawn, label, (x1 + 4, y1 - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            except OSError:
+                pass
 
         elapsed = round(time.time() - t0, 2)
-        sam_mm.mark_used()
         logging.info(f"Task {task_id} done in {elapsed}s | prompts={prompts}")
 
         with task_lock:
-            task_store[task_id]["status"] = "done"
-            task_store[task_id]["image"] = encode_result(drawn)
-            task_store[task_id]["elapsed"] = elapsed
+            task_store[task_id]["status"] = result.get("status", "error")
+            task_store[task_id]["image"] = result.get("image")
+            task_store[task_id]["elapsed"] = result.get("elapsed", elapsed)
+            if result.get("error"):
+                task_store[task_id]["error"] = result["error"]
 
     except Exception as e:
         logging.error(f"Task {task_id} failed: {e}")
         with task_lock:
             task_store[task_id]["status"] = "error"
             task_store[task_id]["error"] = str(e)
-    finally:
-        sam_mm.mark_busy(False)
 
 
 @app.get("/prompt-segment/status/{task_id}")
@@ -382,6 +408,7 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
+    sam_worker.kill()
     await model_manager.stop_monitor()
     model_manager.unload_all()
 

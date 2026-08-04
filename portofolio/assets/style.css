@@ -1196,6 +1196,18 @@ nav {
     padding: 16px 0;
   }
 
+  .llm-grid {
+    flex-direction: column;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .llm-btn {
+    width: 100%;
+    padding: 18px 0;
+    font-size: 20px;
+  }
+
   /* Contact responsive */
   .contact-title {
     font-size: 26px;

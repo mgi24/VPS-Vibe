@@ -1,7 +1,14 @@
 let svcAvailable = [];
 
+// These are already declared in app.js, just reassign here
+svcLogTimer = null;
+svcLogName = null;
+
 async function loadService() {
+  console.log('[svc] loadService called, authToken:', !!authToken);
   const el = document.getElementById('tab-services');
+  console.log('[svc] tab-services element:', el);
+  if (!el) { console.error('[svc] tab-services NOT FOUND!'); return; }
   el.innerHTML = `
     <div class="svc-controls">
       <button class="svc-add-btn" id="svc-add-btn">+ Add Service</button>
@@ -9,19 +16,29 @@ async function loadService() {
     </div>
     <div id="svc-table-wrap"></div>
     <div id="svc-config-area"></div>
+    <div id="svc-log-area"></div>
   `;
+  console.log('[svc] DOM rendered');
   document.getElementById('svc-add-btn').addEventListener('click', openAddServiceModal);
   document.getElementById('svc-refresh').addEventListener('click', refreshServices);
   refreshServices();
 }
 
 async function refreshServices() {
+  console.log('[svc] refreshServices called, authToken:', !!authToken);
   const el = document.getElementById('svc-table-wrap');
+  console.log('[svc] svc-table-wrap element:', el);
+  if (!el) { console.error('[svc] svc-table-wrap NOT FOUND!'); return; }
   el.innerHTML = '<div class="svc-empty"><span class="spinner"></span> Loading...</div>';
   try {
-    const res = await fetch('/api/services/monitored?token=' + encodeURIComponent(authToken));
-    if (!res.ok) throw new Error('Failed to load');
-    const data = await res.json();
+    const url = '/api/services/monitored?token=' + encodeURIComponent(authToken);
+    console.log('[svc] Fetching:', url);
+    const res = await fetch(url);
+    console.log('[svc] Response status:', res.status, 'ok:', res.ok);
+    const text = await res.text();
+    console.log('[svc] Response body:', text.substring(0, 500));
+    if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + text);
+    const data = JSON.parse(text);
     if (!data.services.length) {
       el.innerHTML = '<div class="svc-empty">No services monitored. Click "+ Add Service" to begin.</div>';
       return;
@@ -37,8 +54,8 @@ async function refreshServices() {
       const memStr = svc.pids > 0 ? svc.rss_mb + ' MB \u00b7 ' + svc.pids + ' PID' + (svc.pids > 1 ? 's' : '') : '\u2014';
       html += '<tr>';
       html += '<td><div class="svc-td-name">' + escapeHtml(svc.name) + '</div><div class="svc-td-desc">' + escapeHtml(svc.description) + '</div></td>';
-      html += '<td><span class="svc-check ' + (isActive || isFailed ? (isFailed ? 'no' : 'yes') : 'no') + '">' + (isActive ? '\u2713' : '\u2717') + '</span></td>';
-      html += '<td><span class="svc-check ' + (isEnabled ? 'yes' : 'no') + '">' + (isEnabled ? '\u2713' : '\u2717') + '</span></td>';
+      html += '<td><span class="svc-check ' + (isActive || isFailed ? (isFailed ? 'no' : 'yes') : 'no') + '">' + (isActive ? '\u2713' : '[X]') + '</span></td>';
+      html += '<td><span class="svc-check ' + (isEnabled ? 'yes' : 'no') + '">' + (isEnabled ? '\u2713' : '[X]') + '</span></td>';
       html += '<td style="color:var(--text2);font-size:12px">' + memStr + '</td>';
       html += '<td style="text-align:right"><div class="svc-drop-wrap">';
       html += '<button class="svc-drop-btn" onclick="toggleDropdown(event,\'' + safeId + '\')">Actions <span class="arrow">\u25be</span></button>';
@@ -57,6 +74,7 @@ async function refreshServices() {
       }
       html += '<div class="svc-drop-sep"></div>';
       html += '<div class="svc-drop-item" onclick="toggleServiceConfig(\'' + svc.name + '\')">Show Config</div>';
+      html += '<div class="svc-drop-item" onclick="toggleServiceLogs(\'' + svc.name + '\')">Show Logs</div>';
       html += '<div class="svc-drop-item danger" onclick="removeService(\'' + svc.name + '\')">Remove</div>';
       html += '</div></div></td>';
       html += '</tr>';
@@ -110,6 +128,44 @@ async function toggleServiceConfig(name) {
     }
   } catch(e) {
     el.innerHTML = '<div class="svc-config show"><pre style="color:var(--accent)">Error: ' + escapeHtml(e.message) + '</pre></div>';
+  }
+}
+
+svcLogTimer = null;
+svcLogName = null;
+
+async function toggleServiceLogs(name) {
+  const el = document.getElementById('svc-log-area');
+  if (svcLogName === name) {
+    svcLogName = null;
+    if (svcLogTimer) { clearInterval(svcLogTimer); svcLogTimer = null; }
+    el.innerHTML = '';
+    return;
+  }
+  svcLogName = name;
+  el.innerHTML = '<div class="svc-config show"><div class="svc-config-src">Realtime logs \u00b7 ' + escapeHtml(name) + '</div><pre class="svc-log-body"><span class="spinner"></span> Loading logs...</pre></div>';
+  await loadServiceLogs(name);
+  if (svcLogTimer) clearInterval(svcLogTimer);
+  svcLogTimer = setInterval(() => loadServiceLogs(name), 3000);
+}
+
+async function loadServiceLogs(name) {
+  const el = document.getElementById('svc-log-area');
+  if (svcLogName !== name || !el) return;
+  const pre = el.querySelector('.svc-log-body');
+  if (!pre) return;
+  try {
+    const res = await fetch('/api/services/' + encodeURIComponent(name) + '/logs?token=' + encodeURIComponent(authToken));
+    if (!res.ok) throw new Error('Failed to load logs');
+    const data = await res.json();
+    if (data.error) {
+      pre.textContent = data.error;
+    } else {
+      pre.textContent = data.logs.length ? data.logs.join('\n') : '(no logs)';
+      pre.scrollTop = pre.scrollHeight;
+    }
+  } catch(e) {
+    pre.textContent = 'Error: ' + e.message;
   }
 }
 

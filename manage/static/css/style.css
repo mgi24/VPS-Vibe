@@ -101,9 +101,9 @@ input,button,select,textarea{font-family:inherit}
 .svc-table tr:hover td{background:rgba(255,255,255,0.03)}
 .svc-table .svc-td-name{font-family:'Consolas','Courier New',monospace;font-weight:600;color:#fff}
 .svc-table .svc-td-desc{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
-.svc-check{font-size:16px;line-height:1}
-.svc-check.yes{color:var(--green)}
-.svc-check.no{color:var(--accent)}
+.svc-check{display:inline-block;font-size:12px;line-height:1;font-weight:700;padding:3px 6px;border-radius:4px;min-width:26px;text-align:center;font-family:'Consolas','Courier New',monospace}
+.svc-check.yes{color:var(--green);background:rgba(12,237,160,0.12);border:1px solid var(--green)}
+.svc-check.no{color:#ff6b81;background:rgba(233,69,96,0.18);border:1px solid var(--accent);box-shadow:0 0 0 1px rgba(233,69,96,0.25)}
 .svc-drop-wrap{position:relative;display:inline-block}
 .svc-drop-btn{padding:5px 12px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:4px}
 .svc-drop-btn:hover{border-color:var(--accent2);color:#fff}
@@ -147,3 +147,38 @@ input,button,select,textarea{font-family:inherit}
 .docker-state.exited{background:rgba(233,69,96,0.15);color:var(--accent)}
 .docker-state.paused{background:rgba(240,160,48,0.15);color:#f0a030}
 .docker-state.created{background:rgba(91,141,239,0.15);color:var(--accent2)}
+/* Explorer */
+.explorer-layout{display:flex;gap:0;height:calc(100vh - 120px);overflow:hidden}
+.explorer-left{flex:0 0 60%;min-width:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.explorer-right{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;background:var(--surface)}
+.explorer-toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.nav-up-btn{padding:5px 12px;background:var(--accent2);color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity 0.15s}
+.nav-up-btn:hover{opacity:0.85}
+.breadcrumb{display:flex;align-items:center;gap:0;overflow-x:auto;flex:1;min-width:0;font-size:13px}
+.breadcrumb-item{cursor:pointer;color:var(--accent2);white-space:nowrap;padding:2px 4px;border-radius:3px;transition:background 0.1s}
+.breadcrumb-item:hover{background:rgba(91,141,239,0.15)}
+.breadcrumb-sep{color:var(--text2);margin:0 2px;font-size:11px;flex-shrink:0}
+.explorer-list{flex:1;overflow-y:auto}
+.entry-row{display:flex;align-items:center;padding:8px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.1s;font-size:13px;gap:8px}
+.entry-row:hover{background:rgba(255,255,255,0.05)}
+.entry-icon{width:28px;text-align:center;font-size:16px;color:var(--text2);flex-shrink:0}
+.entry-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}
+.entry-size{width:70px;text-align:right;font-size:11px;color:var(--text2);flex-shrink:0}
+.entry-date{width:85px;text-align:right;font-size:11px;color:var(--text2);flex-shrink:0;white-space:nowrap}
+.copy-btn{padding:3px 8px;background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:14px;border-radius:3px;transition:all 0.15s;opacity:0.4;flex-shrink:0}
+.copy-btn:hover{color:#fff;background:rgba(91,141,239,0.2);opacity:1}
+.explorer-empty{padding:32px;text-align:center;color:var(--text2);font-size:13px;width:100%}
+.preview-placeholder{display:flex;align-items:center;justify-content:center;height:100%;color:var(--text2);font-size:14px;padding:20px}
+.preview-header{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.preview-filename{font-family:'Consolas','Courier New',monospace;font-size:12px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.preview-content{padding:16px;font-size:12px;color:var(--text);white-space:pre-wrap;word-break:break-all;font-family:'Consolas','Courier New',monospace;line-height:1.5;margin:0;overflow-y:auto;flex:1;min-height:0}
+.preview-image{max-width:100%;max-height:calc(100vh - 200px);object-fit:contain;display:block;margin:auto}
+.preview-empty{display:flex;align-items:center;justify-content:center;height:calc(100% - 45px);color:var(--text2);font-size:13px;padding:20px;text-align:center}
+.edit-btn,.save-btn,.cancel-btn{padding:4px 12px;border:none;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;transition:opacity 0.15s}
+.edit-btn{background:var(--accent);color:#fff}
+.edit-btn:hover{opacity:0.85}
+.save-btn{background:var(--green);color:#000;border:none;padding:4px 12px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer}
+.save-btn:hover{opacity:0.85}
+.cancel-btn{background:var(--text2);color:#fff;border:none;padding:4px 12px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;margin-left:4px}
+.cancel-btn:hover{opacity:0.85}
+.preview-editor{flex:1;width:100%;padding:16px;font-family:'Consolas','Courier New',monospace;font-size:13px;color:var(--text);background:var(--bg);border:none;outline:none;resize:none;line-height:1.5;tab-size:4}
