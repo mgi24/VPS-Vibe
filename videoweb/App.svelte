@@ -17,14 +17,12 @@
     _previewPath: 'kamusai',
   });
 
-  // Dynamic page loader using Vite's glob imports
+  // Dynamic page loader — auto-discover ALL folders in pages/
   const pageModules = import.meta.glob('./pages/*/index.svelte', { eager: false });
-  const segmentModules = import.meta.glob('./pages/kamusai2/index{1..7}.svelte', { eager: false });
 
   console.log('Available pages:', Object.keys(pageModules));
-  console.log('Available segments:', Object.keys(segmentModules));
 
-  // Extract valid page slugs from glob keys
+  // Extract valid page slugs from glob keys (only index.svelte)
   const validPages = new Set();
   for (const key of Object.keys(pageModules)) {
     const match = key.match(/\.\/pages\/([^/]+)\/index\.svelte$/);
@@ -33,22 +31,12 @@
     }
   }
 
-  // Extract valid segment slugs from glob keys
-  const validSegments = new Map();
-  for (const key of Object.keys(segmentModules)) {
-    const match = key.match(/\.\/pages\/kamusai2\/index(\d+)\.svelte$/);
-    if (match) {
-      validSegments.set(match[1], key);
-    }
-  }
-
   console.log('Valid page slugs:', Array.from(validPages));
-  console.log('Valid segments:', Array.from(validSegments.keys()));
 
   async function loadPage(pathname) {
     currentPath = pathname;
     const cleanPath = pathname.replace(/^\/+|\/+$/g, '');
-    
+
     // Root path: redirect to example
     if (!cleanPath || cleanPath === '/') {
       pageProps = {};
@@ -57,64 +45,33 @@
     }
 
     const parts = cleanPath.split('/');
-    
-    // Check for /kamusai2 (full combined timeline) or /kamusai2/{segment} pattern (1-7)
-    if (parts[0] === 'kamusai2') {
-      let segmentStr;
-      if (parts.length >= 2 && parts[1]) {
-        segmentStr = parts[1];
-      } else {
-        // No segment number - load full combined timeline
-        pageProps = {};
-        $controller._previewPath = 'kamusai2';
-        return './pages/kamusai2/index.svelte';
-      }
-      if (validSegments.has(segmentStr)) {
-        const key = validSegments.get(segmentStr);
-        console.log('Loading segment:', key);
-        pageProps = {};
-        $controller._previewPath = 'kamusai2';
-        return key;
+
+    // /{folder}/{number} → frame preview mode (selalu)
+    if (parts.length >= 2 && validPages.has(parts[0])) {
+      const num = parseInt(parts[1], 10);
+      if (!isNaN(num)) {
+        pageProps = { showFrame: num };
+        $controller._previewPath = parts[0];
+        return `./pages/${parts[0]}/index.svelte`;
       }
     }
 
-    // Check for /{slug}/{frameNumber} pattern
-    if (parts.length >= 2) {
-      const slug = parts[0];
-      const frameStr = parts[1];
-      
-      if (validPages.has(slug)) {
-        const frameNum = parseInt(frameStr, 10);
-        if (!isNaN(frameNum) && frameNum >= 0) {
-          // Frame preview mode: /kamusai/345
-          pageProps = { showFrame: frameNum };
-          $controller._previewPath = slug;
-          return `./pages/${slug}/index.svelte`;
-        }
-      }
-    }
-
-    // Normal page route
-    if (!validPages.has(cleanPath)) {
-      console.warn('Page not found:', cleanPath, 'Available pages:', Array.from(validPages));
+    // /{folder} → combined view (index.svelte)
+    if (validPages.has(cleanPath)) {
       pageProps = {};
-      return null;
+      $controller._previewPath = cleanPath;
+      return `./pages/${cleanPath}/index.svelte`;
     }
 
-    const key = `./pages/${cleanPath}/index.svelte`;
-    console.log('Loading page:', key);
+    // Not found
+    console.warn('Page not found:', cleanPath, 'Available pages:', Array.from(validPages));
     pageProps = {};
-    $controller._previewPath = cleanPath.split('/')[0];
-    
-    if (pageModules[key]) {
-      return key;
-    }
     return null;
   }
 
   async function renderPage(pathname) {
     const key = await loadPage(pathname);
-    
+
     if (key === null) {
       currentPage = null;
       console.log('No page to render, showing 404');
@@ -122,7 +79,7 @@
     }
 
     try {
-      const loader = segmentModules[key] ?? pageModules[key];
+      const loader = pageModules[key];
       if (!loader) {
         console.error('Module not found for key:', key);
         currentPage = null;

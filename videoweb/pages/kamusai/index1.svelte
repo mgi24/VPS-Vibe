@@ -1,22 +1,11 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import gsap from 'gsap';
-
   export let controller = null;
   export let showFrame = -1;
-
-  let canvasEl;
-  let wrapEl;
-  let tl = null;
-  let raf = null;
-  let manualT = 0;
-  let lastTs = 0;
-  let duration = 6.0;
-  let isPlaying = false;
-  let speed = 1;
-
-  const W = 1080;
-  const H = 1920;
+  let canvasEl; let wrapEl; let tl = null; let raf = null;
+  let manualT = 0, lastTs = 0, duration = 3.0, isPlaying = false, speed = 1;
+  const W = 1080, H = 1920;
 
   function setupCanvasSize() {
     const isPreview = showFrame >= 0 && isFinite(showFrame);
@@ -31,21 +20,11 @@
   function buildTimeline() {
     tl = gsap.timeline({ paused: true });
     document.querySelectorAll('.kamusai-sec').forEach(el => { el.style.display = 'none'; el.style.opacity = '0'; });
-
-    // Segment 1 (0s - 3s)
-    tl.set('.seg1', { display: 'flex', autoAlpha: 1 }, 0);
-    const s1title = document.querySelector('.s1-title');
-    gsap.set(s1title, { autoAlpha: 0, scale: 0.5 });
-    tl.to(s1title, { autoAlpha: 1, scale: 1, duration: 0.8, ease: 'back.out(2)' }, 0);
-    tl.to(s1title, { autoAlpha: 0, scale: 0.8, duration: 0.6, ease: 'power2.in' }, 2.4);
-
-    // Segment 2 (3s - 6s)
-    tl.set('.seg2', { display: 'flex', autoAlpha: 1 }, 3.0);
-    const s2title = document.querySelector('.s2-title');
-    gsap.set(s2title, { autoAlpha: 0, scale: 0.5 });
-    tl.to(s2title, { autoAlpha: 1, scale: 1, duration: 0.8, ease: 'back.out(2)' }, 3.0);
-    tl.to(s2title, { autoAlpha: 0, scale: 0.8, duration: 0.6, ease: 'power2.in' }, 5.4);
-
+    tl.set('.kamusai-segment1', { display: 'flex', autoAlpha: 1 }, 0);
+    const title = document.querySelector('.seg-title');
+    gsap.set(title, { autoAlpha: 0, scale: 0.5 });
+    tl.to(title, { autoAlpha: 1, scale: 1, duration: 0.8, ease: 'back.out(2)' }, 0);
+    tl.to(title, { autoAlpha: 0, scale: 0.8, duration: 0.6, ease: 'power2.in' }, 2.4);
     tl.duration(duration);
   }
 
@@ -72,8 +51,7 @@
   onDestroy(() => { cancelAnimationFrame(raf); window.removeEventListener('resize', setupCanvasSize); if (tl) tl.kill(); if (controller) controller.update(c => ({ ...c, stageReady: false })); });
 </script>
 <div class="kamusai-page"><div class="kamusai-wrap" bind:this={wrapEl}><div class="kamusai-stage" bind:this={canvasEl}>
-  <div class="kamusai-sec seg1"><h1 class="s1-title">SEGMENT 1</h1></div>
-  <div class="kamusai-sec seg2"><h1 class="s2-title">SEGMENT 2</h1></div>
+  <div class="kamusai-sec kamusai-segment1"><h1 class="seg-title">SEGMENT 1</h1></div>
 </div></div></div>
 
 <style>
@@ -81,6 +59,5 @@
 .kamusai-wrap{position:relative;overflow:visible;flex-shrink:0;margin-top:80px}
 .kamusai-stage{position:relative;width:1080px;height:1920px;transform-origin:top left;overflow:hidden;background:#0D0D1A;border-radius:12px;box-shadow:0 0 60px rgba(0,191,255,0.15)}
 .kamusai-sec{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:10}
-.s1-title{font-size:140px;font-weight:900;color:#00BFFF;text-shadow:0 0 60px rgba(0,191,255,0.8)}
-.s2-title{font-size:140px;font-weight:900;color:#7AE582;text-shadow:0 0 60px rgba(122,229,130,0.8)}
+.seg-title{font-size:140px;font-weight:900;color:#00BFFF;text-shadow:0 0 60px rgba(0,191,255,0.8)}
 </style>

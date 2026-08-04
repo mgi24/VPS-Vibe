@@ -1,43 +1,59 @@
 ## Rules project video web
 
-Buat video motion grafis via web browser. Setiap project baru = folder `pages/{nama}/index.svelte`.
-copy dulu dari `pages/example/index.svelte` ke folder baru itu baru diedit.
+Tugas anda adalah buat video motion grafis via web browser. Setiap project baru = folder `pages/{nama_project}`.
 
-## Arsitektur
+##PREPARING
+1. copy dulu semua file dari `pages/example` ke folder baru itu baru diedit.
 
-- `App.svelte` membuat `controller` (Svelte `writable` store) berisi API stage → di-pass ke page + `src/components/VideoUI.svelte` (UI: player controls + render sidebar).
-- `pages/{nama}/index.svelte` HANYA grafik: stage + timeline GSAP + playback. Di `onMount` daftarkan API ke controller: `controller.update((c) => ({ ...c, stageReady:true, W, H, fps, duration, canvasEl, wrapEl, seekTo, play, pause, playPause, getTime:()=>manualT, getDuration:()=>duration, isPlaying:()=>isPlaying, setSpeed, stepFrame, exportFrame, restoreLayout }))`. `onDestroy` set `stageReady:false`.
-- JANGAN buat UI (tombol, sidebar, input) di page — taruh di `VideoUI` dan akses stage via `$controller`.
+2. edit indexer.js bagian '''export function getSegmentFromPath(pathname)''' di parts[0] === 'example' ubah jadi nama folder project
 
-## Stack
+3. baca file pages/output.srt untuk tau timestamp pengucapan kata subtitle
 
-Svelte 5 + GSAP + Howler (bukan Three.js untuk 2D). `vite.config.js` pakai `import { svelte } from '@sveltejs/vite-plugin-svelte'`. `package.json` `"type": "module"`.
+4. generate visual.md didalam folder pages/{nama_project}, isinya berformat table
 
-## Clock (WAJIB manual, JANGAN pakai tl API untuk playback)
+Total Video Duration: {total_duration}s ({total_frames} frames)
 
-- Tween `repeat:-1` (infinite) korup duration timeline → `tl.time()`/`tl.progress()` meledak jadi ratusan juta → section stuck hidden.
-- Manual clock: `manualT` di-increment rAF (`dt = (ts-lastTs)/1000 * speed`), lalu `tl.seek(manualT)` tiap rAF. `play()` hanya `isPlaying=true; lastTs=performance.now()`. `pause()` hanya `isPlaying=false`.
-- `seekTo(t)`: `manualT=t; tl.seek(t); if (audio?.playing()) audio.seek(t)`.
-- Frame step: `seekTo(manualT + dir*FRAME)`, `FRAME=1/24`.
-- Speed via `dt*speed`, bukan `tl.timeScale()`.
-- Jangan `tl.play()`/`tl.pause()`/`tl.progress()` untuk playback.
+##SEGMENT {number}
+**Subtitle:** "{subtitle_text}"
+**Timestamp:** HH:MM - HH:MM (frame X to Y)
 
-## GSAP onUpdate
+| # | Visual | Status |
+|---|--------|--------|
+| 1. | visual pertama yang tampil & animasinya seperti apa | ⬜ |
+| 2. | ... dst | ⬜ |
 
-Jangan `onUpdate: (e) => e.target...` (e undefined → crash, timeline tidak jadi). Pakai `onUpdate: function () { this.targets()[0].innerHTML = ... }`.
+**Rules visual.md:**
+- a. buat agar sebanyak mungkin ada animation, swipe, move dan dinamis
+- b. buat segment singkat jangan bikin layar jadi crowded, kalau terasa full jadiin beda segmen
+- c. bikin segmen SEBANYAK MUNGKIN, lebih banyak, lebih kecil per segmen LEBIH BAIK
 
-## Layout stage 9:16
+##GENERATING
+1. WAJIB todowrite sebanyak segment yang telah dibuat visual.md misal: create index1.svelte time 00:00 to 00:05, hal ini karena jika compacting task masih bisa continue
+2. Create tool task, jangan lakukan generating di session utama opencode untuk menghemat context! description: index{segment num} generation, prompt: edit index{num}.svelte isi sesuai dengan segment{num} pada pages/visual.md. DILARANG langsung generate 1 pass karena rawan corrupt! Apply 1 visual dulu!, done? edit visual.md bagian statusnya dari X ke OK. jika compacting baca lagi visual.md untuk cek progress! subagent type: general 
+  
+3. WAJIB coret to do list setelah anda generate index.svelte segement itu, misal done index1.svelte maka langsung coret to do list -index1.svelte time 00:00 to 00:05-
+4. lakukan generate per index.svelte secara seri, jangan pararel! 
 
-- Stage TETAP `width:1080px; height:1920px`, `transform-origin: top left`, `overflow:hidden`. Bungkus `.stage-wrap` (overflow:hidden) yang di-resize `wrap.style.width = W*scale; height = H*scale`, stage di-scale `canvasEl.style.transform = scale(${scale})`.
-- JANGAN resize width/height stage (font di dalam tidak ikut scale). JANGAN `line-height:0` di wrap (waris ke stage → teks collapse). JANGAN `max-height`/`aspect-ratio` di stage.
-- JANGAN `style={obj}` object di Svelte 5 untuk top/left — pakai string CSS (`style="top:18%;left:8%"` dari array per-index di `{#each}`).
-- JANGAN `:nth-of-type()` untuk posisi — hitung per jenis tag, bukan class. Posisi per-element via style string index.
+##TESTS
+Jika sudah selesai generate semua index.svelte, lakukan test suite:
+1. setiap 100 frame lakukan test dengan camofox, baca /home/mamad/camoskills.md
+2. total test = durasi*24/100, bulatkan kebawah, misal 60s = 14 test
+3. bikin to do list untuk track progress test, lalu langsung coret setelah test selesai.
+4. Test camofox hanya dilakukan ke model yang ada kemampuan multimodal, untuk model non multimodal, hanya gunakan web_fetch untuk akses 127.0.0.1:8017/{nama_project}/{frame} SAVE ke pages/{nama_project}/test_photo/{num frame}
+5. untuk model multimodal, perhatikan apakah ada element yang keluar dari frame (top, down, left right), overlap. ignore jika kurang rapi, asal terbaca saja. JANGAN PERFEKSIONIS, user akan beri feedback.
+6. jika test tidak passed, tulis di revisi.md, jangan fix dulu sampai test done
+7. isi revision.md adalah tabel
+frame | segment | comment
+100 | 1 | text "Hello" terpotong di kiri 
 
-## Section switching
+##DEBUG
+Hanya dijalankan jika test tidak passed.
+1. Baca revision.md
+2. bikin to do list sejumlah revision.md, langsung coret jika sudah fixed! baca kembali to do list jika compacted!
+3. Setiap list, edit index{segmen bermasalah}.svelte
+4. Lakukan test kembali seperti ##TESTS diatas namun save image ke pages/{nama_project}/test_photo/{num frame}revision{num revision}
+5. looping edit file hingga fixed.
 
-`gsap.set('.sec', { autoAlpha: 0, display:'none' })` + `.set('.sec-x', { autoAlpha: 1, display:'flex' }, t)` + fade out. autoAlpha pakai visibility:hidden.
-
-## Build & verifikasi
-
-- Build: `npx vite build` harus exit 0.
-- Verifikasi di browser: play → `getTime()` ≈ wall clock; seek tiap section → elemen tampil sesuai naskah.
+Rules:
+1. Jangan render subtitle di video! hanya key visualisasi / B roll saja!
+2. Jangan edit file diluar pages/{nama_project}! jika ada error akses 127.0.0.1/{nama_project}! langsung end task saja dan laporkan errornya!
