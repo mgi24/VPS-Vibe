@@ -15,7 +15,7 @@
 | `filesharingweb.service` | `/home/mamad/webfile` | 8011 | — |
 | `thingsboard.service` (Docker) | `/home/mamad/thingsboard` | 8080 | — |
 | `sshd` | — | 8022 | — |
-| `luckfox-tunnel` | SSH reverse tunnel (Luckfox Pico) | 8020 | luck1.misbahwork.my.id |
+| `luckfox-tunnel` | SSH reverse tunnel (Luckfox Pico) | 8020 | luck.misbahwork.my.id |
 | `mptcp.service` | `/usr/libexec/mptcpd` | system-level (MPTCP daemon) | — |
 | `sing-box.service` | `/etc/sing-box/config.json` | 8881 (internal) | — |
 | `socat-bridge.service` | `mptcpize + socat` | 8888 (MPTCP) | — |
