@@ -124,7 +124,7 @@ function routeFromPath(path) {
     if (!ep.startsWith('/')) ep = '/' + ep;
     return { tab: 'explorer', explorerPath: ep };
   }
-  m = path.match(/^\/(docker|services|iptables)$/i);
+  m = path.match(/^\/(docker|services|iptables|wireguard)$/i);
   if (m) return { tab: m[1].toLowerCase(), explorerPath: '/' };
   return { tab: 'explorer', explorerPath: '/' };
 }
@@ -133,13 +133,14 @@ function showTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
   document.querySelectorAll('#main-content > div[id^="tab-"]').forEach(el => el.style.display = 'none');
-  const tabNames = {explorer:'Explorer', iptables:'iptables', services:'Services', docker:'Docker'};
+  const tabNames = {explorer:'Explorer', iptables:'iptables', services:'Services', docker:'Docker', wireguard:'WireGuard'};
   document.getElementById('main-header').textContent = tabNames[tab] || tab;
   document.title = (tabNames[tab] || tab) + ' - VPS Manager';
   const tabEl = document.getElementById('tab-' + tab);
   if (tabEl) tabEl.style.display = 'block';
   if (dockerInterval && tab !== 'docker') { clearInterval(dockerInterval); dockerInterval = null; }
   if (svcLogTimer && tab !== 'services') { clearInterval(svcLogTimer); svcLogTimer = null; }
+  if (tab !== 'wireguard') stopWgPing();
   svcLogName = null;
 }
 
@@ -155,6 +156,8 @@ function loadTabContent(tab, explorerPath) {
   } else if (tab === 'docker') {
     loadDocker();
     dockerInterval = setInterval(loadDocker, 5000);
+  } else if (tab === 'wireguard') {
+    loadWireguard();
   }
 }
 
@@ -172,7 +175,7 @@ function parsePath() {
   let { tab, explorerPath } = routeFromPath(locationPath);
 
   // Legacy hash-based URL support: /#/services, /explorer#/docker, etc.
-  const hm = window.location.hash.match(/^#?\/+\/?(explorer|iptables|services|docker)(\/.*)?$/i);
+  const hm = window.location.hash.match(/^#?\/+\/?(explorer|iptables|services|docker|wireguard)(\/.*)?$/i);
   if (hm) {
     const htab = hm[1].toLowerCase();
     let hep = '/';

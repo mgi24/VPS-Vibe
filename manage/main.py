@@ -896,10 +896,250 @@ async def explorer_upload(
         raise HTTPException(status_code=400, detail=str(e))
 
 
+# --- WireGuard Manage (10.8.0.0/24) ---
+
+WG_MANAGE_IFACE = "wg-manage"
+WG_MANAGE_CONF = "/etc/wireguard/wg-manage.conf"
+WG_MANAGE_META = "/etc/wireguard/wg-manage-meta.json"
+WG_MANAGE_SERVER_IP = "10.8.0.1"
+WG_MANAGE_PORT = 51821
+
+
+def _wg_auth(token: str):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return session
+
+
+def _run_cmd(args: list, timeout: int = 20) -> subprocess.CompletedProcess:
+    return subprocess.run(args, capture_output=True, text=True, timeout=timeout)
+
+
+def _load_wg_meta() -> dict:
+    try:
+        with open(WG_MANAGE_META) as f:
+            return json.load(f)
+    except Exception:
+        return {"endpoint": "", "server_pubkey": "", "peers": []}
+
+
+def _save_wg_meta(meta: dict):
+    with open(WG_MANAGE_META, "w") as f:
+        json.dump(meta, f, indent=2)
+
+
+def _wg_iface_up() -> bool:
+    return _run_cmd(["ip", "link", "show", WG_MANAGE_IFACE]).returncode == 0
+
+
+def _next_wg_ip(peers: list) -> str | None:
+    used = {p["ip"] for p in peers}
+    for i in range(2, 255):
+        ip = f"10.8.0.{i}"
+        if ip not in used:
+            return ip
+    return None
+
+
+def _append_peer_conf(pubkey: str, ip: str):
+    with open(WG_MANAGE_CONF, "a") as f:
+        f.write(f"\n[Peer]\nPublicKey = {pubkey}\nAllowedIPs = {ip}/32\n")
+
+
+def _remove_peer_conf(ip: str):
+    with open(WG_MANAGE_CONF) as f:
+        content = f.read()
+    sections = content.split("\n[Peer]\n")
+    kept = [s for s in sections[1:] if f"AllowedIPs = {ip}/32" not in s]
+    with open(WG_MANAGE_CONF, "w") as f:
+        f.write(sections[0] + "".join("\n[Peer]\n" + s for s in kept))
+
+
+def _gen_client_conf(peer: dict, meta: dict) -> str:
+    return (
+        "[Interface]\n"
+        f"PrivateKey = {peer['privkey']}\n"
+        f"Address = {peer['ip']}/32\n"
+        "DNS = 1.1.1.1, 8.8.8.8\n\n"
+        "[Peer]\n"
+        f"PublicKey = {meta['server_pubkey']}\n"
+        f"Endpoint = {meta['endpoint']}\n"
+        "AllowedIPs = 0.0.0.0/0\n"
+        "PersistentKeepalive = 25\n"
+    )
+
+
+@app.get("/api/wg")
+async def wg_status(token: str = Query(...)):
+    _wg_auth(token)
+    meta = _load_wg_meta()
+    initialized = os.path.exists(WG_MANAGE_CONF)
+    return {
+        "initialized": initialized,
+        "up": _wg_iface_up() if initialized else False,
+        "iface": WG_MANAGE_IFACE,
+        "address": WG_MANAGE_SERVER_IP,
+        "port": WG_MANAGE_PORT,
+        "endpoint": meta.get("endpoint", ""),
+        "peers": sorted(meta.get("peers", []), key=lambda p: p["ip"]),
+    }
+
+
+@app.post("/api/wg/setup")
+async def wg_setup(token: str = Query(...), endpoint: str = Body(..., embed=True)):
+    _wg_auth(token)
+    if os.path.exists(WG_MANAGE_CONF):
+        raise HTTPException(status_code=400, detail="wg-manage.conf already exists")
+
+    endpoint = endpoint.strip()
+    if not endpoint:
+        raise HTTPException(status_code=400, detail="Endpoint required")
+
+    priv = subprocess.check_output(["wg", "genkey"]).strip().decode()
+    pub = subprocess.check_output(["wg", "pubkey"], input=priv.encode()).strip().decode()
+
+    r = _run_cmd(["ip", "route", "show", "default"])
+    parts = r.stdout.split()
+    dev = parts[parts.index("dev") + 1] if "dev" in parts else "eth0"
+
+    conf = (
+        "[Interface]\n"
+        f"PrivateKey = {priv}\n"
+        f"Address = {WG_MANAGE_SERVER_IP}/24\n"
+        f"ListenPort = {WG_MANAGE_PORT}\n"
+        f"PostUp = iptables -A FORWARD -i {WG_MANAGE_IFACE} -j ACCEPT\n"
+        f"PostUp = iptables -t nat -A POSTROUTING -o {dev} -j MASQUERADE\n"
+        f"PostDown = iptables -D FORWARD -i {WG_MANAGE_IFACE} -j ACCEPT\n"
+        f"PostDown = iptables -t nat -D POSTROUTING -o {dev} -j MASQUERADE\n"
+        "SaveConfig = false\n"
+    )
+    with open(WG_MANAGE_CONF, "w") as f:
+        f.write(conf)
+    os.chmod(WG_MANAGE_CONF, 0o600)
+
+    meta = _load_wg_meta()
+    meta["endpoint"] = endpoint
+    meta["server_pubkey"] = pub
+    meta.setdefault("peers", [])
+    _save_wg_meta(meta)
+
+    r = _run_cmd(["systemctl", "enable", "--now", f"wg-quick@{WG_MANAGE_IFACE}"], timeout=30)
+    if r.returncode != 0:
+        raise HTTPException(status_code=500, detail=f"Failed to start interface: {r.stderr.strip()}")
+
+    return {"success": True, "server_pubkey": pub, "endpoint": endpoint}
+
+
+@app.post("/api/wg/power")
+async def wg_power(token: str = Query(...), action: str = Body(..., embed=True)):
+    _wg_auth(token)
+    if action not in ("start", "stop", "restart"):
+        raise HTTPException(status_code=400, detail="Invalid action")
+    r = _run_cmd(["systemctl", action, f"wg-quick@{WG_MANAGE_IFACE}"], timeout=30)
+    if r.returncode != 0:
+        raise HTTPException(status_code=500, detail=r.stderr.strip() or "Command failed")
+    return {"success": True, "up": _wg_iface_up()}
+
+
+@app.post("/api/wg/peers")
+async def wg_add_peer(token: str = Query(...), name: str = Body(..., embed=True)):
+    _wg_auth(token)
+    name = name.strip()
+    if not name or len(name) > 32 or not all(c.isalnum() or c in "-_" for c in name):
+        raise HTTPException(status_code=400, detail="Name must be alphanumeric/dash/underscore (max 32)")
+
+    meta = _load_wg_meta()
+    peers = meta.setdefault("peers", [])
+    if any(p["name"].lower() == name.lower() for p in peers):
+        raise HTTPException(status_code=400, detail="Name already exists")
+
+    ip = _next_wg_ip(peers)
+    if not ip:
+        raise HTTPException(status_code=400, detail="No free IP left in 10.8.0.0/24")
+
+    priv = subprocess.check_output(["wg", "genkey"]).strip().decode()
+    pub = subprocess.check_output(["wg", "pubkey"], input=priv.encode()).strip().decode()
+
+    if not _wg_iface_up():
+        raise HTTPException(status_code=400, detail="Interface wg-manage is down — start it first")
+
+    r = _run_cmd(["wg", "set", WG_MANAGE_IFACE, "peer", pub, "allowed-ips", f"{ip}/32"])
+    if r.returncode != 0:
+        raise HTTPException(status_code=500, detail=r.stderr.strip() or "wg set failed")
+
+    _append_peer_conf(pub, ip)
+
+    peer = {
+        "name": name,
+        "ip": ip,
+        "pubkey": pub,
+        "privkey": priv,
+        "created": datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
+    }
+    peers.append(peer)
+    _save_wg_meta(meta)
+
+    return {"peer": peer, "config": _gen_client_conf(peer, meta)}
+
+
+@app.delete("/api/wg/peers")
+async def wg_delete_peer(token: str = Query(...), ip: str = Query(...)):
+    _wg_auth(token)
+    meta = _load_wg_meta()
+    peers = meta.get("peers", [])
+    peer = next((p for p in peers if p["ip"] == ip), None)
+    if not peer:
+        raise HTTPException(status_code=404, detail="Peer not found")
+
+    if _wg_iface_up():
+        _run_cmd(["wg", "set", WG_MANAGE_IFACE, "peer", peer["pubkey"], "remove"])
+
+    _remove_peer_conf(ip)
+    meta["peers"] = [p for p in peers if p["ip"] != ip]
+    _save_wg_meta(meta)
+    return {"success": True}
+
+
+@app.get("/api/wg/peer-config")
+async def wg_peer_config(token: str = Query(...), ip: str = Query(...)):
+    _wg_auth(token)
+    meta = _load_wg_meta()
+    peer = next((p for p in meta.get("peers", []) if p["ip"] == ip), None)
+    if not peer:
+        raise HTTPException(status_code=404, detail="Peer not found")
+    return {
+        "filename": f"wg-manage_{peer['name']}.conf",
+        "content": _gen_client_conf(peer, meta),
+    }
+
+
+@app.get("/api/wg/ping")
+async def wg_ping(token: str = Query(...)):
+    _wg_auth(token)
+    peers = _load_wg_meta().get("peers", [])
+
+    async def probe(ip: str) -> tuple[str, bool]:
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                "ping", "-c", "1", "-W", "1", ip,
+                stdout=asyncio.subprocess.DEVNULL,
+                stderr=asyncio.subprocess.DEVNULL,
+            )
+            rc = await asyncio.wait_for(proc.wait(), timeout=3)
+            return ip, rc == 0
+        except Exception:
+            return ip, False
+
+    results = await asyncio.gather(*(probe(p["ip"]) for p in peers))
+    return {"status": dict(results)}
+
+
 @app.api_route("/", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 @app.api_route("/explorer{rest:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 @app.api_route("/docker", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 @app.api_route("/services", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 @app.api_route("/iptables", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+@app.api_route("/wireguard", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def catch_all(request: Request, rest: str = "/"):
     return FileResponse("static/index.html")
