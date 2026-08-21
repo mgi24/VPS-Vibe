@@ -5,10 +5,8 @@ svcLogTimer = null;
 svcLogName = null;
 
 async function loadService() {
-  console.log('[svc] loadService called, authToken:', !!authToken);
   const el = document.getElementById('tab-services');
-  console.log('[svc] tab-services element:', el);
-  if (!el) { console.error('[svc] tab-services NOT FOUND!'); return; }
+  if (!el) return;
   el.innerHTML = `
     <div class="svc-controls">
       <button class="svc-add-btn" id="svc-add-btn">+ Add Service</button>
@@ -18,27 +16,19 @@ async function loadService() {
     <div id="svc-config-area"></div>
     <div id="svc-log-area"></div>
   `;
-  console.log('[svc] DOM rendered');
   document.getElementById('svc-add-btn').addEventListener('click', openAddServiceModal);
   document.getElementById('svc-refresh').addEventListener('click', refreshServices);
   refreshServices();
 }
 
 async function refreshServices() {
-  console.log('[svc] refreshServices called, authToken:', !!authToken);
   const el = document.getElementById('svc-table-wrap');
-  console.log('[svc] svc-table-wrap element:', el);
-  if (!el) { console.error('[svc] svc-table-wrap NOT FOUND!'); return; }
+  if (!el) return;
   el.innerHTML = '<div class="svc-empty"><span class="spinner"></span> Loading...</div>';
   try {
-    const url = '/api/services/monitored?token=' + encodeURIComponent(authToken);
-    console.log('[svc] Fetching:', url);
-    const res = await fetch(url);
-    console.log('[svc] Response status:', res.status, 'ok:', res.ok);
-    const text = await res.text();
-    console.log('[svc] Response body:', text.substring(0, 500));
-    if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + text);
-    const data = JSON.parse(text);
+    const res = await fetch('/api/services/monitored?token=' + encodeURIComponent(authToken));
+    if (!res.ok) throw new Error('Failed to load');
+    const data = await res.json();
     if (!data.services.length) {
       el.innerHTML = '<div class="svc-empty">No services monitored. Click "+ Add Service" to begin.</div>';
       return;

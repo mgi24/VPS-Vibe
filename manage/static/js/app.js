@@ -69,7 +69,7 @@ function showLogin() {
 function showApp() {
   document.getElementById('login-overlay').classList.remove('show');
   document.getElementById('app').classList.add('show');
-  parseHash();
+  parsePath();
 }
 
 async function doLogin(username, password) {
@@ -101,7 +101,35 @@ async function doLogin(username, password) {
   }
 }
 
-function switchTab(tab, explorerPath) {
+function getPathFromLocation() {
+  let p = window.location.pathname;
+  if (p.length > 1) p = p.replace(/\/+$/, '');
+  return p || '/';
+}
+
+function urlForTab(tab, explorerPath) {
+  if (tab === 'explorer') {
+    const p = (explorerPath || '/') === '/' ? '' : (explorerPath || '/').replace(/^\/+|\/+$/g, '');
+    return '/explorer' + (p ? '/' + p : '/');
+  }
+  return '/' + tab;
+}
+
+function routeFromPath(path) {
+  if (path === '/' || path === '') return { tab: 'explorer', explorerPath: '/' };
+  let m = path.match(/^\/explorer(\/.*)?$/i);
+  if (m) {
+    let ep = m[1] ? m[1].replace(/\/+$/, '') : '';
+    if (!ep) return { tab: 'explorer', explorerPath: '/' };
+    if (!ep.startsWith('/')) ep = '/' + ep;
+    return { tab: 'explorer', explorerPath: ep };
+  }
+  m = path.match(/^\/(docker|services|iptables)$/i);
+  if (m) return { tab: m[1].toLowerCase(), explorerPath: '/' };
+  return { tab: 'explorer', explorerPath: '/' };
+}
+
+function showTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
   document.querySelectorAll('#main-content > div[id^="tab-"]').forEach(el => el.style.display = 'none');
@@ -110,55 +138,57 @@ function switchTab(tab, explorerPath) {
   document.title = (tabNames[tab] || tab) + ' - VPS Manager';
   const tabEl = document.getElementById('tab-' + tab);
   if (tabEl) tabEl.style.display = 'block';
-  if (dockerInterval) { clearInterval(dockerInterval); dockerInterval = null; }
-  if (typeof svcLogTimer !== 'undefined' && svcLogTimer) { clearInterval(svcLogTimer); svcLogTimer = null; }
+  if (dockerInterval && tab !== 'docker') { clearInterval(dockerInterval); dockerInterval = null; }
+  if (svcLogTimer && tab !== 'services') { clearInterval(svcLogTimer); svcLogTimer = null; }
   svcLogName = null;
-
-  // Update URL without triggering navigation
-  let hashPath = tab === 'explorer' ? '/explorer' + ((explorerPath || '/') === '/' ? '' : (explorerPath || '/').replace(/\/+$/, '')) : '/' + tab;
-  if (!hashPath || hashPath === '/explorer') hashPath += '/';
-  history.pushState({tab, explorerPath: explorerPath || '/'}, '', '#/' + hashPath.replace(/^\/+/,''));
-
-  if (tab === 'explorer') loadExplorer(explorerPath || '/');
-  if (tab === 'iptables') loadIptables();
-  if (tab === 'services') loadService();
-  if (tab === 'docker') { loadDocker(); dockerInterval = setInterval(loadDocker, 5000); }
 }
 
-function parseHash() {
-  console.log('[app] parseHash called, hash:', window.location.hash);
-  const hash = window.location.hash;
-  // Match #/explorer/path/to/dir or #/iptables etc. (supports both #/ and without, and double slashes)
-  const match = hash.match(/^#?\/+\/?(explorer|iptables|services|docker)(\/.*)?$/i);
-  console.log('[app] parseHash match:', match ? [match[1], match[2]] : 'NO MATCH');
-  if (match) {
-    const tab = match[1].toLowerCase();
-    let explorerPath = '/';
-    if (tab === 'explorer' && match[2]) {
-      // Remove leading slash from path segment and normalize
-      explorerPath = match[2].replace(/\/+$/, '') || '/';
-      if (!explorerPath.startsWith('/')) explorerPath = '/' + explorerPath;
+function loadTabContent(tab, explorerPath) {
+  if (tab === 'explorer') {
+    currentPath = explorerPath || '/';
+    renderExplorer(currentPath);
+    clearPreview();
+  } else if (tab === 'iptables') {
+    loadIptables();
+  } else if (tab === 'services') {
+    loadService();
+  } else if (tab === 'docker') {
+    loadDocker();
+    dockerInterval = setInterval(loadDocker, 5000);
+  }
+}
+
+function switchTab(tab, explorerPath, pushUrl) {
+  showTab(tab);
+  const url = urlForTab(tab, explorerPath);
+  if (pushUrl && window.location.pathname !== url) {
+    history.pushState({tab, explorerPath: explorerPath || '/'}, '', url);
+  }
+  loadTabContent(tab, explorerPath);
+}
+
+function parsePath() {
+  const locationPath = getPathFromLocation();
+  let { tab, explorerPath } = routeFromPath(locationPath);
+
+  // Legacy hash-based URL support: /#/services, /explorer#/docker, etc.
+  const hm = window.location.hash.match(/^#?\/+\/?(explorer|iptables|services|docker)(\/.*)?$/i);
+  if (hm) {
+    const htab = hm[1].toLowerCase();
+    let hep = '/';
+    if (htab === 'explorer' && hm[2]) {
+      hep = hm[2].replace(/\/+$/, '') || '/';
+      if (!hep.startsWith('/')) hep = '/' + hep;
     }
-    currentTab = tab;
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
-    document.querySelectorAll('#main-content > div[id^="tab-"]').forEach(el => el.style.display = 'none');
-    const tabNames = {explorer:'Explorer', iptables:'iptables', services:'Services', docker:'Docker'};
-    document.getElementById('main-header').textContent = tabNames[tab] || tab;
-    document.title = (tabNames[tab] || tab) + ' - VPS Manager';
-    const tabEl = document.getElementById('tab-' + tab);
-    if (tabEl) tabEl.style.display = 'block';
-    if (dockerInterval && tab !== 'docker') { clearInterval(dockerInterval); dockerInterval = null; }
-    if (typeof svcLogTimer !== 'undefined' && svcLogTimer && tab !== 'services') { clearInterval(svcLogTimer); svcLogTimer = null; }
-    svcLogName = null;
-    if (tab === 'explorer') loadExplorer(explorerPath);
-    else if (tab === 'iptables') loadIptables();
-    else if (tab === 'services') loadService();
-    else if (tab === 'docker') { loadDocker(); dockerInterval = setInterval(loadDocker, 5000); }
-    return;
+    const url = urlForTab(htab, hep);
+    history.replaceState({tab: htab, explorerPath: hep}, '', url);
+    tab = htab;
+    explorerPath = hep;
+  } else if (locationPath === '/') {
+    history.replaceState({tab: 'explorer', explorerPath: '/'}, '', urlForTab('explorer', '/'));
   }
 
-  // Default to explorer
-  switchTab('explorer', '/');
+  switchTab(tab, explorerPath, false);
 }
 
 function toggleDropdown(e, safeId) {
@@ -193,9 +223,7 @@ document.getElementById('login-password').addEventListener('keydown', (e) => {
 document.querySelectorAll('.nav-item').forEach(el => {
   el.addEventListener('click', () => {
     const tab = el.dataset.tab;
-    const hashPath = tab === 'explorer' ? '/explorer/' : '/' + tab;
-    history.pushState({tab}, '', '#/' + hashPath.replace(/^\/+/,''));
-    switchTab(tab, tab === 'explorer' ? '/' : undefined);
+    switchTab(tab, '/', true);
   });
 });
 
@@ -207,37 +235,8 @@ document.getElementById('sidebar-logout').addEventListener('click', () => {
 });
 
 // Handle browser back/forward buttons
-window.addEventListener('popstate', (e) => {
-  const state = e.state;
-  if (state && state.tab) {
-    currentTab = state.tab;
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === state.tab));
-    document.querySelectorAll('#main-content > div[id^="tab-"]').forEach(el => el.style.display = 'none');
-    const tabNames = {explorer:'Explorer', iptables:'iptables', services:'Services', docker:'Docker'};
-    document.getElementById('main-header').textContent = tabNames[state.tab] || state.tab;
-    document.title = (tabNames[state.tab] || state.tab) + ' - VPS Manager';
-    const tabEl = document.getElementById('tab-' + state.tab);
-    if (tabEl) tabEl.style.display = 'block';
-    if (dockerInterval && state.tab !== 'docker') { clearInterval(dockerInterval); dockerInterval = null; }
-    if (typeof svcLogTimer !== 'undefined' && svcLogTimer && state.tab !== 'services') { clearInterval(svcLogTimer); svcLogTimer = null; }
-    svcLogName = null;
-    if (state.tab === 'explorer') loadExplorer(state.explorerPath || '/');
-    else if (state.tab === 'iptables') loadIptables();
-    else if (state.tab === 'services') loadService();
-    else if (state.tab === 'docker') { loadDocker(); dockerInterval = setInterval(loadDocker, 5000); }
-  } else {
-    parseHash();
-  }
+window.addEventListener('popstate', () => {
+  parsePath();
 });
-
-// Handle initial hash on load
-if (window.location.hash && window.location.hash !== '#/') {
-  // Will be handled by checkAuth -> showApp -> parseHash
-} else if (!window.location.hash) {
-  // No hash, default to explorer
-  setTimeout(() => {
-    history.replaceState(null, '', '#/explorer');
-  }, 0);
-}
 
 checkAuth();

@@ -749,6 +749,32 @@ async def explorer_read(
     return {"path": real_path.replace(os.sep, "/"), "type": "text", "content": text}
 
 
+@app.get("/api/explorer/download")
+async def explorer_download(
+    token: str = Query(...),
+    path: str = Query(...),
+):
+    session = sessions.get(token)
+    if not session or datetime.utcnow() > session["expires"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    real_path = os.path.realpath(path)
+    allowed = [os.path.realpath(p) for p in ["/", "/home", "/etc", "/var/log", "/tmp", "/root"]]
+    if not any(real_path.startswith(a + "/") or real_path == a for a in allowed):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    if os.path.isdir(real_path):
+        raise HTTPException(status_code=400, detail="Cannot download a directory")
+    if not os.path.exists(real_path):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    return FileResponse(
+        real_path,
+        filename=os.path.basename(real_path),
+        content_disposition_type="attachment",
+    )
+
+
 @app.get("/api/explorer/image")
 async def explorer_image(
     token: str = Query(...),
@@ -872,7 +898,8 @@ async def explorer_upload(
 
 @app.api_route("/", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 @app.api_route("/explorer{rest:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+@app.api_route("/docker", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+@app.api_route("/services", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+@app.api_route("/iptables", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def catch_all(request: Request, rest: str = "/"):
-    if rest and rest != "/":
-        return RedirectResponse(url="/#/explorer/" + rest.lstrip("/"), status_code=307)
     return FileResponse("static/index.html")

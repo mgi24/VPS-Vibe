@@ -182,3 +182,27 @@ input,button,select,textarea{font-family:inherit}
 .cancel-btn{background:var(--text2);color:#fff;border:none;padding:4px 12px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;margin-left:4px}
 .cancel-btn:hover{opacity:0.85}
 .preview-editor{flex:1;width:100%;padding:16px;font-family:'Consolas','Courier New',monospace;font-size:13px;color:var(--text);background:var(--bg);border:none;outline:none;resize:none;line-height:1.5;tab-size:4}
+
+/* GitHub-style markdown preview */
+.preview-md{flex:1;overflow-y:auto;padding:16px 20px;font-size:13px;line-height:1.6;color:var(--text);min-height:0}
+.preview-md h1,.preview-md h2,.preview-md h3,.preview-md h4,.preview-md h5,.preview-md h6{margin:16px 0 8px;font-weight:600;color:#fff;line-height:1.25}
+.preview-md h1{font-size:24px;border-bottom:1px solid var(--border);padding-bottom:6px}
+.preview-md h2{font-size:20px;border-bottom:1px solid var(--border);padding-bottom:6px}
+.preview-md h3{font-size:16px}
+.preview-md h4{font-size:14px}
+.preview-md p{margin:8px 0}
+.preview-md a{color:#5b8def;text-decoration:none}
+.preview-md a:hover{text-decoration:underline}
+.preview-md ul,.preview-md ol{margin:8px 0;padding-left:24px}
+.preview-md li{margin:3px 0}
+.preview-md code{background:rgba(110,118,129,0.2);padding:2px 5px;border-radius:4px;font-family:'Consolas','Courier New',monospace;font-size:12px;color:#ff9d5c}
+.preview-md pre{background:rgba(110,118,129,0.15);border:1px solid var(--border);border-radius:6px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.preview-md pre code{background:none;padding:0;font-size:12.5px;color:#e6e6e6;line-height:1.5;white-space:pre}
+.preview-md blockquote{margin:10px 0;padding:2px 14px;border-left:3px solid var(--accent);color:var(--text2);background:rgba(255,255,255,0.02)}
+.preview-md img{max-width:100%;border-radius:6px}
+.preview-md hr{border:none;border-top:1px solid var(--border);margin:16px 0}
+.preview-md table{border-collapse:collapse;margin:10px 0;width:100%;font-size:12.5px}
+.preview-md th,.preview-md td{border:1px solid var(--border);padding:6px 12px}
+.preview-md th{background:rgba(110,118,129,0.2);font-weight:600;color:#fff}
+.preview-md tr:nth-child(2n){background:rgba(255,255,255,0.02)}
+.preview-md del{color:var(--text2)}
